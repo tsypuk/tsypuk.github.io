@@ -1,0 +1,617 @@
+<!--Single post template: Start-->
+<!doctype html>
+<html>
+<head>
+    <!--HEAD section: Start-->
+
+<!--Google Analytics: Start-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155054471-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-155054471-1', { 'optimize_id': 'GTM-K8M5MPW'});
+</script>
+<!--Google Analytics: End-->
+
+
+<meta charset="UTF-8">
+<link type="application/atom+xml" rel="alternate" href="https://tsypuk.github.io/feed.xml" title="Roman Tsypuk Blog" />
+<!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Apache Kafka Ops commands | Roman Tsypuk Blog</title>
+<meta name="generator" content="Jekyll v3.8.6" />
+<meta property="og:title" content="Apache Kafka Ops commands" />
+<meta name="author" content="Roman Tsypuk" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Ops commands to maintain Kafka cluster" />
+<meta property="og:description" content="Ops commands to maintain Kafka cluster" />
+<link rel="canonical" href="https://tsypuk.github.io/kafka-admin-commands" />
+<meta property="og:url" content="https://tsypuk.github.io/kafka-admin-commands" />
+<meta property="og:site_name" content="Roman Tsypuk Blog" />
+<meta property="og:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/keyboard-1242569.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-04-10T00:00:00+03:00" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/kafka-admin-commands"},"author":{"@type":"Person","name":"Roman Tsypuk"},"url":"https://tsypuk.github.io/kafka-admin-commands","description":"Ops commands to maintain Kafka cluster","@type":"BlogPosting","image":"https://tsypuk.github.io/images/posts/thumbs/1000/keyboard-1242569.jpg","headline":"Apache Kafka Ops commands","dateModified":"2020-04-10T00:00:00+03:00","datePublished":"2020-04-10T00:00:00+03:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<!-- mobile specific metas-->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<!-- Google Card -->
+
+<meta itemprop="description" content="Apache Kafka Ops commands">
+
+
+
+<meta itemprop="image" content="https://tsypuk.github.io/images/posts/thumbs/1000/keyboard-1242569.jpg">
+
+
+<!--LinkedIn cards-->
+
+<meta property='og:image' content="https://tsypuk.github.io/images/posts/thumbs/1000/keyboard-1242569.jpg">
+
+
+<meta name="author" content="Roman Tsypuk">
+<!--end of LinkedIn cards-->
+
+<!-- Twitter cards -->
+<meta name="twitter:site"    content="@tsypuk_r">
+<meta name="twitter:creator" content="@tsypuk_r">
+<meta name="twitter:title"   content="Apache Kafka Ops commands">
+
+
+<meta name="twitter:description" content="Ops commands to maintain Kafka cluster">
+
+
+
+<meta name="twitter:card"  content="summary_large_image">
+<meta name="twitter:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/keyboard-1242569.jpg">
+
+<!-- end of Twitter cards -->
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/css/asciidoctor.css">
+<link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/a11y-dark.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- CSS
+================================================== -->
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/vendor.css">
+<link rel="stylesheet" href="/css/main.css">
+
+<!-- favicons
+================================================== -->
+<link rel="shortcut icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<link rel="icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<!--HEAD section: End-->
+
+    <title>Apache Kafka Ops commands</title>
+</head>
+<body id="top" data-aos-easing="ease-in-sine" data-aos-duration="600" data-aos-delay="100" class="pace-done">
+<!--HEADER: Start-->
+<!-- pageheader
+================================================== -->
+<section class="s-pageheader">
+    <header class="header">
+        <div class="header__content row">
+            <ul class="header__social">
+                <li>
+                    <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143">
+                        <i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="https://www.twitter.com/tsypuk_r">
+                        <i class="fa fa-twitter" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                <li>
+                    <a href="https://github.com/tsypuk">
+                        <i class="fa fa-github" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/" title="Tsypuk Blog">Tsypuk Blog</a>
+                </li>
+            </ul> <!-- end header__social -->
+        </div> <!-- header-content -->
+    </header> <!-- header -->
+
+
+</section> <!-- end s-pageheader -->
+<!--HEADER: End-->
+
+<section class="s-content s-content--narrow s-content--no-padding-bottom">
+    <article class="row format-standard">
+        <div class="s-content__header col-full">
+            <h1 class="s-content__header-title">Apache Kafka Ops commands</h1>
+            <ul class="s-content__header-meta">
+                <li class="date">Apr 10th, 2020</li>
+                <li class="cat">~5 minutes to read</li>
+                <li class="cat"><!--Share this page section: Start-->
+<div class="share-page">
+    share this article with:
+    <a href="https://twitter.com/intent/tweet?text=Apache+Kafka+Ops+commands&url=https://tsypuk.github.io/kafka-admin-commands&via=tsypuk_r&related=tsypuk_r"
+       rel="nofollow" target="_blank" title="Share on Twitter"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Ftsypuk.github.io%2Fkafka-admin-commands&title=Apache+Kafka+Ops+commands&summary=%3Cdiv+class%3D%22paragraph%22%3E%0A%3Cp%3EOps+commands+to+maintain+Kafka+cluster%3C%2Fp%3E%0A%3C%2Fdiv%3E&source=https%3A%2F%2Ftsypuk.github.io"
+       rel="nofollow" target="_blank" title="Share on LinkedIn"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+    <a href="https://facebook.com/sharer.php?u=https://tsypuk.github.io/kafka-admin-commands" rel="nofollow" target="_blank"
+       title="Share on Facebook"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=https://tsypuk.github.io/kafka-admin-commands" rel="nofollow" target="_blank"
+       title="Share on Google+"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+</div>
+<!--Share this page section: End-->
+</li>
+                <!--                <li class="cat">In kafkalinuxcliadministration</li>-->
+                <li class="cat"><!--Twitter follow me button: Start-->
+<li>
+    <a href="https://twitter.com/tsypuk_r?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @tsypuk_r</a>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</li>
+<!--Twitter follow me button: End-->
+</li>
+                <!--                <li class="cat">In kafkalinuxcliadministration</li>-->
+            </ul>
+        </div> <!-- end s-content__header -->
+        <div class="s-content__media col-full">
+            <div class="s-content__post-thumb">
+                
+                <picture>
+                    <source media="(min-width: 1024px)" srcset="https://tsypuk.github.io/images/posts/thumbs/1000/keyboard-1242569.jpg">
+                    <source media="(min-width: 600px)" srcset="https://tsypuk.github.io/images/posts/thumbs/800/keyboard-1242569.jpg">
+                    <source media="(min-width: 400px)" srcset="https://tsypuk.github.io/images/posts/thumbs/500/keyboard-1242569.jpg">
+                    <source media="(min-width: 100px)" srcset="https://tsypuk.github.io/images/posts/thumbs/400/keyboard-1242569.jpg">
+                    <img src="https://tsypuk.github.io/images/posts/thumbs/1000/keyboard-1242569.jpg" alt="Apache Kafka Ops commands" style="width:auto;">
+                </picture>
+                
+            </div>
+        </div> <!-- end s-content__media -->
+        <!--Tags on the page: Start-->
+<p class="s-content__tags" align="center">
+    <span>Post Tags:</span>
+    <span class="s-content__tag-list">
+    
+        <a href="#0">kafka</a>
+    
+        <a href="#0">linux</a>
+    
+        <a href="#0">cli</a>
+    
+        <a href="#0">administration</a>
+    
+    </span>
+</p>
+<!--Tags on the page: End-->
+
+        <div class="col-full s-content__main">
+            <div id="preamble">
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Topic operations</dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#create_topic">Create topic</a></p>
+</li>
+<li>
+<p><a href="#change_partitions_number_can_only_add_more">Change partitions number (can only add more)</a></p>
+</li>
+<li>
+<p><a href="#delete_a_topic">Delete a topic</a></p>
+</li>
+<li>
+<p><a href="#list_all_topics">List all topics</a></p>
+</li>
+<li>
+<p><a href="#describe_all_the_topics">Describe all the topics</a></p>
+</li>
+<li>
+<p><a href="#list_topics_with_overridesconfigs_added_to_the_defaults">List topics with overrides(configs added to the defaults)</a></p>
+</li>
+<li>
+<p><a href="#list_topics_that_are_not_in_sync_with_all_replicas">List topics that are not in-sync with all replicas</a></p>
+</li>
+<li>
+<p><a href="#list_topics_without_a_leader_replica">List topics without a leader replica</a></p>
+</li>
+<li>
+<p><a href="#describe_the_configurations_for_all_topics_only_in_addition_to_the_defaults">Describe the configurations for all topics (only in addition to the defaults)</a></p>
+</li>
+<li>
+<p><a href="#describe_the_configurations_for_a_specific_topic_defaults_will_not_show">Describe the configurations for a specific topic (defaults will not show)</a></p>
+</li>
+</ul>
+</div>
+</dd>
+<dt class="hdlist1">Consumer operations</dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#list_all_the_consumer_groups">List all the consumer groups</a></p>
+</li>
+<li>
+<p><a href="#describe_a_specific_consumer_group">Describe a specific consumer group</a></p>
+</li>
+<li>
+<p><a href="#describe_the_active_members_of_the_group">Describe the active members of the group</a></p>
+</li>
+<li>
+<p><a href="#If the group has active members">get a more verbose output</a></p>
+</li>
+<li>
+<p><a href="#describe_the_state_of_the_group">Describe the state of the group</a></p>
+</li>
+<li>
+<p><a href="#delete_a_consumer_group_only_works_if_there_are_no_active_members">Delete a consumer group (only works if there are no active members).</a></p>
+</li>
+<li>
+<p><a href="#delete_multiple_consumer_groups">Delete multiple consumer groups</a></p>
+</li>
+<li>
+<p><a href="#reset_offsets_for_a_consumer_group">Reset offsets for a consumer group</a></p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="add_kafka_to_the_path">Add Kafka to the PATH</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ export PATH="/xxx/xxxxxx/kafka_2.13-2.4.1/$bin:$PATH"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="topic_operations">Topic operations</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="create_topic">Create topic</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--create \
+--topic my-topic \
+--replication-factor 1 \
+--partitions 5 \
+--if-not-exists</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="change_partitions_number_can_only_add_more">Change partitions number (can only add more)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--alter \
+--topic my-topic \
+--partitions 7</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="delete_a_topic">Delete a topic</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--delete \
+--topic my-topic</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="list_all_topics">List all topics</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--list</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="describe_all_the_topics">Describe all the topics</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--describe</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="list_topics_with_overridesconfigs_added_to_the_defaults">List topics with overrides(configs added to the defaults)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--describe \
+--topics-with-overrides</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="list_topics_that_are_not_in_sync_with_all_replicas">List topics that are not in-sync with all replicas</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--describe \
+--under-replicated-partitions</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="list_topics_without_a_leader_replica">List topics without a leader replica</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--describe \
+--unavailable-partitions</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="describe_the_configurations_for_all_topics_only_in_addition_to_the_defaults">Describe the configurations for all topics (only in addition to the defaults)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--describe \
+--entity-type topics</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="describe_the_configurations_for_a_specific_topic_defaults_will_not_show">Describe the configurations for a specific topic (defaults will not show)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--describe \
+--entity-type topics \
+--entity-name my-topic</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="change_the_topics_message_retention">Change the topics message retention</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--alter \
+--entity-type topics \
+--entity-name connect-test \
+--add-config retention.ms=3600000</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="describe_the_configurations_for_all_brokers_defaults_will_not_show">Describe the configurations for all brokers (defaults will not show)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--entity-type brokers \
+--entity-default \
+--describe</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="describe_the_configuration_for_broker_0_defaults_will_not_show">Describe the configuration for broker 0 (defaults will not show)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--entity-type brokers \
+--entity-name 0 \
+--describe</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="add_a_custom_config_to_broker_0_log_cleaner_thread_count">Add a custom config to broker 0 (log cleaner thread count)</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--entity-type brokers \
+--entity-name 0 \
+--alter \
+--add-config log.cleaner.threads=2</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="remove_all_custom_configs_not_including_defaults_from_broker_0">Remove all custom configs (not including defaults) from broker 0</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--entity-type brokers \
+--entity-name 0 \
+--alter \
+--delete-config log.cleaner.threads</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="consumer_operations">Consumer operations</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="list_all_the_consumer_groups">List all the consumer groups</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--list</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="describe_a_specific_consumer_group">Describe a specific consumer group</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--describe \
+--group application1</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="describe_the_active_members_of_the_group">Describe the active members of the group</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--describe \
+--group application1 \
+--members</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="if_the_group_has_active_members_get_a_more_verbose_output">If the group has active members, get a more verbose output</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--describe \
+--group application1 \
+--members \
+--verbose</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="describe_the_state_of_the_group">Describe the state of the group</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--describe \
+--group application1 \
+--state</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="delete_a_consumer_group_only_works_if_there_are_no_active_members">Delete a consumer group (only works if there are no active members).</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--delete \
+--group application1</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="delete_multiple_consumer_groups">Delete multiple consumer groups</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--delete \
+--group application1 \
+--group application2</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="reset_offsets_for_a_consumer_group">Reset offsets for a consumer group</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ kafka-consumer-groups.sh --bootstrap-server kafka:9092 \
+--reset-offsets \
+--group application1 \
+--topic topic-1 \
+--to-latest</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+            <!--Page navigation section: Start-->
+<div class="s-content__pagenav">
+    <div class="s-content__nav">
+        
+        <div class="s-content__prev">
+            <a href="https://tsypuk.github.io/gpg-key-git-commit-sign" rel="prev">
+                <span>Previous Post</span>How to sign git commits with GPG key
+            </a>
+        </div>
+        
+        
+        <div class="s-content__next">
+            <a href="https://tsypuk.github.io/docker-machine-raspberry" rel="prev">
+                <span>Next Post</span>How to configure your local docker client to work with remote docker server on Raspberry PI
+            </a>
+        </div>
+        
+    </div>
+</div>
+<!--Page navigation section: End-->
+
+            <!--Author section: Start-->
+<div class="s-content__author">
+    <img src="https://tsypuk.github.io/images/avatar/rtsypuk.jpg" alt="">
+    <div class="s-content__author-about">
+        <h2 class="s-content__author-name">
+            <a href="#0">Roman Tsypuk</a>
+        </h2>
+        <p>
+            Big fan of JVM-based languages: Java, Kotlin, Groovy, Spring ecosystem with Cloud and K8S integration,
+            AWS cloud, TDD and DevOps practices. Speaker on meet-ups and conferences. Radio HAM and contributor to
+            open source projects.
+        </p>
+        <ul class="s-content__author-social">
+            <li>
+                <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143"><i class="fa fa-linkedin"
+                                                                                     aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://www.twitter.com/tsypuk_r"><i class="fa fa-twitter"
+                                                                                aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://github.com/tsypuk"><i class="fa fa-github"
+                                                                           aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+            </li>
+        </ul>
+
+    </div>
+</div>
+<!--Author section: End-->
+
+        </div>
+    </article>
+</section> <!-- s-content -->
+
+<!--Footer Section: Start-->
+<!-- s-footer
+================================================== -->
+<footer class="s-footer">
+    <div class="s-footer__bottom">
+        <div class="row">
+            <div class="col-full">
+                <div class="s-footer__copyright">
+                    <span>© Copyright Roman Tsypuk 2020</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer> <!-- end s-footer -->
+</html>
+<!--Footer Section: End-->
+</body>
+</html>
+<!--Single post template: End-->

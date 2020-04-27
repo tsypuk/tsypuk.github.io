@@ -1,0 +1,2843 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="https://tsypuk.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://tsypuk.github.io/" rel="alternate" type="text/html" /><updated>2020-04-27T09:59:21+03:00</updated><id>https://tsypuk.github.io/feed.xml</id><title type="html">Roman Tsypuk Blog</title><subtitle>Roman Tsypuk Blog</subtitle><author><name>Roman Tsypuk</name></author><entry><title type="html">Avro tools</title><link href="https://tsypuk.github.io/avro-tools" rel="alternate" type="text/html" title="Avro tools" /><published>2020-04-20T00:00:00+03:00</published><updated>2020-04-20T00:00:00+03:00</updated><id>https://tsypuk.github.io/avro-tools</id><content type="html" xml:base="https://tsypuk.github.io/avro-tools">&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;abstract&quot;&gt;Abstract&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Apache avro-tools dependency allows to operate with serialization/deserialization of records in AVRO format,
+this dependency is used under the hood in streaming systems like Apache Kafka for records processing, also as a binary
+format in other framework. But it can be applied as a standalone executable to explore files and records in AVRO format.
+Here is the list of basic operations with avro-tools. Schemas and binary files from the
+&lt;a href=&quot;avro-evolution&quot;&gt;Avro schema evolution&lt;/a&gt; previous post are used in this article.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;dlist&quot;&gt;
+&lt;dl&gt;
+&lt;dt class=&quot;hdlist1&quot;&gt;Content&lt;/dt&gt;
+&lt;dd&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#configuration&quot;&gt;Configuration&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#get_schema_from_avro_file&quot;&gt;Get schema from AVRO file&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#get_records_from_avro_file_in_json_format&quot;&gt;Get records from AVRO file in JSON format&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#specify_schema_on_read_to_be_used&quot;&gt;Specify schema on read to be used&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#Exctract records from a group of files into single file&quot;&gt;[Exctract records from a group of files into single file]&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#get_metainformation&quot;&gt;Get metainformation&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;configuration&quot;&gt;Configuration&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Avro tools can be downloaded directly (wget) or as a maven dependency&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ mvn dependency:get -Dartifact=org.apache.avro:avro-tools:1.9.2
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------&amp;lt; org.apache.maven:standalone-pom &amp;gt;-------------------
+[INFO] Building Maven Stub Project (No POM) 1
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO]
+[INFO] --- maven-dependency-plugin:2.8:get (default-cli) @ standalone-pom ---
+[INFO] Resolving org.apache.avro:avro-tools:jar:1.9.2 with transitive dependencies
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/avro/avro/1.9.2/avro-1.9.2-tests.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/avro/avro-mapred/1.9.2/avro-mapred-1.9.2-tests.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/avro/avro-mapred/1.9.2/avro-mapred-1.9.2-tests.jar (266 kB at 214 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/avro/avro/1.9.2/avro-1.9.2-tests.jar (384 kB at 281 kB/s)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.189 s
+[INFO] Finished at: 2020-04-19T17:52:20+03:00
+[INFO] ------------------------------------------------------------------------&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;After adding JAR file to PATH variable, it is directly accessible with no need to provide direct path references.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ cp  ~/.m2/repository/org/apache/avro/avro-tools/1.9.2/avro-tools-1.9.2.jar .
+$ ls -l
+total 100208
+-rw-r--r--  1 rtsypuk  wheel  51302758 Apr 19 17:53 avro-tools-1.9.2.jar&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;avro-tools is ready to use:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ java -jar avro-tools-1.9.2.jar
+Version 1.9.2
+ of Apache Avro
+Copyright 2010-2015 The Apache Software Foundation
+---------------
+This product includes software developed at
+The Apache Software Foundation (https://www.apache.org/).
+----------------
+Available tools:
+    canonical  Converts an Avro Schema to its canonical form
+          cat  Extracts samples from files
+      compile  Generates Java code for the given schema.
+       concat  Concatenates avro files without re-compressing.
+  fingerprint  Returns the fingerprint for the schemas.
+   fragtojson  Renders a binary-encoded Avro datum as JSON.
+     fromjson  Reads JSON records and writes an Avro data file.
+     fromtext  Imports a text file into an avro data file.
+      getmeta  Prints out the metadata of an Avro data file.
+    getschema  Prints out schema of an Avro data file.
+          idl  Generates a JSON schema from an Avro IDL file
+ idl2schemata  Extract JSON schemata of the types from an Avro IDL file
+       induce  Induce schema/protocol from Java class/interface via reflection.
+   jsontofrag  Renders a JSON-encoded Avro datum as binary.
+       random  Creates a file with randomly generated instances of a schema.
+      recodec  Alters the codec of a data file.
+       repair  Recovers data from a corrupt Avro Data file
+  rpcprotocol  Output the protocol of a RPC service
+   rpcreceive  Opens an RPC Server and listens for one message.
+      rpcsend  Sends a single RPC message.
+       tether  Run a tethered mapreduce job.
+       tojson  Dumps an Avro data file as JSON, record per line or pretty.
+       totext  Converts an Avro data file to a text file.
+     totrevni  Converts an Avro data file to a Trevni file.
+  trevni_meta  Dumps a Trevni file's metadata as JSON.
+trevni_random  Create a Trevni file filled with random instances of a schema.
+trevni_tojson  Dumps a Trevni file as JSON.&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;get_schema_from_avro_file&quot;&gt;Get schema from AVRO file&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ java -jar avro-tools-1.9.2.jar getschema /tmp/forwardTransitive\(TestInfo\).avro
+20/04/20 09:25:15 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+{
+  &quot;type&quot; : &quot;record&quot;,
+  &quot;name&quot; : &quot;UserV3&quot;,
+  &quot;namespace&quot; : &quot;io.github.tsypuk&quot;,
+  &quot;doc&quot; : &quot;Avro Schema for User&quot;,
+  &quot;fields&quot; : [ {
+    &quot;name&quot; : &quot;user_name&quot;,
+    &quot;type&quot; : {
+      &quot;type&quot; : &quot;string&quot;,
+      &quot;avro.java.string&quot; : &quot;String&quot;
+    },
+    &quot;doc&quot; : &quot;Name of the User&quot;
+  }, {
+    &quot;name&quot; : &quot;password&quot;,
+    &quot;type&quot; : {
+      &quot;type&quot; : &quot;string&quot;,
+      &quot;avro.java.string&quot; : &quot;String&quot;
+    },
+    &quot;doc&quot; : &quot;Password of the User&quot;
+  }, {
+    &quot;name&quot; : &quot;phone_number&quot;,
+    &quot;type&quot; : [ &quot;null&quot;, {
+      &quot;type&quot; : &quot;string&quot;,
+      &quot;avro.java.string&quot; : &quot;String&quot;
+    } ],
+    &quot;doc&quot; : &quot;Optional phone&quot;,
+    &quot;default&quot; : null
+  }, {
+    &quot;name&quot; : &quot;email&quot;,
+    &quot;type&quot; : {
+      &quot;type&quot; : &quot;string&quot;,
+      &quot;avro.java.string&quot; : &quot;String&quot;
+    },
+    &quot;doc&quot; : &quot;Email of the user&quot;,
+    &quot;default&quot; : &quot;xxx@xx.com&quot;
+  }, {
+    &quot;name&quot; : &quot;level&quot;,
+    &quot;type&quot; : {
+      &quot;type&quot; : &quot;string&quot;,
+      &quot;avro.java.string&quot; : &quot;String&quot;
+    },
+    &quot;doc&quot; : &quot;user level&quot;,
+    &quot;default&quot; : &quot;NOT_SET&quot;
+  } ]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;get_records_from_avro_file_in_json_format&quot;&gt;Get records from AVRO file in JSON format&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ java -jar avro-tools-1.9.2.jar tojson --pretty --head 1 /tmp/backward\(TestInfo\).avro
+20/04/20 09:32:15 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+{
+  &quot;user_name&quot; : &quot;ALICE&quot;,
+  &quot;password&quot; : &quot;PASSWORD&quot;,
+  &quot;is_root&quot; : true
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;specify_schema_on_read_to_be_used&quot;&gt;Specify schema on read to be used&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ java -jar avro-tools-1.9.2.jar tojson --pretty --head 1 --reader-schema-file /tmp/user-v1.avsc  /tmp/backward\(TestInfo\).avro
+20/04/20 09:33:59 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+{
+  &quot;user_name&quot; : &quot;ALICE&quot;,
+  &quot;password&quot; : &quot;PASSWORD&quot;,
+  &quot;is_root&quot; : true
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ java -jar avro-tools-1.9.2.jar tojson --pretty --head 1 --reader-schema-file /tmp/user-v2.avsc  /tmp/backward\(TestInfo\).avro
+20/04/20 09:34:10 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+{
+&quot;user_name&quot; : &quot;ALICE&quot;,
+&quot;password&quot; : &quot;PASSWORD&quot;,
+&quot;phone_number&quot; : null,
+&quot;email&quot; : &quot;xxx@xx.com&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ java -jar avro-tools-1.9.2.jar tojson --pretty --head 1 --reader-schema-file /tmp/user-v3.avsc  /tmp/backward\(TestInfo\).avro
+20/04/20 09:34:17 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+{
+  &quot;user_name&quot; : &quot;ALICE&quot;,
+  &quot;password&quot; : &quot;PASSWORD&quot;,
+  &quot;phone_number&quot; : null,
+  &quot;email&quot; : &quot;xxx@xx.com&quot;,
+  &quot;level&quot; : &quot;NOT_SET&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;extract_records_from_a_group_of_files_into_single_file&quot;&gt;Extract records from a group of files into single file&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ java -jar avro-tools-1.9.2.jar cat /tmp/backward*.avro /tmp/newavro.avro
+20/04/20 09:39:27 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+List of input files:
+/tmp/backward(TestInfo).avro
+/tmp/backwardBroken(TestInfo).avro
+/tmp/backwardTransitive(TestInfo).avro
+3 records written.&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ java -jar avro-tools-1.9.2.jar tojson --pretty  /tmp/newavro2.avro
+20/04/20 09:44:13 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+{
+  &quot;user_name&quot; : &quot;ALICE&quot;,
+  &quot;password&quot; : &quot;PASSWORD&quot;,
+  &quot;is_root&quot; : true
+}
+{
+  &quot;user_name&quot; : &quot;ALICE&quot;,
+  &quot;password&quot; : &quot;PASSWORD&quot;,
+  &quot;is_root&quot; : true
+}
+{
+  &quot;user_name&quot; : &quot;ALICE&quot;,
+  &quot;password&quot; : &quot;PASSWORD&quot;,
+  &quot;is_root&quot; : true
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;get_metainformation&quot;&gt;Get metainformation&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ java -jar avro-tools-1.9.2.jar getmeta /tmp/forwardTransitive\(TestInfo\).avro
+20/04/20 09:29:54 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+avro.schema	{&quot;type&quot;:&quot;record&quot;,&quot;name&quot;:&quot;UserV3&quot;,&quot;namespace&quot;:&quot;io.github.tsypuk&quot;,&quot;doc&quot;:&quot;Avro Schema for User&quot;,&quot;fields&quot;:[{&quot;name&quot;:&quot;user_name&quot;,&quot;type&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;avro.java.string&quot;:&quot;String&quot;},&quot;doc&quot;:&quot;Name of the User&quot;},{&quot;name&quot;:&quot;password&quot;,&quot;type&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;avro.java.string&quot;:&quot;String&quot;},&quot;doc&quot;:&quot;Password of the User&quot;},{&quot;name&quot;:&quot;phone_number&quot;,&quot;type&quot;:[&quot;null&quot;,{&quot;type&quot;:&quot;string&quot;,&quot;avro.java.string&quot;:&quot;String&quot;}],&quot;doc&quot;:&quot;Optional phone&quot;,&quot;default&quot;:null},{&quot;name&quot;:&quot;email&quot;,&quot;type&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;avro.java.string&quot;:&quot;String&quot;},&quot;doc&quot;:&quot;Email of the user&quot;,&quot;default&quot;:&quot;xxx@xx.com&quot;},{&quot;name&quot;:&quot;level&quot;,&quot;type&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;avro.java.string&quot;:&quot;String&quot;},&quot;doc&quot;:&quot;user level&quot;,&quot;default&quot;:&quot;NOT_SET&quot;}]}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://avro.apache.org/docs/current/gettingstartedjava.html&quot; class=&quot;bare&quot;&gt;https://avro.apache.org/docs/current/gettingstartedjava.html&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</content><author><name>Roman Tsypuk</name></author><category term="avro" /><category term="avro" /><category term="java" /><category term="avrotools" /><summary type="html">avro-tools is used by lots of frameworks under the hood, also it allows operate in standalone mode. Overview of AVRO operations with schema, content, merge files, etc</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://tsypuk.github.io/images/posts/thumbs/1000/multi-purpose-knife-1427665-1918x1251.jpg" /><media:content medium="image" url="https://tsypuk.github.io/images/posts/thumbs/1000/multi-purpose-knife-1427665-1918x1251.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Avro Schema Evolution</title><link href="https://tsypuk.github.io/avro-evolution" rel="alternate" type="text/html" title="Avro Schema Evolution" /><published>2020-04-14T00:00:00+03:00</published><updated>2020-04-14T00:00:00+03:00</updated><id>https://tsypuk.github.io/avro-evolution</id><content type="html" xml:base="https://tsypuk.github.io/avro-evolution">&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;abstract&quot;&gt;Abstract&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Schema evolution is the process of changing payload structure in the data formats by
+deleting, adding, renaming fields. It is extremely important to handle it with care because incompatible changes can
+break your consumer or data processing tools. Evolution is more complicated when 3rd parties are involved
+in data processing and it is not possible to update all consumers, producers at a time.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are tactics and rules that should be kept in the mind when creating the initial schema
+and also rules how to create a new version of the schema and make them compatible.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;compatibility_types&quot;&gt;Compatibility types&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Two main directions are present in the evolution of compatibility - &lt;strong&gt;forward and backward&lt;/strong&gt;. The term &lt;strong&gt;transitive changes&lt;/strong&gt;
+identifies that there are several generations of the schema and compatibility is applied to all of them.
+&lt;strong&gt;Full compatibility&lt;/strong&gt; includes both backward and forward compatibilities.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;schemas&quot;&gt;Schemas&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;User V1: initial schema&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;json&quot; class=&quot;language-json hljs&quot;&gt;{
+     &quot;type&quot;: &quot;record&quot;,
+     &quot;namespace&quot;: &quot;io.github.tsypuk&quot;,
+     &quot;name&quot;: &quot;UserV1&quot;,
+     &quot;doc&quot;: &quot;Avro Schema for User&quot;,
+     &quot;fields&quot;: [
+       { &quot;name&quot;: &quot;user_name&quot;, &quot;type&quot;: &quot;string&quot;, &quot;doc&quot;: &quot;Name of the User&quot; },
+       { &quot;name&quot;: &quot;password&quot;, &quot;type&quot;: &quot;string&quot;, &quot;doc&quot;: &quot;Password of the User&quot; },
+       { &quot;name&quot;: &quot;is_root&quot;, &quot;type&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;doc&quot;: &quot;Field indicating if the user has root access level&quot; }
+     ]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;User V2: added new &lt;strong&gt;phone_number&lt;/strong&gt;, &lt;strong&gt;email&lt;/strong&gt; fields with default values, deleted &lt;strong&gt;is_root&lt;/strong&gt; field with default value in the previous schema&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;json&quot; class=&quot;language-json hljs&quot;&gt;{
+     &quot;type&quot;: &quot;record&quot;,
+     &quot;namespace&quot;: &quot;io.github.tsypuk&quot;,
+     &quot;name&quot;: &quot;UserV2&quot;,
+     &quot;doc&quot;: &quot;Avro Schema for User&quot;,
+     &quot;fields&quot;: [
+       { &quot;name&quot;: &quot;user_name&quot;, &quot;type&quot;: &quot;string&quot;, &quot;doc&quot;: &quot;Name of the User&quot; },
+       { &quot;name&quot;: &quot;password&quot;, &quot;type&quot;: &quot;string&quot;, &quot;doc&quot;: &quot;Password of the User&quot; },
+       { &quot;name&quot;: &quot;phone_number&quot;, &quot;type&quot;: [&quot;null&quot;, &quot;string&quot;], &quot;default&quot;: null, &quot;doc&quot;: &quot;Optional phone&quot; },
+       { &quot;name&quot;: &quot;email&quot;, &quot;type&quot;: &quot;string&quot;, &quot;default&quot;: &quot;xxx@xx.com&quot;, &quot;doc&quot;: &quot;Email of the user&quot; }
+     ]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;User V1_2: removed required field &lt;strong&gt;password&lt;/strong&gt;, removed &lt;strong&gt;email&lt;/strong&gt; optional field.
+V1_2 violates both backward and forward compatibilities.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;json&quot; class=&quot;language-json hljs&quot;&gt;{
+     &quot;type&quot;: &quot;record&quot;,
+     &quot;namespace&quot;: &quot;io.github.tsypuk&quot;,
+     &quot;name&quot;: &quot;UserV1_2&quot;,
+     &quot;doc&quot;: &quot;Avro Schema for User. Incompatible&quot;,
+     &quot;fields&quot;: [
+       { &quot;name&quot;: &quot;user_name&quot;, &quot;type&quot;: &quot;string&quot;, &quot;doc&quot;: &quot;Name of the User&quot; },
+       { &quot;name&quot;: &quot;phone_number&quot;, &quot;type&quot;: &quot;string&quot;, &quot;doc&quot;: &quot;Optional phone&quot; }
+     ]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;User V3: added new &lt;strong&gt;level&lt;/strong&gt; field with default values&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;json&quot; class=&quot;language-json hljs&quot;&gt;{
+     &quot;type&quot;: &quot;record&quot;,
+     &quot;namespace&quot;: &quot;io.github.tsypuk&quot;,
+     &quot;name&quot;: &quot;UserV3&quot;,
+     &quot;doc&quot;: &quot;Avro Schema for User&quot;,
+     &quot;fields&quot;: [
+       { &quot;name&quot;: &quot;user_name&quot;, &quot;type&quot;: &quot;string&quot;, &quot;doc&quot;: &quot;Name of the User&quot; },
+       { &quot;name&quot;: &quot;password&quot;, &quot;type&quot;: &quot;string&quot;, &quot;doc&quot;: &quot;Password of the User&quot; },
+       { &quot;name&quot;: &quot;phone_number&quot;, &quot;type&quot;: [&quot;null&quot;, &quot;string&quot;], &quot;default&quot;: null, &quot;doc&quot;: &quot;Optional phone&quot; },
+       { &quot;name&quot;: &quot;email&quot;, &quot;type&quot;: &quot;string&quot;, &quot;default&quot;: &quot;xxx@xx.com&quot;, &quot;doc&quot;: &quot;Email of the user&quot; },
+       { &quot;name&quot;: &quot;level&quot;, &quot;type&quot;: &quot;string&quot;, &quot;default&quot;: &quot;NOT_SET&quot;, &quot;doc&quot;: &quot;user level&quot; }
+     ]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;forward_compatibility_test&quot;&gt;Forward compatibility test&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Adding compatibility tests. Utils class performs write/read cycles with different schema versions involved
+and performs verification. &lt;strong&gt;forwardBroken&lt;/strong&gt; test verifies that Exception is thrown because V1_2 has incompatible changes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;java&quot; class=&quot;language-java hljs&quot;&gt;class ForwardCompatibility {
+
+    final UserV1_2.Builder userV1_2Builder = UserV1_2.newBuilder();
+    final UserV3.Builder userV3Builder = UserV3.newBuilder();
+
+    private String fileName = &quot;/tmp/&quot;;
+
+    @BeforeEach
+    void before(TestInfo testInfo) {
+        fileName = &quot;/tmp/&quot; + testInfo.getDisplayName() + &quot;.avro&quot;;
+    }
+
+    /**
+     * Consumer schema X
+     * Producer schema X
+     */
+    @Test
+    void sameSchema(TestInfo testInfo) {
+        UserV3 userV3Write = userV3Builder
+                .setUserName(&quot;ALICE&quot;)
+                .setPhoneNumber(&quot;777&quot;)
+                .setEmail(&quot;NONE&quot;)
+                .setPassword(&quot;PASSWORD&quot;)
+                .setLevel(&quot;SE&quot;)
+                .build();
+        writeToAvro(userV3Write, UserV3.class, fileName);
+        UserV3 userV3Read = readFromAvro(UserV3.class, fileName);
+
+        assertEquals(userV3Read.getUserName(), &quot;ALICE&quot;);
+        assertEquals(userV3Read.getPhoneNumber(), &quot;777&quot;);
+        assertEquals(userV3Read.getEmail(), &quot;NONE&quot;);
+        assertEquals(userV3Read.getPassword(), &quot;PASSWORD&quot;);
+        assertEquals(userV3Read.getLevel(), &quot;SE&quot;);
+    }
+
+    /**
+     * Consumer schema X-1
+     * Producer schema X
+     */
+    @Test
+    void forward(TestInfo testInfo) {
+        UserV3 userV3Write = userV3Builder
+                .setUserName(&quot;ALICE&quot;)
+                .setPhoneNumber(&quot;777&quot;)
+                .setEmail(&quot;NONE&quot;)
+                .setPassword(&quot;PASSWORD&quot;)
+                .setLevel(&quot;SE&quot;)
+                .build();
+        writeToAvro(userV3Write, UserV3.class, fileName);
+        UserV2 userV2Read = readFromAvro(UserV2.class, fileName);
+
+        assertEquals(userV2Read.getUserName(), &quot;ALICE&quot;);
+        assertEquals(userV2Read.getPhoneNumber(), &quot;777&quot;);
+
+        assertEquals(userV2Read.getEmail(), &quot;NONE&quot;); //default email
+        assertEquals(userV2Read.getPassword(), &quot;PASSWORD&quot;);
+    }
+
+    /**
+     * Consumer schema X-2
+     * Producer schema X
+     */
+    @Test
+    void forwardTransitive(TestInfo testInfo) {
+        UserV3 userV3Write = userV3Builder
+                .setUserName(&quot;ALICE&quot;)
+                .setPhoneNumber(&quot;777&quot;)
+                .setEmail(&quot;NONE&quot;)
+                .setPassword(&quot;PASSWORD&quot;)
+                .setLevel(&quot;SE&quot;)
+                .build();
+        writeToAvro(userV3Write, UserV3.class, fileName);
+        UserV1 userV1Read = readFromAvro(UserV1.class, fileName);
+
+        assertEquals(userV1Read.getUserName(), &quot;ALICE&quot;);
+        assertEquals(userV1Read.getPassword(), &quot;PASSWORD&quot;);
+        assertEquals(userV1Read.getIsRoot(), false);
+    }
+
+    /**
+     * Consumer schema X-1
+     * Producer schema X but break changes (deleted needed field)
+     * &amp;lt;p&amp;gt;
+     * org.apache.avro.AvroTypeException: Found io.github.tsypuk.UserV1_2, expecting io.github.tsypuk.UserV1, missing required field password
+     */
+    @Test
+    void forwardBroken(TestInfo testInfo) {
+        UserV1_2 userV1_2Write = userV1_2Builder
+                .setUserName(&quot;ALICE&quot;)
+                .setPhoneNumber(&quot;777&quot;)
+                .build();
+        writeToAvro(userV1_2Write, UserV1_2.class, fileName);
+
+        Assertions.assertThrows(AvroTypeException.class, () -&amp;gt; {
+            readFromAvro(UserV1.class, fileName);
+        });
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;backward_compatibility_test&quot;&gt;Backward compatibility test&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Adding test for backward compatibility following the same approach&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;java&quot; class=&quot;language-java hljs&quot;&gt;class BackwardCompatibility {
+
+    final UserV1.Builder userV1Builder = UserV1.newBuilder();
+    final UserV2.Builder userV2Builder = UserV2.newBuilder();
+
+    private String fileName = &quot;/tmp/&quot;;
+
+    @BeforeEach
+    void before(TestInfo testInfo) {
+        fileName = &quot;/tmp/&quot; + testInfo.getDisplayName() + &quot;.avro&quot;;
+    }
+
+    @Test
+    void sameSchema(TestInfo testInfo) {
+        UserV2 userV2Write = userV2Builder
+                .setUserName(&quot;ALICE&quot;)
+                .setPhoneNumber(&quot;777&quot;)
+                .setEmail(&quot;NONE&quot;)
+                .setPassword(&quot;PASSWORD&quot;)
+                .build();
+        writeToAvro(userV2Write, UserV2.class, fileName);
+        UserV2 userV2Read = readFromAvro(UserV2.class, fileName);
+
+        assertEquals(userV2Read.getUserName(), &quot;ALICE&quot;);
+        assertEquals(userV2Read.getPhoneNumber(), &quot;777&quot;);
+
+        assertEquals(userV2Read.getEmail(), &quot;NONE&quot;);
+        assertEquals(userV2Read.getPassword(), &quot;PASSWORD&quot;);
+    }
+
+    /**
+     * Consumer schema X
+     * Producer schema X-1
+     */
+    @Test
+    void backward(TestInfo testInfo) {
+        UserV1 userV1Write = userV1Builder
+                .setUserName(&quot;ALICE&quot;)
+                .setPassword(&quot;PASSWORD&quot;)
+                .setIsRoot(true)
+                .build();
+        writeToAvro(userV1Write, UserV1.class, fileName);
+        UserV2 userV2Read = readFromAvro(UserV2.class, fileName);
+
+        assertEquals(userV2Read.getUserName(), &quot;ALICE&quot;);
+        assertEquals(userV2Read.getPhoneNumber(), null);
+
+        assertEquals(userV2Read.getEmail(), &quot;xxx@xx.com&quot;); //default email
+        assertEquals(userV2Read.getPassword(), &quot;PASSWORD&quot;);
+    }
+
+    /**
+     * Consumer schema X
+     * Producer schema X-2
+     */
+    @Test
+    void backwardTransitive(TestInfo testInfo) {
+        UserV1 userV1Write = userV1Builder
+                .setUserName(&quot;ALICE&quot;)
+                .setPassword(&quot;PASSWORD&quot;)
+                .setIsRoot(true)
+                .build();
+        writeToAvro(userV1Write, UserV1.class, fileName);
+        UserV3 userV3Read = readFromAvro(UserV3.class, fileName);
+
+        assertEquals(userV3Read.getUserName(), &quot;ALICE&quot;);
+        assertEquals(userV3Read.getPhoneNumber(), null);
+
+        assertEquals(userV3Read.getEmail(), &quot;xxx@xx.com&quot;); //default email
+        assertEquals(userV3Read.getPassword(), &quot;PASSWORD&quot;);
+        assertEquals(userV3Read.getLevel(), &quot;NOT_SET&quot;);
+    }
+
+    /**
+     * Consumer schema X
+     * Producer schema X-1 but break changes (added non optional field with non default values)
+     * &amp;lt;p&amp;gt;
+     * org.apache.avro.AvroTypeException: Found io.github.tsypuk.UserV1, expecting io.github.tsypuk.UserV1_2, missing required field phone_number
+     */
+    @Test
+    void backwardBroken(TestInfo testInfo) {
+        UserV1 userV1Write = userV1Builder
+                .setUserName(&quot;ALICE&quot;)
+                .setPassword(&quot;PASSWORD&quot;)
+                .setIsRoot(true)
+                .build();
+        writeToAvro(userV1Write, UserV1.class, fileName);
+
+        Assertions.assertThrows(AvroTypeException.class, () -&amp;gt; {
+            readFromAvro(UserV1_2.class, fileName);
+        });
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;schema_evolution_best_practices&quot;&gt;Schema Evolution best practices&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Provide default values to all fields that could change in the next schema versions.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Do not rename fields, if needed use aliases.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;In next schemas, always give default values and do not delete required fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Apply default values to enums, it will be used during resolution when the reader encounters a symbol from the writer
+that isn&amp;#8217;t defined in the reader&amp;#8217;s schema.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;This table represents allowed changes to support different levels of compatibility:&lt;/p&gt;
+&lt;/div&gt;
+&lt;table class=&quot;tableblock frame-all grid-all stretch&quot;&gt;
+&lt;colgroup&gt;
+&lt;col style=&quot;width: 33.3333%;&quot;&gt;
+&lt;col style=&quot;width: 33.3333%;&quot;&gt;
+&lt;col style=&quot;width: 33.3334%;&quot;&gt;
+&lt;/colgroup&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Compatibility&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Allowed changes&lt;/th&gt;
+&lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;Check against which schemas&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;BACKWARD&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;div class=&quot;content&quot;&gt;&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Delete fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Add optional fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Last version&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;BACKWARD_TRANSITIVE&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;div class=&quot;content&quot;&gt;&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Delete fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Add optional fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;All previous versions&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;FORWARD&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;div class=&quot;content&quot;&gt;&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Add fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Delete optional fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Last version&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;FORWARD_TRANSITIVE&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;div class=&quot;content&quot;&gt;&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Add fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Delete optional fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;All previous versions&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;FULL&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;div class=&quot;content&quot;&gt;&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Add optional fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Delete optional fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;Last version&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;FULL_TRANSITIVE&lt;/p&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;div class=&quot;content&quot;&gt;&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Add optional fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Delete optional fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;/td&gt;
+&lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;&lt;p class=&quot;tableblock&quot;&gt;All previous versions&lt;/p&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.confluent.io/current/schema-registry/avro.html&quot; class=&quot;bare&quot;&gt;https://docs.confluent.io/current/schema-registry/avro.html&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://avro.apache.org/docs/1.9.2/&quot; class=&quot;bare&quot;&gt;https://avro.apache.org/docs/1.9.2/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</content><author><name>Roman Tsypuk</name></author><category term="avro" /><category term="avro" /><category term="java" /><category term="schema evolution" /><summary type="html">Avro Schema evolution Backward, Forward and Full compatibility</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://tsypuk.github.io/images/posts/thumbs/1000/watching-lizard-1386905.jpg" /><media:content medium="image" url="https://tsypuk.github.io/images/posts/thumbs/1000/watching-lizard-1386905.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Avro Generic, Specific and Reflection Writer/Reader</title><link href="https://tsypuk.github.io/avro-java-records" rel="alternate" type="text/html" title="Avro Generic, Specific and Reflection Writer/Reader" /><published>2020-04-14T00:00:00+03:00</published><updated>2020-04-14T00:00:00+03:00</updated><id>https://tsypuk.github.io/avro-java-records</id><content type="html" xml:base="https://tsypuk.github.io/avro-java-records">&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;abstract&quot;&gt;Abstract&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are 3 main options to operate with AVRO serialization/deserialization records - to use &lt;strong&gt;Generic&lt;/strong&gt;, &lt;strong&gt;Specific&lt;/strong&gt; or &lt;strong&gt;Reflection&lt;/strong&gt; approaches.
+In this post, I will do an overview of them.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;add_avro_maven_dependency&quot;&gt;Add avro maven dependency&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;xml&quot; class=&quot;language-xml hljs&quot;&gt;&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.apache.avro&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;avro&amp;lt;/artifactId&amp;gt;
+    &amp;lt;version&amp;gt;1.9.2&amp;lt;/version&amp;gt;
+&amp;lt;/dependency&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;defining_the_schema&quot;&gt;Defining the schema&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;resources/avro/user.avsc&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;json&quot; class=&quot;language-json hljs&quot;&gt;{
+     &quot;type&quot;: &quot;record&quot;,
+     &quot;namespace&quot;: &quot;io.github.tsypuk&quot;,
+     &quot;name&quot;: &quot;User&quot;,
+     &quot;doc&quot;: &quot;Avro Schema for User&quot;,
+     &quot;fields&quot;: [
+       { &quot;name&quot;: &quot;user_name&quot;, &quot;type&quot;: &quot;string&quot;, &quot;doc&quot;: &quot;Name of the User&quot; },
+       { &quot;name&quot;: &quot;password&quot;, &quot;type&quot;: &quot;string&quot;, &quot;doc&quot;: &quot;Password of the User&quot; },
+       { &quot;name&quot;: &quot;is_root&quot;, &quot;type&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;doc&quot;: &quot;Field indicating if the user has root access level&quot; }
+     ]
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;genericrecord&quot;&gt;GenericRecord&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;When using Generic Record, there is no need to include plugins to generate the POJO from the schema.
+In this case, operations with Generic Record are the same as with the map - accessing values by the key name of the field.
+If the field is not set null value is returned.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;java&quot; class=&quot;language-java hljs&quot;&gt;public static void main(String[] args) throws IOException {
+        genericWriter();
+        genericReader();
+    }
+    private static void genericWriter() throws IOException {
+        Schema.Parser parser = new Schema.Parser();
+        Schema schema = parser.parse(new File(&quot;user.avsc&quot;));
+
+        GenericRecordBuilder userBuilder = new GenericRecordBuilder(schema);
+        userBuilder.set(&quot;user_name&quot;, &quot;Bob&quot;);
+        userBuilder.set(&quot;password&quot;, &quot;mypass&quot;);
+        userBuilder.set(&quot;is_root&quot;, false);
+        final GenericData.Record user = userBuilder.build();
+
+        final DatumWriter&amp;lt;GenericRecord&amp;gt; datumWriter = new GenericDatumWriter&amp;lt;&amp;gt;(schema);
+        try (DataFileWriter&amp;lt;GenericRecord&amp;gt; dataFileWriter = new DataFileWriter&amp;lt;&amp;gt;(datumWriter)) {
+            dataFileWriter.create(user.getSchema(), new File(&quot;user-generic.avro&quot;));
+            dataFileWriter.append(user);
+            log.info(&quot;Written user-generic.avro&quot;);
+        } catch (IOException ex) {
+            log.error(&quot;Couldn't write file&quot;, ex);
+        }
+    }
+
+    private static void genericReader() {
+        final File file = new File(&quot;user-generic.avro&quot;);
+        final DatumReader&amp;lt;GenericRecord&amp;gt; datumReader = new GenericDatumReader&amp;lt;&amp;gt;();
+        GenericRecord customerRead;
+        try (DataFileReader&amp;lt;GenericRecord&amp;gt; dataFileReader = new DataFileReader&amp;lt;&amp;gt;(file, datumReader)) {
+            customerRead = dataFileReader.next();
+            log.info(&quot;Successfully read avro file&quot;);
+            log.info(customerRead.toString());
+            log.info(&quot;User name: &quot; + customerRead.get(&quot;user_name&quot;));
+            log.info(&quot;Non existent field: &quot; + customerRead.get(&quot;non_existing&quot;));
+        } catch (IOException ex) {
+            log.error(&quot;Couldn't write file&quot;, ex);
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Serialization/deserialization loop for user. If you access non existient field you get null&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;[main] INFO io.github.tsypuk.AvroUtils - Written user-generic.avro
+[main] INFO io.github.tsypuk.AvroUtils - Successfully read avro file
+[main] INFO io.github.tsypuk.AvroUtils - {&quot;user_name&quot;: &quot;Bob&quot;, &quot;password&quot;: &quot;mypass&quot;, &quot;is_root&quot;: false}
+[main] INFO io.github.tsypuk.AvroUtils - User name: Bob
+[main] INFO io.github.tsypuk.AvroUtils - Non existent field: null&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;specific_record&quot;&gt;Specific Record&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;To generate code for the User class based on the AVRO schema definitions, &lt;strong&gt;avro-maven-plugin&lt;/strong&gt; plugin should be added:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;xml&quot; class=&quot;language-xml hljs&quot;&gt;&amp;lt;!--specific record--&amp;gt;
+            &amp;lt;plugin&amp;gt;
+                &amp;lt;groupId&amp;gt;org.apache.avro&amp;lt;/groupId&amp;gt;
+                &amp;lt;artifactId&amp;gt;avro-maven-plugin&amp;lt;/artifactId&amp;gt;
+                &amp;lt;version&amp;gt;${avro.version}&amp;lt;/version&amp;gt;
+                &amp;lt;executions&amp;gt;
+                    &amp;lt;execution&amp;gt;
+                        &amp;lt;phase&amp;gt;generate-sources&amp;lt;/phase&amp;gt;
+                        &amp;lt;goals&amp;gt;
+                            &amp;lt;goal&amp;gt;schema&amp;lt;/goal&amp;gt;
+                            &amp;lt;goal&amp;gt;protocol&amp;lt;/goal&amp;gt;
+                            &amp;lt;goal&amp;gt;idl-protocol&amp;lt;/goal&amp;gt;
+                        &amp;lt;/goals&amp;gt;
+                        &amp;lt;configuration&amp;gt;
+                            &amp;lt;sourceDirectory&amp;gt;${project.basedir}/src/main/resources/avro&amp;lt;/sourceDirectory&amp;gt;
+                            &amp;lt;stringType&amp;gt;String&amp;lt;/stringType&amp;gt;
+                            &amp;lt;createSetters&amp;gt;false&amp;lt;/createSetters&amp;gt;
+                            &amp;lt;enableDecimalLogicalType&amp;gt;true&amp;lt;/enableDecimalLogicalType&amp;gt;
+                            &amp;lt;fieldVisibility&amp;gt;private&amp;lt;/fieldVisibility&amp;gt;
+                        &amp;lt;/configuration&amp;gt;
+                    &amp;lt;/execution&amp;gt;
+                &amp;lt;/executions&amp;gt;
+            &amp;lt;/plugin&amp;gt;
+&amp;lt;!--gen classes discover--&amp;gt;
+            &amp;lt;plugin&amp;gt;
+                &amp;lt;groupId&amp;gt;org.codehaus.mojo&amp;lt;/groupId&amp;gt;
+                &amp;lt;artifactId&amp;gt;build-helper-maven-plugin&amp;lt;/artifactId&amp;gt;
+                &amp;lt;version&amp;gt;3.0.0&amp;lt;/version&amp;gt;
+                &amp;lt;executions&amp;gt;
+                    &amp;lt;execution&amp;gt;
+                        &amp;lt;id&amp;gt;add-source&amp;lt;/id&amp;gt;
+                        &amp;lt;phase&amp;gt;generate-sources&amp;lt;/phase&amp;gt;
+                        &amp;lt;goals&amp;gt;
+                            &amp;lt;goal&amp;gt;add-source&amp;lt;/goal&amp;gt;
+                        &amp;lt;/goals&amp;gt;
+                        &amp;lt;configuration&amp;gt;
+                            &amp;lt;sources&amp;gt;
+                                &amp;lt;source&amp;gt;target/generated-sources/avro&amp;lt;/source&amp;gt;
+                            &amp;lt;/sources&amp;gt;
+                        &amp;lt;/configuration&amp;gt;
+                    &amp;lt;/execution&amp;gt;
+                &amp;lt;/executions&amp;gt;
+            &amp;lt;/plugin&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Triggering package phase generates classes:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ mvn clean package -DskipTests
+[INFO] Scanning for projects...
+[INFO]
+[INFO] --------------&amp;lt; com.github.simpleand.avro:avro-examples &amp;gt;---------------
+[INFO] Building avro-examples 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ avro-examples ---
+[INFO] --- avro-maven-plugin:1.9.2:schema (default) @ avro-examples ---
+...&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At this moment additional benefits of specific records appear: User class is generated, it includes additional methods with builders.
+It is more safe to use this strongly typed to avoid accessing fields by improper naming that could occur on Generic Records.
+Both DatumReader and DatumWriter are typed with User class.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;java&quot; class=&quot;language-java hljs&quot;&gt;    private static void specificWriter() {
+        User.Builder userBuilder = User.newBuilder();
+        User user = userBuilder
+                .setIsRoot(true)
+                .setPassword(&quot;PASSWORD&quot;)
+                .setUserName(&quot;BOB&quot;)
+                .build();
+        log.info(user.toString());
+
+        final DatumWriter&amp;lt;User&amp;gt; datumWriter = new SpecificDatumWriter&amp;lt;&amp;gt;(User.class);
+
+        try (DataFileWriter&amp;lt;User&amp;gt; dataFileWriter = new DataFileWriter&amp;lt;&amp;gt;(datumWriter)) {
+            dataFileWriter.create(user.getSchema(), new File(&quot;user-specific.avro&quot;));
+            dataFileWriter.append(user);
+            log.info(&quot;successfully wrote user-specific.avro&quot;);
+        } catch (IOException ex) {
+            log.error(&quot;Couldn't write file&quot;, ex);
+        }
+    }
+
+    private static void specificRead() {
+        final File file = new File(&quot;user-specific.avro&quot;);
+        final DatumReader&amp;lt;User&amp;gt; datumReader = new SpecificDatumReader&amp;lt;&amp;gt;(User.class);
+        final DataFileReader&amp;lt;User&amp;gt; dataFileReader;
+        try {
+            log.info(&quot;Reading our specific record&quot;);
+            dataFileReader = new DataFileReader&amp;lt;&amp;gt;(file, datumReader);
+            while (dataFileReader.hasNext()) {
+                Schema schema = dataFileReader.getSchema();
+                log.info(&quot;Reading the schema from avro file {}&quot;, schema.toString());
+                User readCustomer = dataFileReader.next();
+                log.info(readCustomer.toString());
+                log.info(&quot;First name: {}&quot;, readCustomer.getUserName());
+            }
+        } catch (IOException ex) {
+            log.error(&quot;Couldn't write file&quot;, ex);
+        }
+    }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Specific Record write/read cycle with read access to schema&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;[main] INFO io.github.tsypuk.AvroUtils - {&quot;user_name&quot;: &quot;BOB&quot;, &quot;password&quot;: &quot;PASSWORD&quot;, &quot;is_root&quot;: true}
+[main] INFO io.github.tsypuk.AvroUtils - successfully wrote user-specific.avro
+[main] INFO io.github.tsypuk.AvroUtils - Reading our specific record
+[main] INFO io.github.tsypuk.AvroUtils - Reading the schema from avro file {&quot;type&quot;:&quot;record&quot;,&quot;name&quot;:&quot;User&quot;,&quot;namespace&quot;:&quot;io.github.tsypuk&quot;,&quot;doc&quot;:&quot;Avro Schema for User&quot;,&quot;fields&quot;:[{&quot;name&quot;:&quot;user_name&quot;,&quot;type&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;avro.java.string&quot;:&quot;String&quot;},&quot;doc&quot;:&quot;Name of the User&quot;},{&quot;name&quot;:&quot;password&quot;,&quot;type&quot;:{&quot;type&quot;:&quot;string&quot;,&quot;avro.java.string&quot;:&quot;String&quot;},&quot;doc&quot;:&quot;Password of the User&quot;},{&quot;name&quot;:&quot;is_root&quot;,&quot;type&quot;:&quot;boolean&quot;,&quot;doc&quot;:&quot;Field indicating if the user has root access level&quot;,&quot;default&quot;:false}]}
+[main] INFO io.github.tsypuk.AvroUtils - {&quot;user_name&quot;: &quot;BOB&quot;, &quot;password&quot;: &quot;PASSWORD&quot;, &quot;is_root&quot;: true}
+[main] INFO io.github.tsypuk.AvroUtils - First name: BOB&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;using_reflection&quot;&gt;Using Reflection&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;First, Pojo record should be defined, and here Lombok library with its annotations to generate getter, setters and constructors is useful.
+Annotations &lt;strong&gt;@AvroDoc&lt;/strong&gt; and &lt;strong&gt;@Nullable&lt;/strong&gt; are from AVRO package and they are used to instrument Avro for schema generation and constraints&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;java&quot; class=&quot;language-java hljs&quot;&gt;@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserReflected {
+    @AvroDoc(&quot;Name of the user&quot;)
+    private String userName;
+    @Nullable
+    private String password;
+    private boolean isRoot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The important difference that schema on write is generated using reflection from the Pojo class on the fly.
+It uses special Avro annotations to fill additional info into the schema.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;java&quot; class=&quot;language-java hljs&quot;&gt;    private static void reflectionWrite() {
+        try {
+            log.info(&quot;Writing user-reflected.avro&quot;);
+            File file = new File(&quot;user-reflected.avro&quot;);
+            Schema schema = ReflectData.get().getSchema(UserReflected.class);
+            log.info(&quot;schema = &quot; + schema.toString(true));
+
+            DatumWriter&amp;lt;UserReflected&amp;gt; writer = new ReflectDatumWriter&amp;lt;&amp;gt;(UserReflected.class);
+            DataFileWriter&amp;lt;UserReflected&amp;gt; out = new DataFileWriter&amp;lt;&amp;gt;(writer)
+                    .create(schema, file);
+
+            out.append(new UserReflected(&quot;Bob&quot;, &quot;any&quot;, true));
+            out.close();
+        } catch (IOException ex) {
+            log.error(&quot;Couldn't write file&quot;, ex);
+        }
+    }
+
+    private static void reflectionRead() {
+        try {
+            log.info(&quot;Reading user-reflected.avro&quot;);
+            File file = new File(&quot;user-reflected.avro&quot;);
+            DatumReader&amp;lt;UserReflected&amp;gt; reader = new ReflectDatumReader&amp;lt;&amp;gt;(UserReflected.class);
+            DataFileReader&amp;lt;UserReflected&amp;gt; dataFileReader = new DataFileReader&amp;lt;&amp;gt;(file, reader);
+            log.info(dataFileReader.getSchema().toString());
+            StreamSupport.stream(dataFileReader.spliterator(), false)
+                    .forEach(userReflected -&amp;gt; log.info(userReflected.toString()));
+            dataFileReader.close();
+        } catch (IOException ex) {
+            log.error(&quot;Couldn't write file&quot;, ex);
+        }
+    }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Reflection write/read. Generated schema is printed&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;[main] INFO io.github.tsypuk.AvroUtils - Writing user-reflected.avro
+[main] INFO io.github.tsypuk.AvroUtils - schema = {
+&quot;type&quot; : &quot;record&quot;,
+&quot;name&quot; : &quot;UserReflected&quot;,
+&quot;namespace&quot; : &quot;io.github.tsypuk&quot;,
+&quot;fields&quot; : [ {
+&quot;name&quot; : &quot;userName&quot;,
+&quot;type&quot; : &quot;string&quot;,
+&quot;doc&quot; : &quot;Name of the user&quot;
+}, {
+&quot;name&quot; : &quot;password&quot;,
+&quot;type&quot; : [ &quot;null&quot;, &quot;string&quot; ],
+&quot;default&quot; : null
+}, {
+&quot;name&quot; : &quot;isRoot&quot;,
+&quot;type&quot; : &quot;boolean&quot;
+} ]
+}
+[main] INFO io.github.tsypuk.AvroUtils - Reading user-reflected.avro
+[main] INFO io.github.tsypuk.AvroUtils - {&quot;type&quot;:&quot;record&quot;,&quot;name&quot;:&quot;UserReflected&quot;,&quot;namespace&quot;:&quot;io.github.tsypuk&quot;,&quot;fields&quot;:[{&quot;name&quot;:&quot;userName&quot;,&quot;type&quot;:&quot;string&quot;,&quot;doc&quot;:&quot;Name of the user&quot;},{&quot;name&quot;:&quot;password&quot;,&quot;type&quot;:[&quot;null&quot;,&quot;string&quot;],&quot;default&quot;:null},{&quot;name&quot;:&quot;isRoot&quot;,&quot;type&quot;:&quot;boolean&quot;}]}
+[main] INFO io.github.tsypuk.AvroUtils - UserReflected(userName=Bob, password=any, isRoot=true)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://avro.apache.org/docs/1.9.2/&quot; class=&quot;bare&quot;&gt;https://avro.apache.org/docs/1.9.2/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</content><author><name>Roman Tsypuk</name></author><category term="avro" /><category term="avro" /><category term="java" /><summary type="html">How to configure and use Avro Generic, Specific and Reflection Writer/Reader</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://tsypuk.github.io/images/posts/thumbs/1000/music-tape-1416288.jpg" /><media:content medium="image" url="https://tsypuk.github.io/images/posts/thumbs/1000/music-tape-1416288.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Configure docker machine to work with remote Raspberry PI docker engine</title><link href="https://tsypuk.github.io/docker-machine-raspberry" rel="alternate" type="text/html" title="Configure docker machine to work with remote Raspberry PI docker engine" /><published>2020-04-11T00:00:00+03:00</published><updated>2020-04-11T00:00:00+03:00</updated><id>https://tsypuk.github.io/docker-machine-raspberry</id><content type="html" xml:base="https://tsypuk.github.io/docker-machine-raspberry">&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;abstract&quot;&gt;Abstract&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Docker-machine is the utility that allows to provision docker on local host or remote servers and configure local docker client
+to interact with remote docker engines from local CLI. This post is overview how to use docker machine and setup docker engine
+on remote server running on Raspberry PI. In this way is possible to configure multiple connections to different docker engines running
+on public clouds like AWS, Azure or custom DC and easy switch between them from CLI.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;dlist&quot;&gt;
+&lt;dl&gt;
+&lt;dt class=&quot;hdlist1&quot;&gt;Content&lt;/dt&gt;
+&lt;dd&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#raspberry_pi_os_name_dirty_hack&quot;&gt;Raspberry PI OS name dirty hack&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#provision_docker_with_docker_machine&quot;&gt;Provision docker with docker machine&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#connect_to_remote_docker_engine&quot;&gt;Connect to remote docker engine&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#certs_regeneration&quot;&gt;Certs regeneration&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;raspberry_pi_os_name_dirty_hack&quot;&gt;Raspberry PI OS name dirty hack&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The first thing to do is a dirty hack of manual update &lt;strong&gt;ID&lt;/strong&gt; property with &lt;strong&gt;debian&lt;/strong&gt; value on Raspberry PI, otherwise docker client could not communicate with remote server.
+This can be done by editing the following file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ sudo vim /etc/os-release&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;properties&quot; class=&quot;language-properties hljs&quot;&gt;PRETTY_NAME=&quot;Raspbian GNU/Linux 9 (stretch)&quot;
+NAME=&quot;Raspbian GNU/Linux&quot;
+VERSION_ID=&quot;9&quot;
+VERSION=&quot;9 (stretch)&quot;
+ID=debian
+ID_LIKE=debian
+HOME_URL=&quot;http://www.raspbian.org/&quot;
+SUPPORT_URL=&quot;http://www.raspbian.org/RaspbianForums&quot;
+BUG_REPORT_URL=&quot;http://www.raspbian.org/RaspbianBugs&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;provision_docker_with_docker_machine&quot;&gt;Provision docker with docker machine&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If SSH keys are setup for remote server docker machine will use them in process of remote docker installation. Otherwise
+docker-machine will generate and setup them. Run the following command.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ docker-machine create --driver generic \
+--generic-ip-address 192.x.x.x \
+--generic-ssh-key ~/.ssh/raspberrypi_rsa \
+--generic-ssh-user pi \
+--engine-storage-driver overlay2 \
+raspberry-docker
+Running pre-create checks...
+Creating machine...
+(raspberry-docker) Importing SSH key...
+Waiting for machine to be running, this may take a few minutes...
+Detecting operating system of created instance...
+Waiting for SSH to be available...
+Detecting the provisioner...
+Provisioning with debian...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+Checking connection to Docker...
+Docker is up and running!
+To see how to connect your Docker Client to the Docker Engine running on this virtual machine, run: docker-machine env raspberry-docker&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It will take some time to install. Once it is complete list docker machines defined on the host can be listed:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ docker-machine ls
+NAME               ACTIVE   DRIVER       STATE     URL                      SWARM   DOCKER     ERRORS
+default            -        virtualbox   Stopped                                    Unknown
+raspberry-docker   -        generic      Running   tcp://192.x.x.x:2376           v18.09.0&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;connect_to_remote_docker_engine&quot;&gt;Connect to remote docker engine&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;By default, docker client operates with local docker engine, it requires configuration to work with remote docker engine.
+The following command will output list of ENVs for configuration.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ docker-machine env raspberry-docker
+export DOCKER_TLS_VERIFY=&quot;1&quot;
+export DOCKER_HOST=&quot;tcp://192.x.x.x:2376&quot;
+export DOCKER_CERT_PATH=&quot;/Users/USER/.docker/machine/machines/raspberry-docker&quot;
+export DOCKER_MACHINE_NAME=&quot;raspberry-docker&quot;
+# Run this command to configure your shell:
+# eval $(docker-machine env raspberry-docker)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;More easy way to configure docker client - is to run the following command with docker machine name and it will complete auto configuration.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ eval $(docker-machine env raspberry-docker)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Docker client now is configured and is ready to control docker engine on remote server. But this setup is applied for the current session only.
+On terminal restart env should be applied again.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Check the running containers on Raspberry PI from local CLI:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ docker ps -a
+CONTAINER ID        IMAGE                         COMMAND                  CREATED             STATUS              PORTS                    NAMES
+1cce328d8174        fg2it/grafana-armhf:v4.1.2    &quot;/run.sh&quot;                16 months ago       Up About a minute   0.0.0.0:3003-&amp;gt;3000/tcp   grafana
+561b758c8312        hypriot/rpi-influxdb:latest   &quot;/usr/bin/entry.sh /…&quot;   16 months ago       Up About a minute   0.0.0.0:8086-&amp;gt;8086/tcp   influxdb&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ docker version
+Client: Docker Engine - Community
+ Version:           19.03.4
+ API version:       1.39 (downgraded from 1.40)
+ Go version:        go1.12.10
+ Git commit:        9013bf5
+ Built:             Thu Oct 17 23:44:48 2019
+ OS/Arch:           darwin/amd64
+ Experimental:      false
+Server: Docker Engine - Community
+Engine:
+Version:          18.09.0
+API version:      1.39 (minimum version 1.12)
+Go version:       go1.10.4
+Git commit:       4d60db4
+Built:            Wed Nov  7 00:17:57 2018
+OS/Arch:          linux/arm
+Experimental:     false&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;certs_regeneration&quot;&gt;Certs regeneration&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Certificates can be regenerated for particular remote server on demand:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ docker-machine regenerate-certs raspberry-docker&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.docker.com/machine/drivers/generic/&quot; class=&quot;bare&quot;&gt;https://docs.docker.com/machine/drivers/generic/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.docker.com/machine/overview/&quot; class=&quot;bare&quot;&gt;https://docs.docker.com/machine/overview/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</content><author><name>Roman Tsypuk</name></author><category term="cli" /><category term="cli" /><category term="docker" /><category term="arm" /><category term="raspberry-pi" /><category term="docker-machine" /><summary type="html">How to configure your local docker client to work with remote docker server on Raspberry PI</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://tsypuk.github.io/images/posts/thumbs/1000/container-yard-1-1531015-1920x1280.jpg" /><media:content medium="image" url="https://tsypuk.github.io/images/posts/thumbs/1000/container-yard-1-1531015-1920x1280.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Apache Kafka Ops commands</title><link href="https://tsypuk.github.io/kafka-admin-commands" rel="alternate" type="text/html" title="Apache Kafka Ops commands" /><published>2020-04-10T00:00:00+03:00</published><updated>2020-04-10T00:00:00+03:00</updated><id>https://tsypuk.github.io/kafka-admin-commands</id><content type="html" xml:base="https://tsypuk.github.io/kafka-admin-commands">&lt;div id=&quot;preamble&quot;&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;dlist&quot;&gt;
+&lt;dl&gt;
+&lt;dt class=&quot;hdlist1&quot;&gt;Topic operations&lt;/dt&gt;
+&lt;dd&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#create_topic&quot;&gt;Create topic&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#change_partitions_number_can_only_add_more&quot;&gt;Change partitions number (can only add more)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#delete_a_topic&quot;&gt;Delete a topic&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#list_all_topics&quot;&gt;List all topics&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#describe_all_the_topics&quot;&gt;Describe all the topics&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#list_topics_with_overridesconfigs_added_to_the_defaults&quot;&gt;List topics with overrides(configs added to the defaults)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#list_topics_that_are_not_in_sync_with_all_replicas&quot;&gt;List topics that are not in-sync with all replicas&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#list_topics_without_a_leader_replica&quot;&gt;List topics without a leader replica&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#describe_the_configurations_for_all_topics_only_in_addition_to_the_defaults&quot;&gt;Describe the configurations for all topics (only in addition to the defaults)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#describe_the_configurations_for_a_specific_topic_defaults_will_not_show&quot;&gt;Describe the configurations for a specific topic (defaults will not show)&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/dd&gt;
+&lt;dt class=&quot;hdlist1&quot;&gt;Consumer operations&lt;/dt&gt;
+&lt;dd&gt;
+&lt;div class=&quot;ulist&quot;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#list_all_the_consumer_groups&quot;&gt;List all the consumer groups&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#describe_a_specific_consumer_group&quot;&gt;Describe a specific consumer group&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#describe_the_active_members_of_the_group&quot;&gt;Describe the active members of the group&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#If the group has active members&quot;&gt;get a more verbose output&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#describe_the_state_of_the_group&quot;&gt;Describe the state of the group&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#delete_a_consumer_group_only_works_if_there_are_no_active_members&quot;&gt;Delete a consumer group (only works if there are no active members).&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#delete_multiple_consumer_groups&quot;&gt;Delete multiple consumer groups&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&quot;#reset_offsets_for_a_consumer_group&quot;&gt;Reset offsets for a consumer group&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;add_kafka_to_the_path&quot;&gt;Add Kafka to the PATH&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ export PATH=&quot;/xxx/xxxxxx/kafka_2.13-2.4.1/$bin:$PATH&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;topic_operations&quot;&gt;Topic operations&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;create_topic&quot;&gt;Create topic&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--create \
+--topic my-topic \
+--replication-factor 1 \
+--partitions 5 \
+--if-not-exists&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;change_partitions_number_can_only_add_more&quot;&gt;Change partitions number (can only add more)&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--alter \
+--topic my-topic \
+--partitions 7&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;delete_a_topic&quot;&gt;Delete a topic&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--delete \
+--topic my-topic&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;list_all_topics&quot;&gt;List all topics&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--list&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;describe_all_the_topics&quot;&gt;Describe all the topics&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--describe&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;list_topics_with_overridesconfigs_added_to_the_defaults&quot;&gt;List topics with overrides(configs added to the defaults)&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--describe \
+--topics-with-overrides&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;list_topics_that_are_not_in_sync_with_all_replicas&quot;&gt;List topics that are not in-sync with all replicas&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--describe \
+--under-replicated-partitions&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;list_topics_without_a_leader_replica&quot;&gt;List topics without a leader replica&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-topics.sh --zookeeper zookeeper1:2181 \
+--describe \
+--unavailable-partitions&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;describe_the_configurations_for_all_topics_only_in_addition_to_the_defaults&quot;&gt;Describe the configurations for all topics (only in addition to the defaults)&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--describe \
+--entity-type topics&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;describe_the_configurations_for_a_specific_topic_defaults_will_not_show&quot;&gt;Describe the configurations for a specific topic (defaults will not show)&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--describe \
+--entity-type topics \
+--entity-name my-topic&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;change_the_topics_message_retention&quot;&gt;Change the topics message retention&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--alter \
+--entity-type topics \
+--entity-name connect-test \
+--add-config retention.ms=3600000&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;describe_the_configurations_for_all_brokers_defaults_will_not_show&quot;&gt;Describe the configurations for all brokers (defaults will not show)&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--entity-type brokers \
+--entity-default \
+--describe&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;describe_the_configuration_for_broker_0_defaults_will_not_show&quot;&gt;Describe the configuration for broker 0 (defaults will not show)&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--entity-type brokers \
+--entity-name 0 \
+--describe&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;add_a_custom_config_to_broker_0_log_cleaner_thread_count&quot;&gt;Add a custom config to broker 0 (log cleaner thread count)&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--entity-type brokers \
+--entity-name 0 \
+--alter \
+--add-config log.cleaner.threads=2&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;remove_all_custom_configs_not_including_defaults_from_broker_0&quot;&gt;Remove all custom configs (not including defaults) from broker 0&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-configs.sh --zookeeper zookeeper1:2181 \
+--entity-type brokers \
+--entity-name 0 \
+--alter \
+--delete-config log.cleaner.threads&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;consumer_operations&quot;&gt;Consumer operations&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;list_all_the_consumer_groups&quot;&gt;List all the consumer groups&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--list&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;describe_a_specific_consumer_group&quot;&gt;Describe a specific consumer group&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--describe \
+--group application1&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;describe_the_active_members_of_the_group&quot;&gt;Describe the active members of the group&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--describe \
+--group application1 \
+--members&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;if_the_group_has_active_members_get_a_more_verbose_output&quot;&gt;If the group has active members, get a more verbose output&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--describe \
+--group application1 \
+--members \
+--verbose&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;describe_the_state_of_the_group&quot;&gt;Describe the state of the group&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--describe \
+--group application1 \
+--state&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;delete_a_consumer_group_only_works_if_there_are_no_active_members&quot;&gt;Delete a consumer group (only works if there are no active members).&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--delete \
+--group application1&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;delete_multiple_consumer_groups&quot;&gt;Delete multiple consumer groups&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-consumer-groups.sh --bootstrap-server kafka1:9092 \
+--delete \
+--group application1 \
+--group application2&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect2&quot;&gt;
+&lt;h3 id=&quot;reset_offsets_for_a_consumer_group&quot;&gt;Reset offsets for a consumer group&lt;/h3&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-consumer-groups.sh --bootstrap-server kafka:9092 \
+--reset-offsets \
+--group application1 \
+--topic topic-1 \
+--to-latest&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</content><author><name>Roman Tsypuk</name></author><category term="kafka" /><category term="kafka" /><category term="linux" /><category term="cli" /><category term="administration" /><summary type="html">Ops commands to maintain Kafka cluster</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://tsypuk.github.io/images/posts/thumbs/1000/keyboard-1242569.jpg" /><media:content medium="image" url="https://tsypuk.github.io/images/posts/thumbs/1000/keyboard-1242569.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Sign git commits with GPG key</title><link href="https://tsypuk.github.io/gpg-key-git-commit-sign" rel="alternate" type="text/html" title="Sign git commits with GPG key" /><published>2020-04-09T00:00:00+03:00</published><updated>2020-04-09T00:00:00+03:00</updated><id>https://tsypuk.github.io/gpg-key-git-commit-sign</id><content type="html" xml:base="https://tsypuk.github.io/gpg-key-git-commit-sign">&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;abstraction&quot;&gt;Abstraction&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Git provides the possibility to add a signature to each commit. By doing this you instrument version control system
+with instructions to verify the identity of the person who performed commit operation. For this purpose private and public keys
+need to be generated and configured for git client on local machine to use GPG key. Public key should be submitted to VCS server -
+github, gitlab etc to verify the validity of commit signature.
+Here are steps to implement commit signature process.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;generate_the_key&quot;&gt;Generate the key&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ brew install gpg&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ gpg --gen-key
+gpg (GnuPG) 2.2.19; Copyright (C) 2019 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Note: Use &quot;gpg --full-generate-key&quot; for a full featured key generation dialog.
+GnuPG needs to construct a user ID to identify your key.&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Enter Real name, email address and passphrase,&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once the process of key generation is complete, it can be verified:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ gpg --list-keys
+gpg: checking the trustdb
+gpg: marginals needed: 3  completes needed: 1  trust model: pgp
+gpg: depth: 0  valid:   2  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 2u
+gpg: next trustdb check due at 2022-01-17
+/Users/user/.gnupg/pubring.kbx
+---------------------------------
+pub   rsa2048 2020-04-04 [SC] [expires: 2022-04-04]
+      E2A9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+uid           [ultimate] Mr.Robot &amp;lt;mr.robot.xxxxxxxxxxxxx@gmail.com&amp;gt;
+sub   rsa2048 2020-04-04 [E] [expires: 2022-04-04]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Copy the public key into buffer to paste into GIT account settings.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ gpg --armor --export E2A9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | pbcopy&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;gpg_useful_commands&quot;&gt;GPG useful commands&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ gpg --delete-key key-ID
+$ gpg --list-keys
+$ gpg --delete-key keyID1 keyID2 keyID3
+$ gpg --delete-secret-key key-ID
+$ gpg --default-new-key-algo rsa4096 --gen-keys&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;configure_git_client_to_sign_commits&quot;&gt;Configure git client to sign commits&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;gitconfig file should be updated with the following items&lt;/div&gt;
+&lt;p&gt;Assign signkey the value from gpg command output. Turn on gpg signature by setting gpgsign = true and define
+the tool that is used for signature.
+Part of gitconfig with signature enabled:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;properties&quot; class=&quot;language-properties hljs&quot;&gt;[user]
+    name = XXXXXX
+    email = xxxx@xxxx.xxx
+    signkey = E2A9xxxxxxxxx
+[commit]
+    gpgsign = true
+[merge]
+    tool = opendiff
+    conflictstyle = diff3
+[gpg]
+    program = gpg&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;add_signature_to_git_based_server&quot;&gt;Add signature to git-based server&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Gitlab: &lt;a href=&quot;https://docs.gitlab.com/ee/user/project/repository/gpg_signed_commits/&quot; class=&quot;bare&quot;&gt;https://docs.gitlab.com/ee/user/project/repository/gpg_signed_commits/&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Github: &lt;a href=&quot;https://help.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key&quot; class=&quot;bare&quot;&gt;https://help.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;verify_commits&quot;&gt;Verify commits&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;OnceThe GPG signature is added to commit, you can verify commits on you repository for the validity of the key and also check the commit details with git internal tools:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git log --show-signature
+commit b6df3265fce5e0809a5409e77da94c97ef7c70cc (HEAD -&amp;gt; master, origin/master)
+gpg: Signature made Wed Feb 12 13:26:20 2020 EET
+gpg:                using RSA key E2A9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+gpg:                issuer &quot;mr.robot.xxxxxxxxxxxxx@gmail.com&quot;
+gpg: Good signature from &quot;Mr.Robot &amp;lt;mr.robot.xxxxxxxxxxxxx@gmail.com&amp;gt;&quot; [ultimate]
+Author: Mr.Robot &amp;lt;mr.robot.xxxxxxxxxxxxx@gmail.com&amp;gt;
+Date:   Wed Feb 12 13:26:19 2020 +0200
+    added description for prometheus real-life statistics
+commit dfb25b1d487a4b0433b33c3cd39e00e0fe5cf770
+gpg: Signature made Wed Feb 12 13:17:39 2020 EET
+gpg:                using RSA key E2A9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+gpg:                issuer &quot;mr.robot.xxxxxxxxxxxxx@gmail.com&quot;
+gpg: Good signature from &quot;Mr.Robot &amp;lt;mr.robot.xxxxxxxxxxxxx@gmail.com&amp;gt;&quot; [ultimate]
+Author: Mr.Robot &amp;lt;mr.robot.xxxxxxxxxxxxx@gmail.com&amp;gt;
+Date:   Wed Feb 12 13:17:39 2020 +0200
+    change directories structure&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -p b6df3265fce5e0809a5409e77da94c97ef7c70cc
+tree 440996dc5e3609cde15a5826dae92a87469c9341
+parent dfb25b1d487a4b0433b33c3cd39e00e0fe5cf770
+author Mr.Robot &amp;lt;mr.robot.xxxxxxxxxxxxx@gmail.com&amp;gt; 1581506779 +0200
+committer Mr.Robot &amp;lt;mr.robot.xxxxxxxxxxxxx@gmail.com&amp;gt; 1581506779 +0200
+gpgsig -----BEGIN PGP SIGNATURE-----
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ =xxxx
+ -----END PGP SIGNATURE-----&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;commit_process&quot;&gt;Commit process&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now once code changes in the repo are completed, on commit operation the message to enter passphrase will appear.
+On correctly entering the passphrase for GPG key, the commit will be signed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code class=&quot;language-none hljs&quot;&gt;┌────────────────────────────────────────────────────────────────┐
+│ Please enter the passphrase to unlock the OpenPGP secret key:  │
+│ &quot;Xxx Xxxxx &amp;lt;xxxf@xxx.coxxm&amp;gt;&quot;                                   │
+│ 4096-bit RSA key, ID XXXXXXXXXXXXXXXX,                         │
+│ created 2020-01-18.                                            │
+│                                                                │
+│                                                                │
+│ Passphrase: __________________________________________________ │&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</content><author><name>Roman Tsypuk</name></author><category term="git" /><category term="git" /><category term="gpg" /><category term="key" /><category term="signature" /><summary type="html">How to sign git commits with GPG key</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://tsypuk.github.io/images/posts/thumbs/1000/hand-1445014.jpg" /><media:content medium="image" url="https://tsypuk.github.io/images/posts/thumbs/1000/hand-1445014.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Stream tweets with Apache Kafka Connect</title><link href="https://tsypuk.github.io/kafka-twitter-streaming" rel="alternate" type="text/html" title="Stream tweets with Apache Kafka Connect" /><published>2020-04-05T00:00:00+03:00</published><updated>2020-04-05T00:00:00+03:00</updated><id>https://tsypuk.github.io/kafka-twitter-streaming</id><content type="html" xml:base="https://tsypuk.github.io/kafka-twitter-streaming">&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;abstraction&quot;&gt;Abstraction&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Apache Kafka provides a variety of ways to connect its topics with external systems (to use as sources or sinks).
+One of them is Connect API.
+Here is example how to setup and configure &lt;strong&gt;com.eneco.trading.kafka.connect.twitter.TwitterSourceConnector&lt;/strong&gt; connector.
+Once it is setup and configured recent tweets will be received using twitter API that include &lt;strong&gt;java&lt;/strong&gt; keyword. These tweets will be send to dedicated Kafka topic.
+Prerequisite is the registration of application at Twitter developer &lt;a href=&quot;https://developer.twitter.com/en/apps/create&quot; class=&quot;bare&quot;&gt;https://developer.twitter.com/en/apps/create&lt;/a&gt;, setup read-only permission
+and generate Access token, Access token secret, API key and API secret key for Connector configuration.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The following components diagram will be build:&lt;/p&gt;
+&lt;/div&gt;
+&lt;center&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/141db934-b862-4d8d-84488-d6a4c627216b.png&quot; alt=&quot;141db934 b862 4d8d 84488 d6a4c627216b&quot; width=&quot;600&quot; height=&quot;400&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Highlevel Architecture Kafka Connect&lt;/div&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;apply_twitter_kafka_connector&quot;&gt;Apply Twitter Kafka Connector&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Some platforms have a UI and preinstalled connectors others are require to add connector manually.
+But all of them support API requests. Here is example of creating Connector with REST API call
+(the request should include all metadata for connector to setup).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ curl -X POST \
+  http://localhost:8083/connectors \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{
+  &quot;name&quot;: &quot;source-twitter-distributed&quot;,
+  &quot;config&quot;: {
+    &quot;connector.class&quot;: &quot;com.eneco.trading.kafka.connect.twitter.TwitterSourceConnector&quot;,
+    &quot;tasks.max&quot;: &quot;1&quot;,
+    &quot;topics&quot;: &quot;topic-twitter&quot;,
+    &quot;topic&quot;: &quot;topic-twitter&quot;,
+    &quot;key.converter&quot;: &quot;org.apache.kafka.connect.json.JsonConverter&quot;,
+    &quot;key.converter.schemas.enable&quot;: &quot;false&quot;,
+    &quot;value.converter&quot;: &quot;org.apache.kafka.connect.json.JsonConverter&quot;,
+    &quot;value.converter.schemas.enable&quot;: &quot;false&quot;,
+    &quot;twitter.consumerkey&quot;: &quot;xxxxxxxxxxxxx&quot;,
+    &quot;twitter.consumersecret&quot;: &quot;xxxxxxxxxxxxx&quot;,
+    &quot;twitter.token&quot;: &quot;xxxxxxxxxxxxx&quot;,
+    &quot;twitter.secret&quot;: &quot;xxxxxxxxxxxxx&quot;,
+    &quot;track.terms&quot;: &quot;java&quot;,
+    &quot;language&quot;: &quot;en&quot;
+  }
+}'&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The response includes connector info.
+&lt;strong&gt;&quot;track.terms&quot;:&quot;java&quot;&lt;/strong&gt; indicates that tweets with &lt;strong&gt;java&lt;/strong&gt; keyword present will be consumed.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;json&quot; class=&quot;language-json hljs&quot;&gt;{
+&quot;name&quot;:&quot;source-twitter-distributed&quot;,
+&quot;config&quot;: {
+    &quot;connector.class&quot;:&quot;com.eneco.trading.kafka.connect.twitter.TwitterSourceConnector&quot;,
+    &quot;tasks.max&quot;:&quot;1&quot;,
+    &quot;topics&quot;:&quot;topic-twitter&quot;,
+    &quot;key.converter&quot;:&quot;org.apache.kafka.connect.json.JsonConverter&quot;,
+    &quot;key.converter.schemas.enable&quot;:&quot;false&quot;,
+    &quot;value.converter&quot;:&quot;org.apache.kafka.connect.json.JsonConverter&quot;,
+    &quot;value.converter.schemas.enable&quot;:&quot;false&quot;,
+    &quot;twitter.consumerkey&quot;:&quot;xxxxxxxxxxxxx&quot;,
+    &quot;twitter.consumersecret&quot;:&quot;xxxxxxxxxxxxx&quot;,
+    &quot;twitter.token&quot;:&quot;xxxxxxxxxxxxx&quot;,
+    &quot;twitter.secret&quot;:&quot;xxxxxxxxxxxxx&quot;,
+    &quot;track.terms&quot;:&quot;java&quot;,
+    &quot;language&quot;:&quot;en&quot;,
+    &quot;name&quot;:&quot;source-twitter-distributed&quot;
+},
+&quot;tasks&quot;:[],
+&quot;type&quot;:&quot;unknown&quot;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;run_consumer_for_topic_and_start_receiving_messages&quot;&gt;Run Consumer for topic and start receiving messages&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ kafka-console-consumer.sh --topic topic-twitter --bootstrap-server 127.0.0.1:9092&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Once the Consumer is up and running the messages will appear in the console output.
+The output is in JSON format, due to applied .converter&quot;:&quot;org.apache.kafka.connect.json.JsonConverter&quot;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;json&quot; class=&quot;language-json hljs&quot;&gt;{
+	&quot;id&quot;: 1246814159699709953,
+	&quot;created_at&quot;: &quot;2020-04-05T14:57:15.000+0000&quot;,
+	&quot;user&quot;: {
+		&quot;id&quot;: 125107613,
+		&quot;name&quot;: &quot;sunnyesquire&quot;,
+		&quot;screen_name&quot;: &quot;sunny_esquire&quot;,
+		&quot;location&quot;: null,
+		&quot;verified&quot;: false,
+		&quot;friends_count&quot;: 316,
+		&quot;followers_count&quot;: 180,
+		&quot;statuses_count&quot;: 9079
+	},
+	&quot;text&quot;: &quot;RT @javarevisited: Follow these people to keep learning @java on lockdown\n@TheDonRaab  \n@jeanneboyarsky\n@javarevisited \n@trisha_gee\n@yawkat…&quot;,
+	&quot;lang&quot;: &quot;en&quot;,
+	&quot;is_retweet&quot;: true,
+	&quot;entities&quot;: {
+		&quot;hashtags&quot;: [],
+		&quot;media&quot;: [],
+		&quot;urls&quot;: [],
+		&quot;user_mentions&quot;: [{
+			&quot;id&quot;: 1005111468595920897,
+			&quot;name&quot;: &quot;Javarevisited&quot;,
+			&quot;screen_name&quot;: &quot;javarevisited&quot;
+		}, {
+			&quot;id&quot;: 125485258,
+			&quot;name&quot;: &quot;Java&quot;,
+			&quot;screen_name&quot;: &quot;java&quot;
+		}, {
+			&quot;id&quot;: 2790286156,
+			&quot;name&quot;: &quot;Donald Raab&quot;,
+			&quot;screen_name&quot;: &quot;TheDonRaab&quot;
+		}, {
+			&quot;id&quot;: 55440347,
+			&quot;name&quot;: &quot;Jeanne Boyarsky&quot;,
+			&quot;screen_name&quot;: &quot;jeanneboyarsky&quot;
+		}, {
+			&quot;id&quot;: 1005111468595920897,
+			&quot;name&quot;: &quot;Javarevisited&quot;,
+			&quot;screen_name&quot;: &quot;javarevisited&quot;
+		}, {
+			&quot;id&quot;: 14162967,
+			&quot;name&quot;: &quot;Trisha Gee&quot;,
+			&quot;screen_name&quot;: &quot;trisha_gee&quot;
+		}, {
+			&quot;id&quot;: 463764901,
+			&quot;name&quot;: &quot;yawkat&quot;,
+			&quot;screen_name&quot;: &quot;yawkat&quot;
+		}]
+	}
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Check active connectors running:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ curl localhost:8083/connectors | jq
+[
+  &quot;source-twitter-distributed&quot;,
+  &quot;logs-broker&quot;,
+  &quot;file-stream-demo-distributed&quot;
+]&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</content><author><name>Roman Tsypuk</name></author><category term="kafka" /><category term="kafka" /><category term="connect" /><category term="twitter" /><summary type="html">Stream the data from Twitter to Apache Kafka with Kafka Connect</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://tsypuk.github.io/images/posts/thumbs/1000/french-telegraph-pole-at-dawn-1464290.jpg" /><media:content medium="image" url="https://tsypuk.github.io/images/posts/thumbs/1000/french-telegraph-pole-at-dawn-1464290.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Git branches, where do they lead ?</title><link href="https://tsypuk.github.io/git-branches" rel="alternate" type="text/html" title="Git branches, where do they lead ?" /><published>2020-02-04T00:00:00+02:00</published><updated>2020-02-04T00:00:00+02:00</updated><id>https://tsypuk.github.io/git-branches</id><content type="html" xml:base="https://tsypuk.github.io/git-branches">&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;terminology&quot;&gt;Terminology&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;strong&gt;Branch&lt;/strong&gt; is a special labeled marker that allows you to switch back or forward to some particular state of your repository.
+I.e. branch is just a reference that is pointing to some dedicated commit hash.
+By having such aliases (branches) it is more easy to operate with git tree than keep in mind SHA1 commits number.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There is a misconception that branch is a data structure like a list or hashmap of commits. It is wrong,
+git uses the DAG commit structure and branches is a mechanism to create named anchors to some particular state (snapshot) in a time.
+All branches references are stored in &lt;strong&gt;.git/refs/heads&lt;/strong&gt; directory&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;HEAD&lt;/strong&gt; is the reference to the actual state. It can have two states: attached (referencing to some branch by its name) or detached (referencing to commit SHA1 number). On filesystem is represented by file &lt;strong&gt;.git/HEAD&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;init_repo_with_first_commit&quot;&gt;Init repo with first commit&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Here is an initial state of repository with a single commit only. We can see that branch master is referencing to &lt;strong&gt;0d38698f&lt;/strong&gt; SHA1 commit and HEAD is attached and referencing to master.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ cat .git/refs/heads/master
+0d38698f4b3d301decb1aa390ee47c953e1fbccd
+$ cat .git/HEAD
+ref: refs/heads/master&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;center&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/554819a-e8d8-4a0f-a932-c064040a6512.png&quot; alt=&quot;554819a e8d8 4a0f a932 c064040a6512&quot; width=&quot;250&quot; height=&quot;250&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Git repository snapshot: 1 commits, 1 trees, 1 blobs, 2 refs: HEAD, refs/heads/master&lt;/div&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+If git&amp;#8217;s concept of Commit, Tree and Blob is new for you, check &lt;a href=&quot;git-advanced&quot;&gt;this article&lt;/a&gt;
+with overview of these git&amp;#8217;s internal objects and structures.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Adding second.txt file with a second commit. By doing this git is just moves master and HEAD references. And now they
+are pointing to the latest commit. Now master branch is referencing a newly made commit with SHA1 &lt;strong&gt;993bb5b5&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;center&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/c5c83423-bdca-4062-a029-f18127f3aded.png&quot; alt=&quot;c5c83423 bdca 4062 a029 f18127f3aded&quot; width=&quot;400&quot; height=&quot;400&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. Git repository snapshot: 6 commits, 6 trees, 5 blobs, 4 refs: HEAD, refs/heads/master, refs/remotes/origin/HEAD, refs/remotes/origin/master&lt;/div&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;detached_head&quot;&gt;Detached HEAD&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Let&amp;#8217;s checkout &lt;strong&gt;0d38698f&lt;/strong&gt; commit, by doing so we are setting HEAD into detached state, now it is not associated with any branch, but referencing to a single commit.
+From this state, you can create a new branch, do operations with commit or checkout any other branch.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ git checkout 0d38698f4b3d301decb1aa390ee47c953e1fbccd
+Note: checking out '0d38698f4b3d301decb1aa390ee47c953e1fbccd'
+You are in 'detached HEAD' state.
+$ cat .git/HEAD
+0d38698f4b3d301decb1aa390ee47c953e1fbccd&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;center&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/88bfb9e-1271-43a1-81f2-1dca5aac303f.png&quot; alt=&quot;88bfb9e 1271 43a1 81f2 1dca5aac303f&quot; width=&quot;400&quot; height=&quot;400&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. Git repository snapshot: 2 commits, 2 trees, 2 blobs, 2 refs: HEAD, refs/heads/master, &lt;/div&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;adding_feature_branch_and_one_more_commit_to_master&quot;&gt;Adding feature branch and one more commit to master&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;center&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/7c8ee7f0-8162-4f73-917c-a52b0ac78ba0.png&quot; alt=&quot;7c8ee7f0 8162 4f73 917c a52b0ac78ba0&quot; width=&quot;650&quot; height=&quot;650&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. Git repository snapshot: 3 commits, 3 trees, 3 blobs, 3 refs: HEAD, refs/heads/master, refs/heads/feature, &lt;/div&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;adding_remote_origin&quot;&gt;Adding remote origin&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It is a local repo, now let&amp;#8217;s create a repository on GitHub and add it as a remote repo origin.
+Now branch remotes/origin/master is referencing to &lt;strong&gt;849d8fba5&lt;/strong&gt; commit. It is the latest commit push and available the remote repo.
+&lt;strong&gt;.git/refs/remotes&lt;/strong&gt; directory represent remote repositories and remote branches.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ git remote add origin git@github.com:tsypuk/gitexplore.git
+$ git push -u origin master
+$ cat .git/refs/remotes/origin/master
+849d8fba50d841590e4f8cbb7fe3bf118b7b1fc9&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;center&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/93989576-54a6-4eba-8558-47e4e977b2b3.png&quot; alt=&quot;93989576 54a6 4eba 8558 47e4e977b2b3&quot; width=&quot;850&quot; height=&quot;850&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. Git repository snapshot: 3 commits, 3 trees, 3 blobs, 4 refs: HEAD, refs/heads/master, refs/heads/feature, refs/remotes/origin/master, &lt;/div&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We continue local development by adding more commits, the HEAD is associated with the current master branch, and the master branch
+is referencing to the latest SHA1 commit. Also, we see that the current changes are not available at the remote repo,
+the only previous commit was pushed to the remote.
+The bigger picture of repository state with all Commit, Tree and Blob objects:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/b85ce256-d297-457a-b25e-71a30a584211.png&quot; alt=&quot;b85ce256 d297 457a b25e 71a30a584211&quot; width=&quot;850&quot; height=&quot;850&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 6. Git repository snapshot: 4 commits, 4 trees, 4 blobs, 4 refs: HEAD, refs/heads/master, refs/heads/feature, refs/remotes/origin/master, &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Git repo is a DAG structure of Objects, branches (both local and remote) are a sliding labeled references to particular SHA1 commit in the repo.
+Overview of branching strategies as well as merging, rebasing, etc,  I will do in the next articles.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</content><author><name>Roman Tsypuk</name></author><category term="git" /><category term="git" /><category term="advanced" /><summary type="html">Git branches are labeled references to particular commit in the DAG. Review of branch, HEAD, remote</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://tsypuk.github.io/images/posts/thumbs/1000/b-w-tracks-2-1468064.jpg" /><media:content medium="image" url="https://tsypuk.github.io/images/posts/thumbs/1000/b-w-tracks-2-1468064.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">How actually git tracks objects. Snapshotting and the Illusion of git Diff.</title><link href="https://tsypuk.github.io/git-advanced" rel="alternate" type="text/html" title="How actually git tracks objects. Snapshotting and the Illusion of git Diff." /><published>2020-01-20T00:00:00+02:00</published><updated>2020-01-20T00:00:00+02:00</updated><id>https://tsypuk.github.io/git-advanced</id><content type="html" xml:base="https://tsypuk.github.io/git-advanced">&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;the_illusion_of_git_diff&quot;&gt;The Illusion of Git Diff&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Git stores the full latest snapshot of the entire file when you modify the file and perform commit operations.
+There are &lt;strong&gt;NO&lt;/strong&gt; diffs of modified lines that are stored on the filesystem or somewhere else after commit.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The &lt;strong&gt;&quot;diff illusion&quot;&lt;/strong&gt; appeared in engineers' minds because we used to see file diffs modifications in many tools,
+like VCS of IDEA, gitk, etc. The actual diff of modifications between different commits is calculated on the fly and
+is represented in an understandable form for us.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;I will explain this git’s snapshotting model behavior in the following commit-by-commit actions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;1_init_git_repository_add_first_txt_file_to_repo&quot;&gt;1. Init git repository. Add first.txt file to repo&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 1. Content of .git/ directory&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git init
+$ ls -la .git
+total 16
+drwxr-xr-x  7 rtsypuk  staff  224 Jan 20 15:21 .
+drwxr-xr-x  3 rtsypuk  staff   96 Jan 20 15:21 ..
+-rw-r--r--  1 rtsypuk  staff   23 Jan 20 15:21 HEAD
+-rw-r--r--  1 rtsypuk  staff  137 Jan 20 15:21 config
+drwxr-xr-x  5 rtsypuk  staff  160 Jan 20 15:21 hooks
+drwxr-xr-x  4 rtsypuk  staff  128 Jan 20 15:21 objects
+drwxr-xr-x  4 rtsypuk  staff  128 Jan 20 15:21 refs&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 2. Adding first.txt file with the single &quot;First line&quot;&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ echo &quot;First line&quot; &amp;gt;&amp;gt; first.txt
+$ git add .
+$ git commit -m &quot;first commit&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now we can see that there are 3 new files created in the .git/objects folder.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 3. Content of .git/objects directory&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ find .git/objects -type f
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We can check their type by applying &lt;strong&gt;-t&lt;/strong&gt; option to command &lt;strong&gt;cat-file&lt;/strong&gt; and content by applying option &lt;strong&gt;-p&lt;/strong&gt;.
+These new objects types are: commit, blob and tree.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 4. using -t cat-file command we can check types of the objects&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -t 2aae0a6496aba985dcf01e7ddf684c49ada7c5db
+commit
+$ git cat-file -t 9649cde946d8d0896fa80977b9bcd76439f99e6b
+blob
+$ git cat-file -t 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+tree&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Each object&amp;#8217;s filename is the SHA1 hash of its content. But there is special trick in git to remap SHA1 into file structure.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock note&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-note&quot; title=&quot;Note&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+E.g. &lt;strong&gt;.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d&lt;/strong&gt; has actual hash 5d9ddc8ff39ad75d0f98e71780cbbf56478dbb8d.
+Git uses SHA1, 160-bit hexadecimal hash number with 40 characters long to form filenames. Tha actual SHA1 of the object
+is split into 2 chunks: the first 2 chars define the folder and the last 38 chars create a filename that is placed under
+this folder. This approach allows better distribution to access files in git filesystem and allows avoid scan entire parent directory .git/objects
+(in case if all sha1 objects will be placed here with no subdirectories).
+If you are from Java world you can think about this improvement as accessing the HashMap by key and retrieving the list of objects as the value.
+Such structures are much efficient than full-length list search.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;If you will try to calculate SHA1 of added file by yourself and compare it to SHA1 hexadecimal number stored in git you will not find the matching&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ shasum first.txt
+9b6a082673a0e60b1804797a367e01671cfdb92b  first.txt&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It is because git uses standard SHA1 algorithm, but does not apply it directly to the file&amp;#8217;s content. Instead, it also uses
+concatenated keyword &lt;strong&gt;blob&lt;/strong&gt;, the actual file size, &lt;strong&gt;&quot;\0&quot;&lt;/strong&gt; character and finally the content of the entire file.
+So the actual &quot;git-based SHA1&quot; can be calculated using the following formula:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;&lt;strong&gt;git_sha = SHA1(&quot;blob &quot; + [file_size] + &quot;\0&quot; + [file_content])&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Git has command to get hash of the object, e.g. &lt;strong&gt;git-like SHA1&lt;/strong&gt; for a file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell&quot; class=&quot;language-shell hljs&quot;&gt;$ git hash-object first.txt
+9649cde946d8d0896fa80977b9bcd76439f99e6b&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;1_1_commit_object&quot;&gt;1.1. Commit object&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 5. Content of 2aae0a6496aba985dcf01e7ddf684c49ada7c5db commit object&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -p 2aae0a6496aba985dcf01e7ddf684c49ada7c5db
+tree 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+author Roman Tsypuk &amp;lt;tsypuk.conf@gmail.com&amp;gt; 1579528773 +0200
+committer Roman Tsypuk &amp;lt;tsypuk.conf@gmail.com&amp;gt; 1579528773 +0200
+first commit&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Commit object contains reference to a tree and commit details - author, committer and commit message.
+If you are using PGP verification, PGP signature also will be included here.
+The same SHA1 commit information is present in regular &lt;strong&gt;git log&lt;/strong&gt; command output, e.g.:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 6. Content of .git/objects directory&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git log
+commit 2aae0a6496aba985dcf01e7ddf684c49ada7c5db (HEAD -&amp;gt; master)
+Author: Roman Tsypuk &amp;lt;tsypuk.conf@gmail.com&amp;gt;
+Date:   Mon Jan 20 15:59:33 2020 +0200
+first commit&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;1_2_tree_object&quot;&gt;1.2. Tree object&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 7. Content of 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d tree object&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -p 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	first.txt&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Tree object has references to the list of objects that have been modified in the current commit. Each file item represents
+a line that starts with the Unix permission followed by blob/tree depending if current object is file(blob) or directory(tree).
+Next follows git-sha1 of the object and its filename.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;1_3_blob_object&quot;&gt;1.3. Blob object&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Contains the actual content of the file:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 8. Content of 9649cde946d8d0896fa80977b9bcd76439f99e6b blob object&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -p 9649cde946d8d0896fa80977b9bcd76439f99e6b
+First line&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The DAG (Direct Acyclic Graph) diagram looks like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;center&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/b96db934-b862-4d8d-8688-d6a4c627216b.png&quot; alt=&quot;b96db934 b862 4d8d 8688 d6a4c627216b&quot; width=&quot;200&quot; height=&quot;200&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 1. Git repository snapshot: 1 commits, 1 trees, 1 blobs, 2 refs: HEAD,refs/heads/master&lt;/div&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;2_adding_second_txt_file_with_the_same_content_to_repository&quot;&gt;2. Adding second.txt file with the same content to repository&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 9. Adding second.txt&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ echo &quot;First line&quot; &amp;gt;&amp;gt; second.txt
+$ git add .
+$ git commit -m &quot;second commit&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 10. Content of .git/objects directory&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ find .git/objects -type f
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now we have 2 more new object:
+73/d4372bc1049b80935ee2b36d4ade2d7187afe9 and
+6b/3a79276e9bfa58e64cb7e5def587f593e7ae20&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 11. Commit2: .git/objects/6b3a79276e9bfa58e64cb7e5def587f593e7ae20&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -p 6b3a79276e9bfa58e64cb7e5def587f593e7ae20
+tree 73d4372bc1049b80935ee2b36d4ade2d7187afe9
+parent 2aae0a6496aba985dcf01e7ddf684c49ada7c5db
+author Roman Tsypuk &amp;lt;tsypuk.conf@gmail.com&amp;gt; 1579530262 +0200
+committer Roman Tsypuk &amp;lt;tsypuk.conf@gmail.com&amp;gt; 1579530262 +0200
+second commit&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 12. Tree2: .git/objects/73d4372bc1049b80935ee2b36d4ade2d7187afe9&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -p 73d4372bc1049b80935ee2b36d4ade2d7187afe9
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As we can see from the new TREE file, now git manages 2 records - filename first.txt and second.txt, but both of them are referencing
+the same blob record. Git has identified that the content of &lt;strong&gt;first.txt&lt;/strong&gt; and &lt;strong&gt;second.txt&lt;/strong&gt; files is absolutely the same (SHA1 equals) and there is no need to
+keep duplicate of the same object. Remember that only file size and file content are used in SHA1 calculation. Filename does not play here.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Git commits represent the DAG, each next commit has a reference to the previous parent commit,
+creating the graph structure. The &lt;strong&gt;tree&lt;/strong&gt; git object represents the node of the graph that can be associated with different &lt;strong&gt;blob&lt;/strong&gt; objects.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;At the second commit step, we see that &lt;strong&gt;commit2 (sha1 6b3a79276e9bfa58e64cb7e5def587f593e7ae20)&lt;/strong&gt; has reference to parent commit1 (sha1 2aae0a6496aba985dcf01e7ddf684c49ada7c5db)
+as well as reference to &lt;strong&gt;tree2 object (sha1 73d4372bc1049b80935ee2b36d4ade2d7187afe9)&lt;/strong&gt;, which maintains two references to first.txt and seconds.txt but both mapped to the same &lt;strong&gt;blob object&lt;/strong&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;center&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/51e3679a-9dd9-44dd-bdfd-de55606b4cbc.png&quot; alt=&quot;51e3679a 9dd9 44dd bdfd de55606b4cbc&quot; width=&quot;500&quot; height=&quot;500&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 2. Git repository snapshot: 2 commits, 2 trees, 1 blobs, 2 refs: HEAD,refs/heads/master&lt;/div&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;3_adding_third_txt_file_with_the_same_content_to_git_repo&quot;&gt;3. Adding third.txt file with the same content to git repo&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 13 Adding third.txt&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ echo &quot;First line&quot; &amp;gt;&amp;gt; third.txt
+$ git add .
+$ git commit -m &quot;third commit&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 14. Content of .git/objects directory&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ find .git/objects -type f
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+.git/objects/d4/9117a72fc08b1991572d363bd43bdfe6c56c9f
+.git/objects/e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We have 2 new object: d4/9117a72fc08b1991572d363bd43bdfe6c56c9f and e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 15. Tree3 .git/objects/d49117a72fc08b1991572d363bd43bdfe6c56c9f&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -p d49117a72fc08b1991572d363bd43bdfe6c56c9f
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	third.txt&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 16. Commit3: .git/objects/e9c3f660695d448fd33fa0b3e731f4ea7d9d4eed&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -p e9c3f660695d448fd33fa0b3e731f4ea7d9d4eed
+tree d49117a72fc08b1991572d363bd43bdfe6c56c9f
+parent 6b3a79276e9bfa58e64cb7e5def587f593e7ae20
+author Roman Tsypuk &amp;lt;tsypuk.conf@gmail.com&amp;gt; 1579531622 +0200
+committer Roman Tsypuk &amp;lt;tsypuk.conf@gmail.com&amp;gt; 1579531622 +0200
+third commit
+(base)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And the same happening here again: after adding a third.txt with the same content (&quot;First line&quot;), we have
+2 new objects only - the tree3 and the commit3. But tree3 is referencing to the same blob object.&lt;/p&gt;
+&lt;/div&gt;
+&lt;center&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/70cd2d87-0e52-4f0f-b2ff-7b9901e04999.png&quot; alt=&quot;70cd2d87 0e52 4f0f b2ff 7b9901e04999&quot; width=&quot;1000&quot; height=&quot;1000&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 3. Git repository snapshot: 3 commits, 3 trees, 1 blobs, 2 refs: HEAD,refs/heads/master&lt;/div&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;4_appending_first_txt_with_second_line&quot;&gt;4. Appending first.txt with &quot;Second line&quot;&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Now let&amp;#8217;s do several commits that will modify the actual files content and track the modification in git objects.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 17. Append &quot;Second line&quot; to first.txt&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ echo &quot;Second line&quot; &amp;gt;&amp;gt; first.txt
+$ git add .
+$ git commit -m &quot;fourth commit&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 18. Content of .git/objects directory&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ find .git/objects -type f
+.git/objects/04/c8335e36222638af3c52ad7cb90d2f8ff68ad6
+.git/objects/a5/ed01df2450ce61d01d05803ec75983a38eaff6
+.git/objects/7d/91453217afc429984c4706e8df22aaac47c9ce
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+.git/objects/d4/9117a72fc08b1991572d363bd43bdfe6c56c9f
+.git/objects/e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We have 3 new objects:
+.git/objects/04/c8335e36222638af3c52ad7cb90d2f8ff68ad6
+.git/objects/a5/ed01df2450ce61d01d05803ec75983a38eaff6
+.git/objects/7d/91453217afc429984c4706e8df22aaac47c9ce&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 19. Commit4: .git/objects/04c8335e36222638af3c52ad7cb90d2f8ff68ad6&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -t 04c8335e36222638af3c52ad7cb90d2f8ff68ad6
+commit
+$ git cat-file -p 04c8335e36222638af3c52ad7cb90d2f8ff68ad6
+tree a5ed01df2450ce61d01d05803ec75983a38eaff6
+parent e9c3f660695d448fd33fa0b3e731f4ea7d9d4eed
+author Roman Tsypuk &amp;lt;tsypuk.conf@gmail.com&amp;gt; 1579532082 +0200
+committer Roman Tsypuk &amp;lt;tsypuk.conf@gmail.com&amp;gt; 1579532082 +0200
+fourth commit
+(base)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 20. Tree4: .git/objects/a5ed01df2450ce61d01d05803ec75983a38eaff6&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -t a5ed01df2450ce61d01d05803ec75983a38eaff6
+tree
+$ git cat-file -p a5ed01df2450ce61d01d05803ec75983a38eaff6
+100644 blob 7d91453217afc429984c4706e8df22aaac47c9ce	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	third.txt&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 21. Modified first.txt&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -t 7d91453217afc429984c4706e8df22aaac47c9ce
+blob
+$ git cat-file -p 7d91453217afc429984c4706e8df22aaac47c9ce
+First line
+Second line&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;center&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/209dbfe5-9ae1-4af2-a6e6-b78a89937a81.png&quot; alt=&quot;209dbfe5 9ae1 4af2 a6e6 b78a89937a81&quot; width=&quot;800&quot; height=&quot;800&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 4. Git repository snapshot: 4 commits, 4 trees, 2 blobs, 2 refs: HEAD,refs/heads/master&lt;/div&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The new Blob2 with &quot;First line&quot; and &quot;Second line&quot; is created. Now new Tree4 object has reference to it as well as to Blob1, that
+represents second.txt. At the same time wee see the old version of first.txt (with &quot;First line only&quot;) That is referenced in Commit1-Commit3.
+So, for modified files git creates a new Blob records with the full entire snapshot of the files content. There are no diffs of modified lines of code!!!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;5_appending_first_txt_with_third_line&quot;&gt;5. Appending first.txt with &quot;Third line&quot;&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 22. Appending &quot;Third line&quot; &amp;gt;&amp;gt; first.txt&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ echo &quot;Third line&quot; &amp;gt;&amp;gt; first.txt
+$ git add .
+$ git commit -m &quot;fifth commit&quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 23. Content of .git/objects directory&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ find .git/objects -type f
+.git/objects/04/c8335e36222638af3c52ad7cb90d2f8ff68ad6
+.git/objects/3c/fa938b257bccd12320093fd62e5e5c3b0c05fc
+.git/objects/a5/ed01df2450ce61d01d05803ec75983a38eaff6
+.git/objects/7d/91453217afc429984c4706e8df22aaac47c9ce
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/91/ddeac3958b9c3f335c723852ed2e3869fad6ba
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+.git/objects/6d/a4d3e0a797240aefaa9c8009e49c57ded3b59e
+.git/objects/d4/9117a72fc08b1991572d363bd43bdfe6c56c9f
+.git/objects/e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;We have 3 new object:
+.git/objects/3c/fa938b257bccd12320093fd62e5e5c3b0c05fc
+.git/objects/91/ddeac3958b9c3f335c723852ed2e3869fad6ba
+.git/objects/6d/a4d3e0a797240aefaa9c8009e49c57ded3b59e&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 24. Tree5: .git/objects/3cfa938b257bccd12320093fd62e5e5c3b0c05fc&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -t 3cfa938b257bccd12320093fd62e5e5c3b0c05fc
+tree
+$ git cat-file -p 3cfa938b257bccd12320093fd62e5e5c3b0c05fc
+100644 blob 6da4d3e0a797240aefaa9c8009e49c57ded3b59e	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	third.txt&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 25. Commit5: .git/objects/91ddeac3958b9c3f335c723852ed2e3869fad6ba&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -t 91ddeac3958b9c3f335c723852ed2e3869fad6ba
+commit
+$ git cat-file -p 91ddeac3958b9c3f335c723852ed2e3869fad6ba
+tree 3cfa938b257bccd12320093fd62e5e5c3b0c05fc
+parent 04c8335e36222638af3c52ad7cb90d2f8ff68ad6
+author Roman Tsypuk &amp;lt;tsypuk.conf@gmail.com&amp;gt; 1579533662 +0200
+committer Roman Tsypuk &amp;lt;tsypuk.conf@gmail.com&amp;gt; 1579533662 +0200
+fifth commit
+(base)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;listingblock&quot;&gt;
+&lt;div class=&quot;title&quot;&gt;Listing 26. All 3 versions of first.txt are present in git&lt;/div&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;pre class=&quot;highlightjs highlight&quot;&gt;&lt;code data-lang=&quot;shell session&quot; class=&quot;language-shell session hljs&quot;&gt;$ git cat-file -t 6da4d3e0a797240aefaa9c8009e49c57ded3b59e
+blob
+$ git cat-file -p 6da4d3e0a797240aefaa9c8009e49c57ded3b59e
+First line
+Second line
+Third line
+$ git cat-file -p 7d91453217afc429984c4706e8df22aaac47c9ce
+First line
+Second line
+$ git cat-file -p 9649cde946d8d0896fa80977b9bcd76439f99e6b
+First line&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But in the same time we have the old version of file with 9649cde946d8d0896fa80977b9bcd76439f99e6b object&lt;/p&gt;
+&lt;/div&gt;
+&lt;center&gt;
+&lt;div class=&quot;imageblock&quot;&gt;
+&lt;div class=&quot;content&quot;&gt;
+&lt;img src=&quot;/images/ea71d96f-03bf-4147-872f-3cc0bc12ca08.png&quot; alt=&quot;ea71d96f 03bf 4147 872f 3cc0bc12ca08&quot; width=&quot;1000&quot; height=&quot;1000&quot;&gt;
+&lt;/div&gt;
+&lt;div class=&quot;title&quot;&gt;Figure 5. Git repository snapshot: 5 commits, 5 trees, 3 blobs, 2 refs: HEAD,refs/heads/master&lt;/div&gt;
+&lt;/div&gt;
+&lt;/center&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As you can see, all three versions of first.txt are stored now in different Blob1 - Blob3 objects. By checking the desired commit
+we can switch between attached versions of the files.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Following this hands-on step-by-step interaction, we have identified that git creates a whole file snapshot if it was
+modified in the commit and maps it using a tree object. It does not use delta, diff, etc. Exact the latest snapshot is stored.
+Another interesting behavior is that files with the same content are stored as a single object on the file system with managing multiple
+references and filename aliases from the tree objects only.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;admonitionblock important&quot;&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td class=&quot;icon&quot;&gt;
+&lt;i class=&quot;fa icon-important&quot; title=&quot;Important&quot;&gt;&lt;/i&gt;
+&lt;/td&gt;
+&lt;td class=&quot;content&quot;&gt;
+There is also a compaction mechanism and pack files format in git that is triggered by git gc. It allows reorganize the filesystem structure
+more efficiently and use deltas in files. I will do an overview of pack files in the next article.
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</content><author><name>Roman Tsypuk</name></author><category term="git" /><category term="git" /><category term="advanced" /><summary type="html">Git advanced internals. How git Snapshotting works. There are no diffs on filesystem in git between commits. They are created on the fly.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://tsypuk.github.io/images/posts/thumbs/1000/new-york-streets-3-1551331.jpg" /><media:content medium="image" url="https://tsypuk.github.io/images/posts/thumbs/1000/new-york-streets-3-1551331.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">AWS BigData Specialty Certification: Preparation, Materials and the Exam</title><link href="https://tsypuk.github.io/aws-big-data-certification" rel="alternate" type="text/html" title="AWS BigData Specialty Certification: Preparation, Materials and the Exam" /><published>2020-01-14T00:00:00+02:00</published><updated>2020-01-14T00:00:00+02:00</updated><id>https://tsypuk.github.io/aws-big-data-certification</id><content type="html" xml:base="https://tsypuk.github.io/aws-big-data-certification">&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;why_aws_and_not_other_cloud_providers_certification&quot;&gt;Why AWS, and not other cloud providers certification?&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Based on the regularly reported statistics (link to Gartner&amp;#8217;s report is available in &lt;a href=&quot;#resources&quot;&gt;Resources&lt;/a&gt; section), AWS is staying as the leader in the global cloud competition.
+The number of clients that are with AWS now also making a good projection to choose exactly this certification.
+It would be wrong to say that all these exam topics are only AWS-specific and could not be applied with on-premise solutions or other cloud providers' infrastructure.
+There are some services dedicated to AWS only, but the overall approach, principles and fundamentals with majority of components are cloud-agnostic.
+So switching from one cloud provider’s stack to another should not be an issue and this knowledge is fully reusable.
+Preparing and passing the Certification are absolute win-win in this case.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;it_is_bigdata_exam_and_the_amount_of_topics_is_big&quot;&gt;It is BigData exam and the amount of topics is BIG&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Exam&amp;#8217;s content is under NDA so I will not explicitly explain and retell questions here, but I want to highlight the topics and the general approach used on the exam.
+The area of topics is the same as described in the AWS exam guide.
+It covers all the areas from Streaming, Processing, Analytics, Security, Visualization, IoT, Machine Learning.
+You can check the distribution in the percentages of each topic in the exam on the guide page.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;You should know Kinesis, Spark streaming, DynamoDB with streaming and DAX caching, and its integration.
+Know how to calculate Capacity Units for Eventually Consistent or Strongly Consistent Reads of DynamoDB, limitations of shards on the Kinesis Stream.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Hadoop and MapReduce were present for decades and you still can meet them in the technical stack of lots of companies, so having this knowledge is desired.
+In AWS infrastructure it is represented by EMR service that has integration with both HDFS and S3 storage system (EMRFS instead of classic HDFS volumes).
+S3 topic is also widely covered on the exam, so review storage types, lifecycle rules, Glacier Vaults, security.
+RDS, Elastic Cache, Redshift DWH data ingestion and partitioning, Glue, Lambda integration and troubleshooting issues, Hive, Kinesis Analytics are met too.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Check QuickSight dashboards integration and what graphs types are good enough for particular business use cases.
+IoT infrastructure and its integration with other services.
+Security per service (what encryption in rest and in transit are applied), integrations in AWS VPC, IAM with its limitation, integration with IdP and Federations, HSM, RBAC for DWH based on opensource tools like Apache Ranger.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;And this is not a final list of course…​&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;the_questions_are_mostly_situational&quot;&gt;The questions are mostly situational&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Be ready to see a lot of text in questions.
+Some are in 4-5 sentences long with values and metrics present.
+Question describes some situation or business case to solve and identifies several answers for verification.
+Such situational questions are more interesting than obvious YES/NO. The certification center provides you markers and papers for notes.
+So, while reading the content and understanding the current architecture described in the question it is good to draw diagrams.
+Also, I was noting some keywords that could narrow the choice of components, f.e. &lt;strong&gt;realtime is required&lt;/strong&gt; or &lt;strong&gt;data delay in 1 month is ok&lt;/strong&gt; or &lt;strong&gt;need historical data&lt;/strong&gt;, etc.
+Answers are multichoice and you need to identify between them the most appropriate solution.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;There are questions where all answers can be applied as possible, for such situations it is important to understand the root of the question - the challenge that is defined to solve.
+You will have markers like &lt;strong&gt;define solution with LEAST time to implement&lt;/strong&gt; or &lt;strong&gt;that covers all defined aspects&lt;/strong&gt;, etc.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Another interesting aspect of the exam is that it not only tests your knowledge of each service in isolation but verifies your understanding of interaction in the chain of components.
+And it is more close to real life.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;knowledge_and_hands_on_experience_with_open_sourced_stack_is_a_bonus_in_preparation&quot;&gt;Knowledge and hands-on experience with open-sourced stack is a bonus in preparation&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;It is not a secret that all public cloud providers are using different distributions of Big Data Stack underneath, like Hortonworks, MapR, Cloudera.
+AWS f.e. uses Amazon and MapR distribution for EMR, Athena engine is based on Presto, etc. So if you had a chance to work with some of these products in the past - it is an extra point for you.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But some non-agnostic and aws-specific services and tools are in use on AWS BigData, so knowledge of open-source tools only is not enough.
+And of course, you should understand the infrastructure with security implementation and each component&amp;#8217;s place in the global AWS landscape.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;the_previous_certifications_could_compliment_your_knowledge&quot;&gt;The previous certifications could compliment your knowledge&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;AWS-specific knowledge from previous exams especially for components like S3, Kinesis, SQS, DynamoDB, Lambda, VPC Endpoint, CloudWatch, SecurityGroups will be a good bridge in moving to learn and understand deeper BigData stack.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;But be ready that this Specialty exam has much deeper questions and the area of material is wider.
+FYI: my preparation notes from the previous Architect, Developer and SysOps Exams were written in the single notebook and there is even extra free space for notes.
+For BigData Exam I have the same size second notebook that is fully filled with notes and diagrams.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;materials_and_resources_for_preparation&quot;&gt;Materials and resources for preparation&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;As for me, Frank Kane&amp;#8217;s BigData course that is based on the Hortonworks Distribution can be a good pre-requisite before going deeper into AWS-specific BigData stack.
+Very popular training resources with AWS related content are &lt;strong&gt;CloudGuru&lt;/strong&gt;, &lt;strong&gt;Udemi&lt;/strong&gt; and &lt;strong&gt;Oreilly&lt;/strong&gt; I enjoyed the way how Stephane Maarek and Frank Kane deliver the materials.
+I&amp;#8217;m also a big fan of visual associations that are developed in our brain, so good diagrams, visualization as for me is better that just a text with voice in background.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Unfortunately, at this moment there is no AWS Practical Test for Big Data Specialty - where you can try and get the feeling of questions and timing (there are lots of practice tests for other AWS Exams). So there is no clear landmark to align if you are prepared enough or not. Just be ready that questions on the exam will be harder and deeper than in CloudGuru or Oreilly exam courses.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;AWS has excellent open library with blueprints and white-papers (link is in &lt;a href=&quot;#resources&quot;&gt;Resources&lt;/a&gt; section below).
+It is good to read these resources not only in terms of exam preparation, but for regular practices.
+Hands-on activity is the glue that could better structure your knowledge and build deeper understanding on the mechanical reproducible memory levels.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;extra_30_mins_tip_for_non_native_speakers&quot;&gt;Extra +30 mins: tip for non-native speakers&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;The exam is scheduled in several languages and if you are not a native speaker you can ask for an extra 30 min to be added to your exam timeline.
+To do this, login into your account of Amazon Training and Certification Exam Accommodations and request &lt;strong&gt;ESL +30 MINUTES&lt;/strong&gt;.
+Once it is approved - you will have an extra 30 min for each scheduled exam in the future.
+So first create and pass through approvement of &lt;strong&gt;ESL + 30 MINUTES&lt;/strong&gt; request and then schedule the exam.
+With this option enabled you will have 200 min for AWS BigData Specialty Exam.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Based on my personal experience and feedback from other persons exam time is very tight to answer all questions.
+So having an extra 30min time is good to review your answers or think over the hard questions.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Hope, that this review and tips will be useful for those of you who are on their way to certification preparation.
+It will be interesting to hear your unique story of preparation and passing exam as well.
+So feel free to add them in comments.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;paragraph&quot;&gt;
+&lt;p&gt;Good Luck with your Certification !!!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class='jekyll-twitter-plugin'&gt;&lt;blockquote class=&quot;twitter-tweet&quot; data-width=&quot;500&quot;&gt;&lt;p lang=&quot;en&quot; dir=&quot;ltr&quot;&gt;&lt;a href=&quot;https://twitter.com/hashtag/AWSCertified?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#AWSCertified&lt;/a&gt; for Big Data Specialty &lt;a href=&quot;https://twitter.com/hashtag/AWS?src=hash&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;#AWS&lt;/a&gt; &lt;a href=&quot;https://t.co/fEWTGAUiIy&quot;&gt;pic.twitter.com/fEWTGAUiIy&lt;/a&gt;&lt;/p&gt;&amp;mdash; Roman Tsypuk (@tsypuk_r) &lt;a href=&quot;https://twitter.com/tsypuk_r/status/1217011720566255616?ref_src=twsrc%5Etfw&quot;&gt;January 14, 2020&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async src=&quot;https://platform.twitter.com/widgets.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;sect1&quot;&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;div class=&quot;sectionbody&quot;&gt;
+&lt;div class=&quot;olist arabic&quot;&gt;
+&lt;ol class=&quot;arabic&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;Gartner report: &lt;a href=&quot;https://aws.amazon.com/blogs/aws/aws-named-as-a-leader-in-gartners-infrastructure-as-a-service-iaas-magic-quadrant-for-the-9th-consecutiveyear/&quot; class=&quot;bare&quot;&gt;https://aws.amazon.com/blogs/aws/aws-named-as-a-leader-in-gartners-infrastructure-as-a-service-iaas-magic-quadrant-for-the-9th-consecutiveyear/&lt;/a&gt;)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;AWS guide BigData exam: &lt;a href=&quot;https://d1.awsstatic.com/training-and-certification/docs-bigdata-spec/AWS%20Certified%20Big%20Data%20-%20Specialty_Exam%20Guide_v1.4_FINAL.pdf&quot; class=&quot;bare&quot;&gt;https://d1.awsstatic.com/training-and-certification/docs-bigdata-spec/AWS%20Certified%20Big%20Data%20-%20Specialty_Exam%20Guide_v1.4_FINAL.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;AWS sample questions: &lt;a href=&quot;https://d1.awsstatic.com/training-and-certification/docs-bigdata-spec/BD-S%20Sample%20Questions%20for%20Web.pdf&quot; class=&quot;bare&quot;&gt;https://d1.awsstatic.com/training-and-certification/docs-bigdata-spec/BD-S%20Sample%20Questions%20for%20Web.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;AWS White Paper on Big Data Analytics: &lt;a href=&quot;https://d1.awsstatic.com/whitepapers/Big_Data_Analytics_Options_on_AWS.pdf?did=wp_card&amp;amp;trk=wp_card&quot; class=&quot;bare&quot;&gt;https://d1.awsstatic.com/whitepapers/Big_Data_Analytics_Options_on_AWS.pdf?did=wp_card&amp;amp;trk=wp_card&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;AWS White Paper Kinesis: &lt;a href=&quot;https://d0.awsstatic.com/whitepapers/whitepaper-streaming-data-solutions-on-aws-with-amazon-kinesis.pdf&quot; class=&quot;bare&quot;&gt;https://d0.awsstatic.com/whitepapers/whitepaper-streaming-data-solutions-on-aws-with-amazon-kinesis.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;EMR security: &lt;a href=&quot;https://aws.amazon.com/blogs/big-data/best-practices-for-securing-amazon-emr/&quot; class=&quot;bare&quot;&gt;https://aws.amazon.com/blogs/big-data/best-practices-for-securing-amazon-emr/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;EMR best practices: &lt;a href=&quot;https://d0.awsstatic.com/whitepapers/aws-amazon-emr-best-practices.pdf&quot; class=&quot;bare&quot;&gt;https://d0.awsstatic.com/whitepapers/aws-amazon-emr-best-practices.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;AWS well architected framework: &lt;a href=&quot;https://aws.amazon.com/architecture/well-architected/&quot; class=&quot;bare&quot;&gt;https://aws.amazon.com/architecture/well-architected/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Redshift encryption: &lt;a href=&quot;https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-db-encryption.html&quot; class=&quot;bare&quot;&gt;https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-db-encryption.html&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;AWS Machine Learining: &lt;a href=&quot;https://docs.aws.amazon.com/machine-learning/latest/dg/the-machine-learning-process.html&quot; class=&quot;bare&quot;&gt;https://docs.aws.amazon.com/machine-learning/latest/dg/the-machine-learning-process.html&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</content><author><name>Roman Tsypuk</name></author><category term="aws" /><category term="aws" /><category term="bigdata" /><category term="certification" /><category term="exam" /><summary type="html">Preparation to AWS Big Data Specialty Certification, topics overview. Some tips for certification. Exam general approach.</summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://tsypuk.github.io/images/posts/thumbs/1000/my-university-library.jpg" /><media:content medium="image" url="https://tsypuk.github.io/images/posts/thumbs/1000/my-university-library.jpg" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>

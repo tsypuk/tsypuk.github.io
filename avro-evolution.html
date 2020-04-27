@@ -1,0 +1,733 @@
+<!--Single post template: Start-->
+<!doctype html>
+<html>
+<head>
+    <!--HEAD section: Start-->
+
+<!--Google Analytics: Start-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155054471-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-155054471-1', { 'optimize_id': 'GTM-K8M5MPW'});
+</script>
+<!--Google Analytics: End-->
+
+
+<meta charset="UTF-8">
+<link type="application/atom+xml" rel="alternate" href="https://tsypuk.github.io/feed.xml" title="Roman Tsypuk Blog" />
+<!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Avro Schema Evolution | Roman Tsypuk Blog</title>
+<meta name="generator" content="Jekyll v3.8.6" />
+<meta property="og:title" content="Avro Schema Evolution" />
+<meta name="author" content="Roman Tsypuk" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Avro Schema evolution Backward, Forward and Full compatibility" />
+<meta property="og:description" content="Avro Schema evolution Backward, Forward and Full compatibility" />
+<link rel="canonical" href="https://tsypuk.github.io/avro-evolution" />
+<meta property="og:url" content="https://tsypuk.github.io/avro-evolution" />
+<meta property="og:site_name" content="Roman Tsypuk Blog" />
+<meta property="og:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/watching-lizard-1386905.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-04-14T00:00:00+03:00" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/avro-evolution"},"author":{"@type":"Person","name":"Roman Tsypuk"},"url":"https://tsypuk.github.io/avro-evolution","description":"Avro Schema evolution Backward, Forward and Full compatibility","@type":"BlogPosting","image":"https://tsypuk.github.io/images/posts/thumbs/1000/watching-lizard-1386905.jpg","headline":"Avro Schema Evolution","dateModified":"2020-04-14T00:00:00+03:00","datePublished":"2020-04-14T00:00:00+03:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<!-- mobile specific metas-->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<!-- Google Card -->
+
+<meta itemprop="description" content="Avro Schema Evolution">
+
+
+
+<meta itemprop="image" content="https://tsypuk.github.io/images/posts/thumbs/1000/watching-lizard-1386905.jpg">
+
+
+<!--LinkedIn cards-->
+
+<meta property='og:image' content="https://tsypuk.github.io/images/posts/thumbs/1000/watching-lizard-1386905.jpg">
+
+
+<meta name="author" content="Roman Tsypuk">
+<!--end of LinkedIn cards-->
+
+<!-- Twitter cards -->
+<meta name="twitter:site"    content="@tsypuk_r">
+<meta name="twitter:creator" content="@tsypuk_r">
+<meta name="twitter:title"   content="Avro Schema Evolution">
+
+
+<meta name="twitter:description" content="Avro Schema evolution Backward, Forward and Full compatibility">
+
+
+
+<meta name="twitter:card"  content="summary_large_image">
+<meta name="twitter:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/watching-lizard-1386905.jpg">
+
+<!-- end of Twitter cards -->
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/css/asciidoctor.css">
+<link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/a11y-dark.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- CSS
+================================================== -->
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/vendor.css">
+<link rel="stylesheet" href="/css/main.css">
+
+<!-- favicons
+================================================== -->
+<link rel="shortcut icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<link rel="icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<!--HEAD section: End-->
+
+    <title>Avro Schema Evolution</title>
+</head>
+<body id="top" data-aos-easing="ease-in-sine" data-aos-duration="600" data-aos-delay="100" class="pace-done">
+<!--HEADER: Start-->
+<!-- pageheader
+================================================== -->
+<section class="s-pageheader">
+    <header class="header">
+        <div class="header__content row">
+            <ul class="header__social">
+                <li>
+                    <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143">
+                        <i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="https://www.twitter.com/tsypuk_r">
+                        <i class="fa fa-twitter" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                <li>
+                    <a href="https://github.com/tsypuk">
+                        <i class="fa fa-github" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/" title="Tsypuk Blog">Tsypuk Blog</a>
+                </li>
+            </ul> <!-- end header__social -->
+        </div> <!-- header-content -->
+    </header> <!-- header -->
+
+
+</section> <!-- end s-pageheader -->
+<!--HEADER: End-->
+
+<section class="s-content s-content--narrow s-content--no-padding-bottom">
+    <article class="row format-standard">
+        <div class="s-content__header col-full">
+            <h1 class="s-content__header-title">Avro Schema Evolution</h1>
+            <ul class="s-content__header-meta">
+                <li class="date">Apr 14th, 2020</li>
+                <li class="cat">~7 minutes to read</li>
+                <li class="cat"><!--Share this page section: Start-->
+<div class="share-page">
+    share this article with:
+    <a href="https://twitter.com/intent/tweet?text=Avro+Schema+Evolution&url=https://tsypuk.github.io/avro-evolution&via=tsypuk_r&related=tsypuk_r"
+       rel="nofollow" target="_blank" title="Share on Twitter"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Ftsypuk.github.io%2Favro-evolution&title=Avro+Schema+Evolution&summary=%3Cdiv+class%3D%22paragraph%22%3E%0A%3Cp%3EAvro+Schema+evolution+Backward%2C+Forward+and+Full+compatibility%3C%2Fp%3E%0A%3C%2Fdiv%3E&source=https%3A%2F%2Ftsypuk.github.io"
+       rel="nofollow" target="_blank" title="Share on LinkedIn"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+    <a href="https://facebook.com/sharer.php?u=https://tsypuk.github.io/avro-evolution" rel="nofollow" target="_blank"
+       title="Share on Facebook"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=https://tsypuk.github.io/avro-evolution" rel="nofollow" target="_blank"
+       title="Share on Google+"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+</div>
+<!--Share this page section: End-->
+</li>
+                <!--                <li class="cat">In avrojavaschema evolution</li>-->
+                <li class="cat"><!--Twitter follow me button: Start-->
+<li>
+    <a href="https://twitter.com/tsypuk_r?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @tsypuk_r</a>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</li>
+<!--Twitter follow me button: End-->
+</li>
+                <!--                <li class="cat">In avrojavaschema evolution</li>-->
+            </ul>
+        </div> <!-- end s-content__header -->
+        <div class="s-content__media col-full">
+            <div class="s-content__post-thumb">
+                
+                <picture>
+                    <source media="(min-width: 1024px)" srcset="https://tsypuk.github.io/images/posts/thumbs/1000/watching-lizard-1386905.jpg">
+                    <source media="(min-width: 600px)" srcset="https://tsypuk.github.io/images/posts/thumbs/800/watching-lizard-1386905.jpg">
+                    <source media="(min-width: 400px)" srcset="https://tsypuk.github.io/images/posts/thumbs/500/watching-lizard-1386905.jpg">
+                    <source media="(min-width: 100px)" srcset="https://tsypuk.github.io/images/posts/thumbs/400/watching-lizard-1386905.jpg">
+                    <img src="https://tsypuk.github.io/images/posts/thumbs/1000/watching-lizard-1386905.jpg" alt="Avro Schema Evolution" style="width:auto;">
+                </picture>
+                
+            </div>
+        </div> <!-- end s-content__media -->
+        <!--Tags on the page: Start-->
+<p class="s-content__tags" align="center">
+    <span>Post Tags:</span>
+    <span class="s-content__tag-list">
+    
+        <a href="#0">avro</a>
+    
+        <a href="#0">java</a>
+    
+        <a href="#0">schema evolution</a>
+    
+    </span>
+</p>
+<!--Tags on the page: End-->
+
+        <div class="col-full s-content__main">
+            <div class="sect1">
+<h2 id="abstract">Abstract</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Schema evolution is the process of changing payload structure in the data formats by
+deleting, adding, renaming fields. It is extremely important to handle it with care because incompatible changes can
+break your consumer or data processing tools. Evolution is more complicated when 3rd parties are involved
+in data processing and it is not possible to update all consumers, producers at a time.</p>
+</div>
+<div class="paragraph">
+<p>There are tactics and rules that should be kept in the mind when creating the initial schema
+and also rules how to create a new version of the schema and make them compatible.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="compatibility_types">Compatibility types</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Two main directions are present in the evolution of compatibility - <strong>forward and backward</strong>. The term <strong>transitive changes</strong>
+identifies that there are several generations of the schema and compatibility is applied to all of them.
+<strong>Full compatibility</strong> includes both backward and forward compatibilities.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="schemas">Schemas</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>User V1: initial schema</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
+     "type": "record",
+     "namespace": "io.github.tsypuk",
+     "name": "UserV1",
+     "doc": "Avro Schema for User",
+     "fields": [
+       { "name": "user_name", "type": "string", "doc": "Name of the User" },
+       { "name": "password", "type": "string", "doc": "Password of the User" },
+       { "name": "is_root", "type": "boolean", "default": false, "doc": "Field indicating if the user has root access level" }
+     ]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>User V2: added new <strong>phone_number</strong>, <strong>email</strong> fields with default values, deleted <strong>is_root</strong> field with default value in the previous schema</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
+     "type": "record",
+     "namespace": "io.github.tsypuk",
+     "name": "UserV2",
+     "doc": "Avro Schema for User",
+     "fields": [
+       { "name": "user_name", "type": "string", "doc": "Name of the User" },
+       { "name": "password", "type": "string", "doc": "Password of the User" },
+       { "name": "phone_number", "type": ["null", "string"], "default": null, "doc": "Optional phone" },
+       { "name": "email", "type": "string", "default": "xxx@xx.com", "doc": "Email of the user" }
+     ]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>User V1_2: removed required field <strong>password</strong>, removed <strong>email</strong> optional field.
+V1_2 violates both backward and forward compatibilities.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
+     "type": "record",
+     "namespace": "io.github.tsypuk",
+     "name": "UserV1_2",
+     "doc": "Avro Schema for User. Incompatible",
+     "fields": [
+       { "name": "user_name", "type": "string", "doc": "Name of the User" },
+       { "name": "phone_number", "type": "string", "doc": "Optional phone" }
+     ]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>User V3: added new <strong>level</strong> field with default values</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
+     "type": "record",
+     "namespace": "io.github.tsypuk",
+     "name": "UserV3",
+     "doc": "Avro Schema for User",
+     "fields": [
+       { "name": "user_name", "type": "string", "doc": "Name of the User" },
+       { "name": "password", "type": "string", "doc": "Password of the User" },
+       { "name": "phone_number", "type": ["null", "string"], "default": null, "doc": "Optional phone" },
+       { "name": "email", "type": "string", "default": "xxx@xx.com", "doc": "Email of the user" },
+       { "name": "level", "type": "string", "default": "NOT_SET", "doc": "user level" }
+     ]
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="forward_compatibility_test">Forward compatibility test</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Adding compatibility tests. Utils class performs write/read cycles with different schema versions involved
+and performs verification. <strong>forwardBroken</strong> test verifies that Exception is thrown because V1_2 has incompatible changes.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">class ForwardCompatibility {
+
+    final UserV1_2.Builder userV1_2Builder = UserV1_2.newBuilder();
+    final UserV3.Builder userV3Builder = UserV3.newBuilder();
+
+    private String fileName = "/tmp/";
+
+    @BeforeEach
+    void before(TestInfo testInfo) {
+        fileName = "/tmp/" + testInfo.getDisplayName() + ".avro";
+    }
+
+    /**
+     * Consumer schema X
+     * Producer schema X
+     */
+    @Test
+    void sameSchema(TestInfo testInfo) {
+        UserV3 userV3Write = userV3Builder
+                .setUserName("ALICE")
+                .setPhoneNumber("777")
+                .setEmail("NONE")
+                .setPassword("PASSWORD")
+                .setLevel("SE")
+                .build();
+        writeToAvro(userV3Write, UserV3.class, fileName);
+        UserV3 userV3Read = readFromAvro(UserV3.class, fileName);
+
+        assertEquals(userV3Read.getUserName(), "ALICE");
+        assertEquals(userV3Read.getPhoneNumber(), "777");
+        assertEquals(userV3Read.getEmail(), "NONE");
+        assertEquals(userV3Read.getPassword(), "PASSWORD");
+        assertEquals(userV3Read.getLevel(), "SE");
+    }
+
+    /**
+     * Consumer schema X-1
+     * Producer schema X
+     */
+    @Test
+    void forward(TestInfo testInfo) {
+        UserV3 userV3Write = userV3Builder
+                .setUserName("ALICE")
+                .setPhoneNumber("777")
+                .setEmail("NONE")
+                .setPassword("PASSWORD")
+                .setLevel("SE")
+                .build();
+        writeToAvro(userV3Write, UserV3.class, fileName);
+        UserV2 userV2Read = readFromAvro(UserV2.class, fileName);
+
+        assertEquals(userV2Read.getUserName(), "ALICE");
+        assertEquals(userV2Read.getPhoneNumber(), "777");
+
+        assertEquals(userV2Read.getEmail(), "NONE"); //default email
+        assertEquals(userV2Read.getPassword(), "PASSWORD");
+    }
+
+    /**
+     * Consumer schema X-2
+     * Producer schema X
+     */
+    @Test
+    void forwardTransitive(TestInfo testInfo) {
+        UserV3 userV3Write = userV3Builder
+                .setUserName("ALICE")
+                .setPhoneNumber("777")
+                .setEmail("NONE")
+                .setPassword("PASSWORD")
+                .setLevel("SE")
+                .build();
+        writeToAvro(userV3Write, UserV3.class, fileName);
+        UserV1 userV1Read = readFromAvro(UserV1.class, fileName);
+
+        assertEquals(userV1Read.getUserName(), "ALICE");
+        assertEquals(userV1Read.getPassword(), "PASSWORD");
+        assertEquals(userV1Read.getIsRoot(), false);
+    }
+
+    /**
+     * Consumer schema X-1
+     * Producer schema X but break changes (deleted needed field)
+     * &lt;p&gt;
+     * org.apache.avro.AvroTypeException: Found io.github.tsypuk.UserV1_2, expecting io.github.tsypuk.UserV1, missing required field password
+     */
+    @Test
+    void forwardBroken(TestInfo testInfo) {
+        UserV1_2 userV1_2Write = userV1_2Builder
+                .setUserName("ALICE")
+                .setPhoneNumber("777")
+                .build();
+        writeToAvro(userV1_2Write, UserV1_2.class, fileName);
+
+        Assertions.assertThrows(AvroTypeException.class, () -&gt; {
+            readFromAvro(UserV1.class, fileName);
+        });
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="backward_compatibility_test">Backward compatibility test</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Adding test for backward compatibility following the same approach</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">class BackwardCompatibility {
+
+    final UserV1.Builder userV1Builder = UserV1.newBuilder();
+    final UserV2.Builder userV2Builder = UserV2.newBuilder();
+
+    private String fileName = "/tmp/";
+
+    @BeforeEach
+    void before(TestInfo testInfo) {
+        fileName = "/tmp/" + testInfo.getDisplayName() + ".avro";
+    }
+
+    @Test
+    void sameSchema(TestInfo testInfo) {
+        UserV2 userV2Write = userV2Builder
+                .setUserName("ALICE")
+                .setPhoneNumber("777")
+                .setEmail("NONE")
+                .setPassword("PASSWORD")
+                .build();
+        writeToAvro(userV2Write, UserV2.class, fileName);
+        UserV2 userV2Read = readFromAvro(UserV2.class, fileName);
+
+        assertEquals(userV2Read.getUserName(), "ALICE");
+        assertEquals(userV2Read.getPhoneNumber(), "777");
+
+        assertEquals(userV2Read.getEmail(), "NONE");
+        assertEquals(userV2Read.getPassword(), "PASSWORD");
+    }
+
+    /**
+     * Consumer schema X
+     * Producer schema X-1
+     */
+    @Test
+    void backward(TestInfo testInfo) {
+        UserV1 userV1Write = userV1Builder
+                .setUserName("ALICE")
+                .setPassword("PASSWORD")
+                .setIsRoot(true)
+                .build();
+        writeToAvro(userV1Write, UserV1.class, fileName);
+        UserV2 userV2Read = readFromAvro(UserV2.class, fileName);
+
+        assertEquals(userV2Read.getUserName(), "ALICE");
+        assertEquals(userV2Read.getPhoneNumber(), null);
+
+        assertEquals(userV2Read.getEmail(), "xxx@xx.com"); //default email
+        assertEquals(userV2Read.getPassword(), "PASSWORD");
+    }
+
+    /**
+     * Consumer schema X
+     * Producer schema X-2
+     */
+    @Test
+    void backwardTransitive(TestInfo testInfo) {
+        UserV1 userV1Write = userV1Builder
+                .setUserName("ALICE")
+                .setPassword("PASSWORD")
+                .setIsRoot(true)
+                .build();
+        writeToAvro(userV1Write, UserV1.class, fileName);
+        UserV3 userV3Read = readFromAvro(UserV3.class, fileName);
+
+        assertEquals(userV3Read.getUserName(), "ALICE");
+        assertEquals(userV3Read.getPhoneNumber(), null);
+
+        assertEquals(userV3Read.getEmail(), "xxx@xx.com"); //default email
+        assertEquals(userV3Read.getPassword(), "PASSWORD");
+        assertEquals(userV3Read.getLevel(), "NOT_SET");
+    }
+
+    /**
+     * Consumer schema X
+     * Producer schema X-1 but break changes (added non optional field with non default values)
+     * &lt;p&gt;
+     * org.apache.avro.AvroTypeException: Found io.github.tsypuk.UserV1, expecting io.github.tsypuk.UserV1_2, missing required field phone_number
+     */
+    @Test
+    void backwardBroken(TestInfo testInfo) {
+        UserV1 userV1Write = userV1Builder
+                .setUserName("ALICE")
+                .setPassword("PASSWORD")
+                .setIsRoot(true)
+                .build();
+        writeToAvro(userV1Write, UserV1.class, fileName);
+
+        Assertions.assertThrows(AvroTypeException.class, () -&gt; {
+            readFromAvro(UserV1_2.class, fileName);
+        });
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="schema_evolution_best_practices">Schema Evolution best practices</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Provide default values to all fields that could change in the next schema versions.</p>
+</li>
+<li>
+<p>Do not rename fields, if needed use aliases.</p>
+</li>
+<li>
+<p>In next schemas, always give default values and do not delete required fields</p>
+</li>
+<li>
+<p>Apply default values to enums, it will be used during resolution when the reader encounters a symbol from the writer
+that isn&#8217;t defined in the reader&#8217;s schema.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This table represents allowed changes to support different levels of compatibility:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Compatibility</th>
+<th class="tableblock halign-left valign-top">Allowed changes</th>
+<th class="tableblock halign-left valign-top">Check against which schemas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BACKWARD</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Delete fields</p>
+</li>
+<li>
+<p>Add optional fields</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Last version</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BACKWARD_TRANSITIVE</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Delete fields</p>
+</li>
+<li>
+<p>Add optional fields</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">All previous versions</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FORWARD</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Add fields</p>
+</li>
+<li>
+<p>Delete optional fields</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Last version</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FORWARD_TRANSITIVE</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Add fields</p>
+</li>
+<li>
+<p>Delete optional fields</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">All previous versions</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FULL</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Add optional fields</p>
+</li>
+<li>
+<p>Delete optional fields</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Last version</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FULL_TRANSITIVE</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Add optional fields</p>
+</li>
+<li>
+<p>Delete optional fields</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">All previous versions</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="https://docs.confluent.io/current/schema-registry/avro.html" class="bare">https://docs.confluent.io/current/schema-registry/avro.html</a></p>
+</li>
+<li>
+<p><a href="https://avro.apache.org/docs/1.9.2/" class="bare">https://avro.apache.org/docs/1.9.2/</a></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+            <!--Page navigation section: Start-->
+<div class="s-content__pagenav">
+    <div class="s-content__nav">
+        
+        <div class="s-content__prev">
+            <a href="https://tsypuk.github.io/avro-java-records" rel="prev">
+                <span>Previous Post</span>How to configure and use Avro Generic, Specific and Reflection Writer/Reader
+            </a>
+        </div>
+        
+        
+        <div class="s-content__next">
+            <a href="https://tsypuk.github.io/avro-tools" rel="prev">
+                <span>Next Post</span>avro-tools is used by lots of frameworks under the hood, also it allows operate in standalone mode. Overview of AVRO operations with schema, content, merge files, etc
+            </a>
+        </div>
+        
+    </div>
+</div>
+<!--Page navigation section: End-->
+
+            <!--Author section: Start-->
+<div class="s-content__author">
+    <img src="https://tsypuk.github.io/images/avatar/rtsypuk.jpg" alt="">
+    <div class="s-content__author-about">
+        <h2 class="s-content__author-name">
+            <a href="#0">Roman Tsypuk</a>
+        </h2>
+        <p>
+            Big fan of JVM-based languages: Java, Kotlin, Groovy, Spring ecosystem with Cloud and K8S integration,
+            AWS cloud, TDD and DevOps practices. Speaker on meet-ups and conferences. Radio HAM and contributor to
+            open source projects.
+        </p>
+        <ul class="s-content__author-social">
+            <li>
+                <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143"><i class="fa fa-linkedin"
+                                                                                     aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://www.twitter.com/tsypuk_r"><i class="fa fa-twitter"
+                                                                                aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://github.com/tsypuk"><i class="fa fa-github"
+                                                                           aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+            </li>
+        </ul>
+
+    </div>
+</div>
+<!--Author section: End-->
+
+        </div>
+    </article>
+</section> <!-- s-content -->
+
+<!--Footer Section: Start-->
+<!-- s-footer
+================================================== -->
+<footer class="s-footer">
+    <div class="s-footer__bottom">
+        <div class="row">
+            <div class="col-full">
+                <div class="s-footer__copyright">
+                    <span>© Copyright Roman Tsypuk 2020</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer> <!-- end s-footer -->
+</html>
+<!--Footer Section: End-->
+</body>
+</html>
+<!--Single post template: End-->

@@ -1,0 +1,608 @@
+<!--Single post template: Start-->
+<!doctype html>
+<html>
+<head>
+    <!--HEAD section: Start-->
+
+<!--Google Analytics: Start-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155054471-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-155054471-1', { 'optimize_id': 'GTM-K8M5MPW'});
+</script>
+<!--Google Analytics: End-->
+
+
+<meta charset="UTF-8">
+<link type="application/atom+xml" rel="alternate" href="https://tsypuk.github.io/feed.xml" title="Roman Tsypuk Blog" />
+<!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Avro Generic, Specific and Reflection Writer/Reader | Roman Tsypuk Blog</title>
+<meta name="generator" content="Jekyll v3.8.6" />
+<meta property="og:title" content="Avro Generic, Specific and Reflection Writer/Reader" />
+<meta name="author" content="Roman Tsypuk" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="How to configure and use Avro Generic, Specific and Reflection Writer/Reader" />
+<meta property="og:description" content="How to configure and use Avro Generic, Specific and Reflection Writer/Reader" />
+<link rel="canonical" href="https://tsypuk.github.io/avro-java-records" />
+<meta property="og:url" content="https://tsypuk.github.io/avro-java-records" />
+<meta property="og:site_name" content="Roman Tsypuk Blog" />
+<meta property="og:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/music-tape-1416288.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-04-14T00:00:00+03:00" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/avro-java-records"},"author":{"@type":"Person","name":"Roman Tsypuk"},"url":"https://tsypuk.github.io/avro-java-records","description":"How to configure and use Avro Generic, Specific and Reflection Writer/Reader","@type":"BlogPosting","image":"https://tsypuk.github.io/images/posts/thumbs/1000/music-tape-1416288.jpg","headline":"Avro Generic, Specific and Reflection Writer/Reader","dateModified":"2020-04-14T00:00:00+03:00","datePublished":"2020-04-14T00:00:00+03:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<!-- mobile specific metas-->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<!-- Google Card -->
+
+<meta itemprop="description" content="Avro Generic, Specific and Reflection Writer/Reader">
+
+
+
+<meta itemprop="image" content="https://tsypuk.github.io/images/posts/thumbs/1000/music-tape-1416288.jpg">
+
+
+<!--LinkedIn cards-->
+
+<meta property='og:image' content="https://tsypuk.github.io/images/posts/thumbs/1000/music-tape-1416288.jpg">
+
+
+<meta name="author" content="Roman Tsypuk">
+<!--end of LinkedIn cards-->
+
+<!-- Twitter cards -->
+<meta name="twitter:site"    content="@tsypuk_r">
+<meta name="twitter:creator" content="@tsypuk_r">
+<meta name="twitter:title"   content="Avro Generic, Specific and Reflection Writer/Reader">
+
+
+<meta name="twitter:description" content="How to configure and use Avro Generic, Specific and Reflection Writer/Reader">
+
+
+
+<meta name="twitter:card"  content="summary_large_image">
+<meta name="twitter:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/music-tape-1416288.jpg">
+
+<!-- end of Twitter cards -->
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/css/asciidoctor.css">
+<link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/a11y-dark.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- CSS
+================================================== -->
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/vendor.css">
+<link rel="stylesheet" href="/css/main.css">
+
+<!-- favicons
+================================================== -->
+<link rel="shortcut icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<link rel="icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<!--HEAD section: End-->
+
+    <title>Avro Generic, Specific and Reflection Writer/Reader</title>
+</head>
+<body id="top" data-aos-easing="ease-in-sine" data-aos-duration="600" data-aos-delay="100" class="pace-done">
+<!--HEADER: Start-->
+<!-- pageheader
+================================================== -->
+<section class="s-pageheader">
+    <header class="header">
+        <div class="header__content row">
+            <ul class="header__social">
+                <li>
+                    <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143">
+                        <i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="https://www.twitter.com/tsypuk_r">
+                        <i class="fa fa-twitter" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                <li>
+                    <a href="https://github.com/tsypuk">
+                        <i class="fa fa-github" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/" title="Tsypuk Blog">Tsypuk Blog</a>
+                </li>
+            </ul> <!-- end header__social -->
+        </div> <!-- header-content -->
+    </header> <!-- header -->
+
+
+</section> <!-- end s-pageheader -->
+<!--HEADER: End-->
+
+<section class="s-content s-content--narrow s-content--no-padding-bottom">
+    <article class="row format-standard">
+        <div class="s-content__header col-full">
+            <h1 class="s-content__header-title">Avro Generic, Specific and Reflection Writer/Reader</h1>
+            <ul class="s-content__header-meta">
+                <li class="date">Apr 14th, 2020</li>
+                <li class="cat">~6 minutes to read</li>
+                <li class="cat"><!--Share this page section: Start-->
+<div class="share-page">
+    share this article with:
+    <a href="https://twitter.com/intent/tweet?text=Avro+Generic%2C+Specific+and+Reflection+Writer%2FReader&url=https://tsypuk.github.io/avro-java-records&via=tsypuk_r&related=tsypuk_r"
+       rel="nofollow" target="_blank" title="Share on Twitter"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Ftsypuk.github.io%2Favro-java-records&title=Avro+Generic%2C+Specific+and+Reflection+Writer%2FReader&summary=%3Cdiv+class%3D%22paragraph%22%3E%0A%3Cp%3EHow+to+configure+and+use+Avro+Generic%2C+Specific+and+Reflection+Writer%2FReader%3C%2Fp%3E%0A%3C%2Fdiv%3E&source=https%3A%2F%2Ftsypuk.github.io"
+       rel="nofollow" target="_blank" title="Share on LinkedIn"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+    <a href="https://facebook.com/sharer.php?u=https://tsypuk.github.io/avro-java-records" rel="nofollow" target="_blank"
+       title="Share on Facebook"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=https://tsypuk.github.io/avro-java-records" rel="nofollow" target="_blank"
+       title="Share on Google+"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+</div>
+<!--Share this page section: End-->
+</li>
+                <!--                <li class="cat">In avrojava</li>-->
+                <li class="cat"><!--Twitter follow me button: Start-->
+<li>
+    <a href="https://twitter.com/tsypuk_r?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @tsypuk_r</a>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</li>
+<!--Twitter follow me button: End-->
+</li>
+                <!--                <li class="cat">In avrojava</li>-->
+            </ul>
+        </div> <!-- end s-content__header -->
+        <div class="s-content__media col-full">
+            <div class="s-content__post-thumb">
+                
+                <picture>
+                    <source media="(min-width: 1024px)" srcset="https://tsypuk.github.io/images/posts/thumbs/1000/music-tape-1416288.jpg">
+                    <source media="(min-width: 600px)" srcset="https://tsypuk.github.io/images/posts/thumbs/800/music-tape-1416288.jpg">
+                    <source media="(min-width: 400px)" srcset="https://tsypuk.github.io/images/posts/thumbs/500/music-tape-1416288.jpg">
+                    <source media="(min-width: 100px)" srcset="https://tsypuk.github.io/images/posts/thumbs/400/music-tape-1416288.jpg">
+                    <img src="https://tsypuk.github.io/images/posts/thumbs/1000/music-tape-1416288.jpg" alt="Avro Generic, Specific and Reflection Writer/Reader" style="width:auto;">
+                </picture>
+                
+            </div>
+        </div> <!-- end s-content__media -->
+        <!--Tags on the page: Start-->
+<p class="s-content__tags" align="center">
+    <span>Post Tags:</span>
+    <span class="s-content__tag-list">
+    
+        <a href="#0">avro</a>
+    
+        <a href="#0">java</a>
+    
+    </span>
+</p>
+<!--Tags on the page: End-->
+
+        <div class="col-full s-content__main">
+            <div class="sect1">
+<h2 id="abstract">Abstract</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are 3 main options to operate with AVRO serialization/deserialization records - to use <strong>Generic</strong>, <strong>Specific</strong> or <strong>Reflection</strong> approaches.
+In this post, I will do an overview of them.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="add_avro_maven_dependency">Add avro maven dependency</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.avro&lt;/groupId&gt;
+    &lt;artifactId&gt;avro&lt;/artifactId&gt;
+    &lt;version&gt;1.9.2&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="defining_the_schema">Defining the schema</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">resources/avro/user.avsc</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
+     "type": "record",
+     "namespace": "io.github.tsypuk",
+     "name": "User",
+     "doc": "Avro Schema for User",
+     "fields": [
+       { "name": "user_name", "type": "string", "doc": "Name of the User" },
+       { "name": "password", "type": "string", "doc": "Password of the User" },
+       { "name": "is_root", "type": "boolean", "default": false, "doc": "Field indicating if the user has root access level" }
+     ]
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="genericrecord">GenericRecord</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When using Generic Record, there is no need to include plugins to generate the POJO from the schema.
+In this case, operations with Generic Record are the same as with the map - accessing values by the key name of the field.
+If the field is not set null value is returned.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public static void main(String[] args) throws IOException {
+        genericWriter();
+        genericReader();
+    }
+    private static void genericWriter() throws IOException {
+        Schema.Parser parser = new Schema.Parser();
+        Schema schema = parser.parse(new File("user.avsc"));
+
+        GenericRecordBuilder userBuilder = new GenericRecordBuilder(schema);
+        userBuilder.set("user_name", "Bob");
+        userBuilder.set("password", "mypass");
+        userBuilder.set("is_root", false);
+        final GenericData.Record user = userBuilder.build();
+
+        final DatumWriter&lt;GenericRecord&gt; datumWriter = new GenericDatumWriter&lt;&gt;(schema);
+        try (DataFileWriter&lt;GenericRecord&gt; dataFileWriter = new DataFileWriter&lt;&gt;(datumWriter)) {
+            dataFileWriter.create(user.getSchema(), new File("user-generic.avro"));
+            dataFileWriter.append(user);
+            log.info("Written user-generic.avro");
+        } catch (IOException ex) {
+            log.error("Couldn't write file", ex);
+        }
+    }
+
+    private static void genericReader() {
+        final File file = new File("user-generic.avro");
+        final DatumReader&lt;GenericRecord&gt; datumReader = new GenericDatumReader&lt;&gt;();
+        GenericRecord customerRead;
+        try (DataFileReader&lt;GenericRecord&gt; dataFileReader = new DataFileReader&lt;&gt;(file, datumReader)) {
+            customerRead = dataFileReader.next();
+            log.info("Successfully read avro file");
+            log.info(customerRead.toString());
+            log.info("User name: " + customerRead.get("user_name"));
+            log.info("Non existent field: " + customerRead.get("non_existing"));
+        } catch (IOException ex) {
+            log.error("Couldn't write file", ex);
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Serialization/deserialization loop for user. If you access non existient field you get null</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell" class="language-shell hljs">[main] INFO io.github.tsypuk.AvroUtils - Written user-generic.avro
+[main] INFO io.github.tsypuk.AvroUtils - Successfully read avro file
+[main] INFO io.github.tsypuk.AvroUtils - {"user_name": "Bob", "password": "mypass", "is_root": false}
+[main] INFO io.github.tsypuk.AvroUtils - User name: Bob
+[main] INFO io.github.tsypuk.AvroUtils - Non existent field: null</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="specific_record">Specific Record</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To generate code for the User class based on the AVRO schema definitions, <strong>avro-maven-plugin</strong> plugin should be added:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;!--specific record--&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.avro&lt;/groupId&gt;
+                &lt;artifactId&gt;avro-maven-plugin&lt;/artifactId&gt;
+                &lt;version&gt;${avro.version}&lt;/version&gt;
+                &lt;executions&gt;
+                    &lt;execution&gt;
+                        &lt;phase&gt;generate-sources&lt;/phase&gt;
+                        &lt;goals&gt;
+                            &lt;goal&gt;schema&lt;/goal&gt;
+                            &lt;goal&gt;protocol&lt;/goal&gt;
+                            &lt;goal&gt;idl-protocol&lt;/goal&gt;
+                        &lt;/goals&gt;
+                        &lt;configuration&gt;
+                            &lt;sourceDirectory&gt;${project.basedir}/src/main/resources/avro&lt;/sourceDirectory&gt;
+                            &lt;stringType&gt;String&lt;/stringType&gt;
+                            &lt;createSetters&gt;false&lt;/createSetters&gt;
+                            &lt;enableDecimalLogicalType&gt;true&lt;/enableDecimalLogicalType&gt;
+                            &lt;fieldVisibility&gt;private&lt;/fieldVisibility&gt;
+                        &lt;/configuration&gt;
+                    &lt;/execution&gt;
+                &lt;/executions&gt;
+            &lt;/plugin&gt;
+&lt;!--gen classes discover--&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+                &lt;artifactId&gt;build-helper-maven-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.0.0&lt;/version&gt;
+                &lt;executions&gt;
+                    &lt;execution&gt;
+                        &lt;id&gt;add-source&lt;/id&gt;
+                        &lt;phase&gt;generate-sources&lt;/phase&gt;
+                        &lt;goals&gt;
+                            &lt;goal&gt;add-source&lt;/goal&gt;
+                        &lt;/goals&gt;
+                        &lt;configuration&gt;
+                            &lt;sources&gt;
+                                &lt;source&gt;target/generated-sources/avro&lt;/source&gt;
+                            &lt;/sources&gt;
+                        &lt;/configuration&gt;
+                    &lt;/execution&gt;
+                &lt;/executions&gt;
+            &lt;/plugin&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Triggering package phase generates classes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell" class="language-shell hljs">$ mvn clean package -DskipTests
+[INFO] Scanning for projects...
+[INFO]
+[INFO] --------------&lt; com.github.simpleand.avro:avro-examples &gt;---------------
+[INFO] Building avro-examples 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ avro-examples ---
+[INFO] --- avro-maven-plugin:1.9.2:schema (default) @ avro-examples ---
+...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At this moment additional benefits of specific records appear: User class is generated, it includes additional methods with builders.
+It is more safe to use this strongly typed to avoid accessing fields by improper naming that could occur on Generic Records.
+Both DatumReader and DatumWriter are typed with User class.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">    private static void specificWriter() {
+        User.Builder userBuilder = User.newBuilder();
+        User user = userBuilder
+                .setIsRoot(true)
+                .setPassword("PASSWORD")
+                .setUserName("BOB")
+                .build();
+        log.info(user.toString());
+
+        final DatumWriter&lt;User&gt; datumWriter = new SpecificDatumWriter&lt;&gt;(User.class);
+
+        try (DataFileWriter&lt;User&gt; dataFileWriter = new DataFileWriter&lt;&gt;(datumWriter)) {
+            dataFileWriter.create(user.getSchema(), new File("user-specific.avro"));
+            dataFileWriter.append(user);
+            log.info("successfully wrote user-specific.avro");
+        } catch (IOException ex) {
+            log.error("Couldn't write file", ex);
+        }
+    }
+
+    private static void specificRead() {
+        final File file = new File("user-specific.avro");
+        final DatumReader&lt;User&gt; datumReader = new SpecificDatumReader&lt;&gt;(User.class);
+        final DataFileReader&lt;User&gt; dataFileReader;
+        try {
+            log.info("Reading our specific record");
+            dataFileReader = new DataFileReader&lt;&gt;(file, datumReader);
+            while (dataFileReader.hasNext()) {
+                Schema schema = dataFileReader.getSchema();
+                log.info("Reading the schema from avro file {}", schema.toString());
+                User readCustomer = dataFileReader.next();
+                log.info(readCustomer.toString());
+                log.info("First name: {}", readCustomer.getUserName());
+            }
+        } catch (IOException ex) {
+            log.error("Couldn't write file", ex);
+        }
+    }</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Specific Record write/read cycle with read access to schema</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell" class="language-shell hljs">[main] INFO io.github.tsypuk.AvroUtils - {"user_name": "BOB", "password": "PASSWORD", "is_root": true}
+[main] INFO io.github.tsypuk.AvroUtils - successfully wrote user-specific.avro
+[main] INFO io.github.tsypuk.AvroUtils - Reading our specific record
+[main] INFO io.github.tsypuk.AvroUtils - Reading the schema from avro file {"type":"record","name":"User","namespace":"io.github.tsypuk","doc":"Avro Schema for User","fields":[{"name":"user_name","type":{"type":"string","avro.java.string":"String"},"doc":"Name of the User"},{"name":"password","type":{"type":"string","avro.java.string":"String"},"doc":"Password of the User"},{"name":"is_root","type":"boolean","doc":"Field indicating if the user has root access level","default":false}]}
+[main] INFO io.github.tsypuk.AvroUtils - {"user_name": "BOB", "password": "PASSWORD", "is_root": true}
+[main] INFO io.github.tsypuk.AvroUtils - First name: BOB</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="using_reflection">Using Reflection</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>First, Pojo record should be defined, and here Lombok library with its annotations to generate getter, setters and constructors is useful.
+Annotations <strong>@AvroDoc</strong> and <strong>@Nullable</strong> are from AVRO package and they are used to instrument Avro for schema generation and constraints</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserReflected {
+    @AvroDoc("Name of the user")
+    private String userName;
+    @Nullable
+    private String password;
+    private boolean isRoot;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The important difference that schema on write is generated using reflection from the Pojo class on the fly.
+It uses special Avro annotations to fill additional info into the schema.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">    private static void reflectionWrite() {
+        try {
+            log.info("Writing user-reflected.avro");
+            File file = new File("user-reflected.avro");
+            Schema schema = ReflectData.get().getSchema(UserReflected.class);
+            log.info("schema = " + schema.toString(true));
+
+            DatumWriter&lt;UserReflected&gt; writer = new ReflectDatumWriter&lt;&gt;(UserReflected.class);
+            DataFileWriter&lt;UserReflected&gt; out = new DataFileWriter&lt;&gt;(writer)
+                    .create(schema, file);
+
+            out.append(new UserReflected("Bob", "any", true));
+            out.close();
+        } catch (IOException ex) {
+            log.error("Couldn't write file", ex);
+        }
+    }
+
+    private static void reflectionRead() {
+        try {
+            log.info("Reading user-reflected.avro");
+            File file = new File("user-reflected.avro");
+            DatumReader&lt;UserReflected&gt; reader = new ReflectDatumReader&lt;&gt;(UserReflected.class);
+            DataFileReader&lt;UserReflected&gt; dataFileReader = new DataFileReader&lt;&gt;(file, reader);
+            log.info(dataFileReader.getSchema().toString());
+            StreamSupport.stream(dataFileReader.spliterator(), false)
+                    .forEach(userReflected -&gt; log.info(userReflected.toString()));
+            dataFileReader.close();
+        } catch (IOException ex) {
+            log.error("Couldn't write file", ex);
+        }
+    }</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Reflection write/read. Generated schema is printed</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell" class="language-shell hljs">[main] INFO io.github.tsypuk.AvroUtils - Writing user-reflected.avro
+[main] INFO io.github.tsypuk.AvroUtils - schema = {
+"type" : "record",
+"name" : "UserReflected",
+"namespace" : "io.github.tsypuk",
+"fields" : [ {
+"name" : "userName",
+"type" : "string",
+"doc" : "Name of the user"
+}, {
+"name" : "password",
+"type" : [ "null", "string" ],
+"default" : null
+}, {
+"name" : "isRoot",
+"type" : "boolean"
+} ]
+}
+[main] INFO io.github.tsypuk.AvroUtils - Reading user-reflected.avro
+[main] INFO io.github.tsypuk.AvroUtils - {"type":"record","name":"UserReflected","namespace":"io.github.tsypuk","fields":[{"name":"userName","type":"string","doc":"Name of the user"},{"name":"password","type":["null","string"],"default":null},{"name":"isRoot","type":"boolean"}]}
+[main] INFO io.github.tsypuk.AvroUtils - UserReflected(userName=Bob, password=any, isRoot=true)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="https://avro.apache.org/docs/1.9.2/" class="bare">https://avro.apache.org/docs/1.9.2/</a></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+            <!--Page navigation section: Start-->
+<div class="s-content__pagenav">
+    <div class="s-content__nav">
+        
+        <div class="s-content__prev">
+            <a href="https://tsypuk.github.io/docker-machine-raspberry" rel="prev">
+                <span>Previous Post</span>How to configure your local docker client to work with remote docker server on Raspberry PI
+            </a>
+        </div>
+        
+        
+        <div class="s-content__next">
+            <a href="https://tsypuk.github.io/avro-evolution" rel="prev">
+                <span>Next Post</span>Avro Schema evolution Backward, Forward and Full compatibility
+            </a>
+        </div>
+        
+    </div>
+</div>
+<!--Page navigation section: End-->
+
+            <!--Author section: Start-->
+<div class="s-content__author">
+    <img src="https://tsypuk.github.io/images/avatar/rtsypuk.jpg" alt="">
+    <div class="s-content__author-about">
+        <h2 class="s-content__author-name">
+            <a href="#0">Roman Tsypuk</a>
+        </h2>
+        <p>
+            Big fan of JVM-based languages: Java, Kotlin, Groovy, Spring ecosystem with Cloud and K8S integration,
+            AWS cloud, TDD and DevOps practices. Speaker on meet-ups and conferences. Radio HAM and contributor to
+            open source projects.
+        </p>
+        <ul class="s-content__author-social">
+            <li>
+                <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143"><i class="fa fa-linkedin"
+                                                                                     aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://www.twitter.com/tsypuk_r"><i class="fa fa-twitter"
+                                                                                aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://github.com/tsypuk"><i class="fa fa-github"
+                                                                           aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+            </li>
+        </ul>
+
+    </div>
+</div>
+<!--Author section: End-->
+
+        </div>
+    </article>
+</section> <!-- s-content -->
+
+<!--Footer Section: Start-->
+<!-- s-footer
+================================================== -->
+<footer class="s-footer">
+    <div class="s-footer__bottom">
+        <div class="row">
+            <div class="col-full">
+                <div class="s-footer__copyright">
+                    <span>© Copyright Roman Tsypuk 2020</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer> <!-- end s-footer -->
+</html>
+<!--Footer Section: End-->
+</body>
+</html>
+<!--Single post template: End-->

@@ -1,0 +1,423 @@
+<!--Single post template: Start-->
+<!doctype html>
+<html>
+<head>
+    <!--HEAD section: Start-->
+
+<!--Google Analytics: Start-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155054471-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-155054471-1', { 'optimize_id': 'GTM-K8M5MPW'});
+</script>
+<!--Google Analytics: End-->
+
+
+<meta charset="UTF-8">
+<link type="application/atom+xml" rel="alternate" href="https://tsypuk.github.io/feed.xml" title="Roman Tsypuk Blog" />
+<!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Git branches, where do they lead ? | Roman Tsypuk Blog</title>
+<meta name="generator" content="Jekyll v3.8.6" />
+<meta property="og:title" content="Git branches, where do they lead ?" />
+<meta name="author" content="Roman Tsypuk" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Git branches are labeled references to particular commit in the DAG. Review of branch, HEAD, remote" />
+<meta property="og:description" content="Git branches are labeled references to particular commit in the DAG. Review of branch, HEAD, remote" />
+<link rel="canonical" href="https://tsypuk.github.io/git-branches" />
+<meta property="og:url" content="https://tsypuk.github.io/git-branches" />
+<meta property="og:site_name" content="Roman Tsypuk Blog" />
+<meta property="og:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/b-w-tracks-2-1468064.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-02-04T00:00:00+02:00" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/git-branches"},"author":{"@type":"Person","name":"Roman Tsypuk"},"url":"https://tsypuk.github.io/git-branches","description":"Git branches are labeled references to particular commit in the DAG. Review of branch, HEAD, remote","@type":"BlogPosting","image":"https://tsypuk.github.io/images/posts/thumbs/1000/b-w-tracks-2-1468064.jpg","headline":"Git branches, where do they lead ?","dateModified":"2020-02-04T00:00:00+02:00","datePublished":"2020-02-04T00:00:00+02:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<!-- mobile specific metas-->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<!-- Google Card -->
+
+<meta itemprop="description" content="Git branches, where do they lead ?">
+
+
+
+<meta itemprop="image" content="https://tsypuk.github.io/images/posts/thumbs/1000/b-w-tracks-2-1468064.jpg">
+
+
+<!--LinkedIn cards-->
+
+<meta property='og:image' content="https://tsypuk.github.io/images/posts/thumbs/1000/b-w-tracks-2-1468064.jpg">
+
+
+<meta name="author" content="Roman Tsypuk">
+<!--end of LinkedIn cards-->
+
+<!-- Twitter cards -->
+<meta name="twitter:site"    content="@tsypuk_r">
+<meta name="twitter:creator" content="@tsypuk_r">
+<meta name="twitter:title"   content="Git branches, where do they lead ?">
+
+
+<meta name="twitter:description" content="Git branches are labeled references to particular commit in the DAG. Review of branch, HEAD, remote">
+
+
+
+<meta name="twitter:card"  content="summary_large_image">
+<meta name="twitter:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/b-w-tracks-2-1468064.jpg">
+
+<!-- end of Twitter cards -->
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/css/asciidoctor.css">
+<link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/a11y-dark.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- CSS
+================================================== -->
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/vendor.css">
+<link rel="stylesheet" href="/css/main.css">
+
+<!-- favicons
+================================================== -->
+<link rel="shortcut icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<link rel="icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<!--HEAD section: End-->
+
+    <title>Git branches, where do they lead ?</title>
+</head>
+<body id="top" data-aos-easing="ease-in-sine" data-aos-duration="600" data-aos-delay="100" class="pace-done">
+<!--HEADER: Start-->
+<!-- pageheader
+================================================== -->
+<section class="s-pageheader">
+    <header class="header">
+        <div class="header__content row">
+            <ul class="header__social">
+                <li>
+                    <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143">
+                        <i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="https://www.twitter.com/tsypuk_r">
+                        <i class="fa fa-twitter" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                <li>
+                    <a href="https://github.com/tsypuk">
+                        <i class="fa fa-github" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/" title="Tsypuk Blog">Tsypuk Blog</a>
+                </li>
+            </ul> <!-- end header__social -->
+        </div> <!-- header-content -->
+    </header> <!-- header -->
+
+
+</section> <!-- end s-pageheader -->
+<!--HEADER: End-->
+
+<section class="s-content s-content--narrow s-content--no-padding-bottom">
+    <article class="row format-standard">
+        <div class="s-content__header col-full">
+            <h1 class="s-content__header-title">Git branches, where do they lead ?</h1>
+            <ul class="s-content__header-meta">
+                <li class="date">Feb 4th, 2020</li>
+                <li class="cat">~4 minutes to read</li>
+                <li class="cat"><!--Share this page section: Start-->
+<div class="share-page">
+    share this article with:
+    <a href="https://twitter.com/intent/tweet?text=Git+branches%2C+where+do+they+lead+%3F&url=https://tsypuk.github.io/git-branches&via=tsypuk_r&related=tsypuk_r"
+       rel="nofollow" target="_blank" title="Share on Twitter"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Ftsypuk.github.io%2Fgit-branches&title=Git+branches%2C+where+do+they+lead+%3F&summary=%3Cdiv+class%3D%22paragraph%22%3E%0A%3Cp%3EGit+branches+are+labeled+references+to+particular+commit+in+the+DAG.+Review+of+branch%2C+HEAD%2C+remote%3C%2Fp%3E%0A%3C%2Fdiv%3E&source=https%3A%2F%2Ftsypuk.github.io"
+       rel="nofollow" target="_blank" title="Share on LinkedIn"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+    <a href="https://facebook.com/sharer.php?u=https://tsypuk.github.io/git-branches" rel="nofollow" target="_blank"
+       title="Share on Facebook"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=https://tsypuk.github.io/git-branches" rel="nofollow" target="_blank"
+       title="Share on Google+"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+</div>
+<!--Share this page section: End-->
+</li>
+                <!--                <li class="cat">In gitadvanced</li>-->
+                <li class="cat"><!--Twitter follow me button: Start-->
+<li>
+    <a href="https://twitter.com/tsypuk_r?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @tsypuk_r</a>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</li>
+<!--Twitter follow me button: End-->
+</li>
+                <!--                <li class="cat">In gitadvanced</li>-->
+            </ul>
+        </div> <!-- end s-content__header -->
+        <div class="s-content__media col-full">
+            <div class="s-content__post-thumb">
+                
+                <picture>
+                    <source media="(min-width: 1024px)" srcset="https://tsypuk.github.io/images/posts/thumbs/1000/b-w-tracks-2-1468064.jpg">
+                    <source media="(min-width: 600px)" srcset="https://tsypuk.github.io/images/posts/thumbs/800/b-w-tracks-2-1468064.jpg">
+                    <source media="(min-width: 400px)" srcset="https://tsypuk.github.io/images/posts/thumbs/500/b-w-tracks-2-1468064.jpg">
+                    <source media="(min-width: 100px)" srcset="https://tsypuk.github.io/images/posts/thumbs/400/b-w-tracks-2-1468064.jpg">
+                    <img src="https://tsypuk.github.io/images/posts/thumbs/1000/b-w-tracks-2-1468064.jpg" alt="Git branches, where do they lead ?" style="width:auto;">
+                </picture>
+                
+            </div>
+        </div> <!-- end s-content__media -->
+        <!--Tags on the page: Start-->
+<p class="s-content__tags" align="center">
+    <span>Post Tags:</span>
+    <span class="s-content__tag-list">
+    
+        <a href="#0">git</a>
+    
+        <a href="#0">advanced</a>
+    
+    </span>
+</p>
+<!--Tags on the page: End-->
+
+        <div class="col-full s-content__main">
+            <div class="sect1">
+<h2 id="terminology">Terminology</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <strong>Branch</strong> is a special labeled marker that allows you to switch back or forward to some particular state of your repository.
+I.e. branch is just a reference that is pointing to some dedicated commit hash.
+By having such aliases (branches) it is more easy to operate with git tree than keep in mind SHA1 commits number.</p>
+</div>
+<div class="paragraph">
+<p>There is a misconception that branch is a data structure like a list or hashmap of commits. It is wrong,
+git uses the DAG commit structure and branches is a mechanism to create named anchors to some particular state (snapshot) in a time.
+All branches references are stored in <strong>.git/refs/heads</strong> directory</p>
+</div>
+<div class="paragraph">
+<p><strong>HEAD</strong> is the reference to the actual state. It can have two states: attached (referencing to some branch by its name) or detached (referencing to commit SHA1 number). On filesystem is represented by file <strong>.git/HEAD</strong>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="init_repo_with_first_commit">Init repo with first commit</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Here is an initial state of repository with a single commit only. We can see that branch master is referencing to <strong>0d38698f</strong> SHA1 commit and HEAD is attached and referencing to master.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell" class="language-shell hljs">$ cat .git/refs/heads/master
+0d38698f4b3d301decb1aa390ee47c953e1fbccd
+$ cat .git/HEAD
+ref: refs/heads/master</code></pre>
+</div>
+</div>
+<center>
+<div class="imageblock">
+<div class="content">
+<img src="/images/554819a-e8d8-4a0f-a932-c064040a6512.png" alt="554819a e8d8 4a0f a932 c064040a6512" width="250" height="250">
+</div>
+<div class="title">Figure 1. Git repository snapshot: 1 commits, 1 trees, 1 blobs, 2 refs: HEAD, refs/heads/master</div>
+</div>
+</center>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If git&#8217;s concept of Commit, Tree and Blob is new for you, check <a href="git-advanced">this article</a>
+with overview of these git&#8217;s internal objects and structures.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Adding second.txt file with a second commit. By doing this git is just moves master and HEAD references. And now they
+are pointing to the latest commit. Now master branch is referencing a newly made commit with SHA1 <strong>993bb5b5</strong></p>
+</div>
+<center>
+<div class="imageblock">
+<div class="content">
+<img src="/images/c5c83423-bdca-4062-a029-f18127f3aded.png" alt="c5c83423 bdca 4062 a029 f18127f3aded" width="400" height="400">
+</div>
+<div class="title">Figure 2. Git repository snapshot: 6 commits, 6 trees, 5 blobs, 4 refs: HEAD, refs/heads/master, refs/remotes/origin/HEAD, refs/remotes/origin/master</div>
+</div>
+</center>
+</div>
+</div>
+<div class="sect1">
+<h2 id="detached_head">Detached HEAD</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s checkout <strong>0d38698f</strong> commit, by doing so we are setting HEAD into detached state, now it is not associated with any branch, but referencing to a single commit.
+From this state, you can create a new branch, do operations with commit or checkout any other branch.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell" class="language-shell hljs">$ git checkout 0d38698f4b3d301decb1aa390ee47c953e1fbccd
+Note: checking out '0d38698f4b3d301decb1aa390ee47c953e1fbccd'
+You are in 'detached HEAD' state.
+$ cat .git/HEAD
+0d38698f4b3d301decb1aa390ee47c953e1fbccd</code></pre>
+</div>
+</div>
+<center>
+<div class="imageblock">
+<div class="content">
+<img src="/images/88bfb9e-1271-43a1-81f2-1dca5aac303f.png" alt="88bfb9e 1271 43a1 81f2 1dca5aac303f" width="400" height="400">
+</div>
+<div class="title">Figure 3. Git repository snapshot: 2 commits, 2 trees, 2 blobs, 2 refs: HEAD, refs/heads/master, </div>
+</div>
+</center>
+</div>
+</div>
+<div class="sect1">
+<h2 id="adding_feature_branch_and_one_more_commit_to_master">Adding feature branch and one more commit to master</h2>
+<div class="sectionbody">
+<center>
+<div class="imageblock">
+<div class="content">
+<img src="/images/7c8ee7f0-8162-4f73-917c-a52b0ac78ba0.png" alt="7c8ee7f0 8162 4f73 917c a52b0ac78ba0" width="650" height="650">
+</div>
+<div class="title">Figure 4. Git repository snapshot: 3 commits, 3 trees, 3 blobs, 3 refs: HEAD, refs/heads/master, refs/heads/feature, </div>
+</div>
+</center>
+</div>
+</div>
+<div class="sect1">
+<h2 id="adding_remote_origin">Adding remote origin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It is a local repo, now let&#8217;s create a repository on GitHub and add it as a remote repo origin.
+Now branch remotes/origin/master is referencing to <strong>849d8fba5</strong> commit. It is the latest commit push and available the remote repo.
+<strong>.git/refs/remotes</strong> directory represent remote repositories and remote branches.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell" class="language-shell hljs">$ git remote add origin git@github.com:tsypuk/gitexplore.git
+$ git push -u origin master
+$ cat .git/refs/remotes/origin/master
+849d8fba50d841590e4f8cbb7fe3bf118b7b1fc9</code></pre>
+</div>
+</div>
+<center>
+<div class="imageblock">
+<div class="content">
+<img src="/images/93989576-54a6-4eba-8558-47e4e977b2b3.png" alt="93989576 54a6 4eba 8558 47e4e977b2b3" width="850" height="850">
+</div>
+<div class="title">Figure 5. Git repository snapshot: 3 commits, 3 trees, 3 blobs, 4 refs: HEAD, refs/heads/master, refs/heads/feature, refs/remotes/origin/master, </div>
+</div>
+</center>
+<div class="paragraph">
+<p>We continue local development by adding more commits, the HEAD is associated with the current master branch, and the master branch
+is referencing to the latest SHA1 commit. Also, we see that the current changes are not available at the remote repo,
+the only previous commit was pushed to the remote.
+The bigger picture of repository state with all Commit, Tree and Blob objects:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/images/b85ce256-d297-457a-b25e-71a30a584211.png" alt="b85ce256 d297 457a b25e 71a30a584211" width="850" height="850">
+</div>
+<div class="title">Figure 6. Git repository snapshot: 4 commits, 4 trees, 4 blobs, 4 refs: HEAD, refs/heads/master, refs/heads/feature, refs/remotes/origin/master, </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="summary">Summary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Git repo is a DAG structure of Objects, branches (both local and remote) are a sliding labeled references to particular SHA1 commit in the repo.
+Overview of branching strategies as well as merging, rebasing, etc,  I will do in the next articles.</p>
+</div>
+</div>
+</div>
+            <!--Page navigation section: Start-->
+<div class="s-content__pagenav">
+    <div class="s-content__nav">
+        
+        <div class="s-content__prev">
+            <a href="https://tsypuk.github.io/git-advanced" rel="prev">
+                <span>Previous Post</span>How actually git tracks objects. Snapshotting and the Illusion of git Diff.
+            </a>
+        </div>
+        
+        
+        <div class="s-content__next">
+            <a href="https://tsypuk.github.io/kafka-twitter-streaming" rel="prev">
+                <span>Next Post</span>Stream the data from Twitter to Apache Kafka with Kafka Connect
+            </a>
+        </div>
+        
+    </div>
+</div>
+<!--Page navigation section: End-->
+
+            <!--Author section: Start-->
+<div class="s-content__author">
+    <img src="https://tsypuk.github.io/images/avatar/rtsypuk.jpg" alt="">
+    <div class="s-content__author-about">
+        <h2 class="s-content__author-name">
+            <a href="#0">Roman Tsypuk</a>
+        </h2>
+        <p>
+            Big fan of JVM-based languages: Java, Kotlin, Groovy, Spring ecosystem with Cloud and K8S integration,
+            AWS cloud, TDD and DevOps practices. Speaker on meet-ups and conferences. Radio HAM and contributor to
+            open source projects.
+        </p>
+        <ul class="s-content__author-social">
+            <li>
+                <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143"><i class="fa fa-linkedin"
+                                                                                     aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://www.twitter.com/tsypuk_r"><i class="fa fa-twitter"
+                                                                                aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://github.com/tsypuk"><i class="fa fa-github"
+                                                                           aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+            </li>
+        </ul>
+
+    </div>
+</div>
+<!--Author section: End-->
+
+        </div>
+    </article>
+</section> <!-- s-content -->
+
+<!--Footer Section: Start-->
+<!-- s-footer
+================================================== -->
+<footer class="s-footer">
+    <div class="s-footer__bottom">
+        <div class="row">
+            <div class="col-full">
+                <div class="s-footer__copyright">
+                    <span>© Copyright Roman Tsypuk 2020</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer> <!-- end s-footer -->
+</html>
+<!--Footer Section: End-->
+</body>
+</html>
+<!--Single post template: End-->

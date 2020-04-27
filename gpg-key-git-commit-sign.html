@@ -1,0 +1,455 @@
+<!--Single post template: Start-->
+<!doctype html>
+<html>
+<head>
+    <!--HEAD section: Start-->
+
+<!--Google Analytics: Start-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155054471-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-155054471-1', { 'optimize_id': 'GTM-K8M5MPW'});
+</script>
+<!--Google Analytics: End-->
+
+
+<meta charset="UTF-8">
+<link type="application/atom+xml" rel="alternate" href="https://tsypuk.github.io/feed.xml" title="Roman Tsypuk Blog" />
+<!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Sign git commits with GPG key | Roman Tsypuk Blog</title>
+<meta name="generator" content="Jekyll v3.8.6" />
+<meta property="og:title" content="Sign git commits with GPG key" />
+<meta name="author" content="Roman Tsypuk" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="How to sign git commits with GPG key" />
+<meta property="og:description" content="How to sign git commits with GPG key" />
+<link rel="canonical" href="https://tsypuk.github.io/gpg-key-git-commit-sign" />
+<meta property="og:url" content="https://tsypuk.github.io/gpg-key-git-commit-sign" />
+<meta property="og:site_name" content="Roman Tsypuk Blog" />
+<meta property="og:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/hand-1445014.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-04-09T00:00:00+03:00" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/gpg-key-git-commit-sign"},"author":{"@type":"Person","name":"Roman Tsypuk"},"url":"https://tsypuk.github.io/gpg-key-git-commit-sign","description":"How to sign git commits with GPG key","@type":"BlogPosting","image":"https://tsypuk.github.io/images/posts/thumbs/1000/hand-1445014.jpg","headline":"Sign git commits with GPG key","dateModified":"2020-04-09T00:00:00+03:00","datePublished":"2020-04-09T00:00:00+03:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<!-- mobile specific metas-->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<!-- Google Card -->
+
+<meta itemprop="description" content="Sign git commits with GPG key">
+
+
+
+<meta itemprop="image" content="https://tsypuk.github.io/images/posts/thumbs/1000/hand-1445014.jpg">
+
+
+<!--LinkedIn cards-->
+
+<meta property='og:image' content="https://tsypuk.github.io/images/posts/thumbs/1000/hand-1445014.jpg">
+
+
+<meta name="author" content="Roman Tsypuk">
+<!--end of LinkedIn cards-->
+
+<!-- Twitter cards -->
+<meta name="twitter:site"    content="@tsypuk_r">
+<meta name="twitter:creator" content="@tsypuk_r">
+<meta name="twitter:title"   content="Sign git commits with GPG key">
+
+
+<meta name="twitter:description" content="How to sign git commits with GPG key">
+
+
+
+<meta name="twitter:card"  content="summary_large_image">
+<meta name="twitter:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/hand-1445014.jpg">
+
+<!-- end of Twitter cards -->
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/css/asciidoctor.css">
+<link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/a11y-dark.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- CSS
+================================================== -->
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/vendor.css">
+<link rel="stylesheet" href="/css/main.css">
+
+<!-- favicons
+================================================== -->
+<link rel="shortcut icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<link rel="icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<!--HEAD section: End-->
+
+    <title>Sign git commits with GPG key</title>
+</head>
+<body id="top" data-aos-easing="ease-in-sine" data-aos-duration="600" data-aos-delay="100" class="pace-done">
+<!--HEADER: Start-->
+<!-- pageheader
+================================================== -->
+<section class="s-pageheader">
+    <header class="header">
+        <div class="header__content row">
+            <ul class="header__social">
+                <li>
+                    <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143">
+                        <i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="https://www.twitter.com/tsypuk_r">
+                        <i class="fa fa-twitter" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                <li>
+                    <a href="https://github.com/tsypuk">
+                        <i class="fa fa-github" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/" title="Tsypuk Blog">Tsypuk Blog</a>
+                </li>
+            </ul> <!-- end header__social -->
+        </div> <!-- header-content -->
+    </header> <!-- header -->
+
+
+</section> <!-- end s-pageheader -->
+<!--HEADER: End-->
+
+<section class="s-content s-content--narrow s-content--no-padding-bottom">
+    <article class="row format-standard">
+        <div class="s-content__header col-full">
+            <h1 class="s-content__header-title">Sign git commits with GPG key</h1>
+            <ul class="s-content__header-meta">
+                <li class="date">Apr 9th, 2020</li>
+                <li class="cat">~4 minutes to read</li>
+                <li class="cat"><!--Share this page section: Start-->
+<div class="share-page">
+    share this article with:
+    <a href="https://twitter.com/intent/tweet?text=Sign+git+commits+with+GPG+key&url=https://tsypuk.github.io/gpg-key-git-commit-sign&via=tsypuk_r&related=tsypuk_r"
+       rel="nofollow" target="_blank" title="Share on Twitter"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Ftsypuk.github.io%2Fgpg-key-git-commit-sign&title=Sign+git+commits+with+GPG+key&summary=%3Cdiv+class%3D%22paragraph%22%3E%0A%3Cp%3EHow+to+sign+git+commits+with+GPG+key%3C%2Fp%3E%0A%3C%2Fdiv%3E&source=https%3A%2F%2Ftsypuk.github.io"
+       rel="nofollow" target="_blank" title="Share on LinkedIn"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+    <a href="https://facebook.com/sharer.php?u=https://tsypuk.github.io/gpg-key-git-commit-sign" rel="nofollow" target="_blank"
+       title="Share on Facebook"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=https://tsypuk.github.io/gpg-key-git-commit-sign" rel="nofollow" target="_blank"
+       title="Share on Google+"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+</div>
+<!--Share this page section: End-->
+</li>
+                <!--                <li class="cat">In gitgpgkeysignature</li>-->
+                <li class="cat"><!--Twitter follow me button: Start-->
+<li>
+    <a href="https://twitter.com/tsypuk_r?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @tsypuk_r</a>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</li>
+<!--Twitter follow me button: End-->
+</li>
+                <!--                <li class="cat">In gitgpgkeysignature</li>-->
+            </ul>
+        </div> <!-- end s-content__header -->
+        <div class="s-content__media col-full">
+            <div class="s-content__post-thumb">
+                
+                <picture>
+                    <source media="(min-width: 1024px)" srcset="https://tsypuk.github.io/images/posts/thumbs/1000/hand-1445014.jpg">
+                    <source media="(min-width: 600px)" srcset="https://tsypuk.github.io/images/posts/thumbs/800/hand-1445014.jpg">
+                    <source media="(min-width: 400px)" srcset="https://tsypuk.github.io/images/posts/thumbs/500/hand-1445014.jpg">
+                    <source media="(min-width: 100px)" srcset="https://tsypuk.github.io/images/posts/thumbs/400/hand-1445014.jpg">
+                    <img src="https://tsypuk.github.io/images/posts/thumbs/1000/hand-1445014.jpg" alt="Sign git commits with GPG key" style="width:auto;">
+                </picture>
+                
+            </div>
+        </div> <!-- end s-content__media -->
+        <!--Tags on the page: Start-->
+<p class="s-content__tags" align="center">
+    <span>Post Tags:</span>
+    <span class="s-content__tag-list">
+    
+        <a href="#0">git</a>
+    
+        <a href="#0">gpg</a>
+    
+        <a href="#0">key</a>
+    
+        <a href="#0">signature</a>
+    
+    </span>
+</p>
+<!--Tags on the page: End-->
+
+        <div class="col-full s-content__main">
+            <div class="sect1">
+<h2 id="abstraction">Abstraction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Git provides the possibility to add a signature to each commit. By doing this you instrument version control system
+with instructions to verify the identity of the person who performed commit operation. For this purpose private and public keys
+need to be generated and configured for git client on local machine to use GPG key. Public key should be submitted to VCS server -
+github, gitlab etc to verify the validity of commit signature.
+Here are steps to implement commit signature process.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="generate_the_key">Generate the key</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ brew install gpg</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ gpg --gen-key
+gpg (GnuPG) 2.2.19; Copyright (C) 2019 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Note: Use "gpg --full-generate-key" for a full featured key generation dialog.
+GnuPG needs to construct a user ID to identify your key.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Enter Real name, email address and passphrase,</p>
+</div>
+<div class="paragraph">
+<p>Once the process of key generation is complete, it can be verified:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ gpg --list-keys
+gpg: checking the trustdb
+gpg: marginals needed: 3  completes needed: 1  trust model: pgp
+gpg: depth: 0  valid:   2  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 2u
+gpg: next trustdb check due at 2022-01-17
+/Users/user/.gnupg/pubring.kbx
+---------------------------------
+pub   rsa2048 2020-04-04 [SC] [expires: 2022-04-04]
+      E2A9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+uid           [ultimate] Mr.Robot &lt;mr.robot.xxxxxxxxxxxxx@gmail.com&gt;
+sub   rsa2048 2020-04-04 [E] [expires: 2022-04-04]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Copy the public key into buffer to paste into GIT account settings.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ gpg --armor --export E2A9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | pbcopy</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="gpg_useful_commands">GPG useful commands</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ gpg --delete-key key-ID
+$ gpg --list-keys
+$ gpg --delete-key keyID1 keyID2 keyID3
+$ gpg --delete-secret-key key-ID
+$ gpg --default-new-key-algo rsa4096 --gen-keys</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="configure_git_client_to_sign_commits">Configure git client to sign commits</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<div class="title">gitconfig file should be updated with the following items</div>
+<p>Assign signkey the value from gpg command output. Turn on gpg signature by setting gpgsign = true and define
+the tool that is used for signature.
+Part of gitconfig with signature enabled:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">[user]
+    name = XXXXXX
+    email = xxxx@xxxx.xxx
+    signkey = E2A9xxxxxxxxx
+[commit]
+    gpgsign = true
+[merge]
+    tool = opendiff
+    conflictstyle = diff3
+[gpg]
+    program = gpg</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="add_signature_to_git_based_server">Add signature to git-based server</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gitlab: <a href="https://docs.gitlab.com/ee/user/project/repository/gpg_signed_commits/" class="bare">https://docs.gitlab.com/ee/user/project/repository/gpg_signed_commits/</a></p>
+</div>
+<div class="paragraph">
+<p>Github: <a href="https://help.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key" class="bare">https://help.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="verify_commits">Verify commits</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>OnceThe GPG signature is added to commit, you can verify commits on you repository for the validity of the key and also check the commit details with git internal tools:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git log --show-signature
+commit b6df3265fce5e0809a5409e77da94c97ef7c70cc (HEAD -&gt; master, origin/master)
+gpg: Signature made Wed Feb 12 13:26:20 2020 EET
+gpg:                using RSA key E2A9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+gpg:                issuer "mr.robot.xxxxxxxxxxxxx@gmail.com"
+gpg: Good signature from "Mr.Robot &lt;mr.robot.xxxxxxxxxxxxx@gmail.com&gt;" [ultimate]
+Author: Mr.Robot &lt;mr.robot.xxxxxxxxxxxxx@gmail.com&gt;
+Date:   Wed Feb 12 13:26:19 2020 +0200
+    added description for prometheus real-life statistics
+commit dfb25b1d487a4b0433b33c3cd39e00e0fe5cf770
+gpg: Signature made Wed Feb 12 13:17:39 2020 EET
+gpg:                using RSA key E2A9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+gpg:                issuer "mr.robot.xxxxxxxxxxxxx@gmail.com"
+gpg: Good signature from "Mr.Robot &lt;mr.robot.xxxxxxxxxxxxx@gmail.com&gt;" [ultimate]
+Author: Mr.Robot &lt;mr.robot.xxxxxxxxxxxxx@gmail.com&gt;
+Date:   Wed Feb 12 13:17:39 2020 +0200
+    change directories structure</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -p b6df3265fce5e0809a5409e77da94c97ef7c70cc
+tree 440996dc5e3609cde15a5826dae92a87469c9341
+parent dfb25b1d487a4b0433b33c3cd39e00e0fe5cf770
+author Mr.Robot &lt;mr.robot.xxxxxxxxxxxxx@gmail.com&gt; 1581506779 +0200
+committer Mr.Robot &lt;mr.robot.xxxxxxxxxxxxx@gmail.com&gt; 1581506779 +0200
+gpgsig -----BEGIN PGP SIGNATURE-----
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ =xxxx
+ -----END PGP SIGNATURE-----</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="commit_process">Commit process</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now once code changes in the repo are completed, on commit operation the message to enter passphrase will appear.
+On correctly entering the passphrase for GPG key, the commit will be signed.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">┌────────────────────────────────────────────────────────────────┐
+│ Please enter the passphrase to unlock the OpenPGP secret key:  │
+│ "Xxx Xxxxx &lt;xxxf@xxx.coxxm&gt;"                                   │
+│ 4096-bit RSA key, ID XXXXXXXXXXXXXXXX,                         │
+│ created 2020-01-18.                                            │
+│                                                                │
+│                                                                │
+│ Passphrase: __________________________________________________ │</code></pre>
+</div>
+</div>
+</div>
+</div>
+            <!--Page navigation section: Start-->
+<div class="s-content__pagenav">
+    <div class="s-content__nav">
+        
+        <div class="s-content__prev">
+            <a href="https://tsypuk.github.io/kafka-twitter-streaming" rel="prev">
+                <span>Previous Post</span>Stream the data from Twitter to Apache Kafka with Kafka Connect
+            </a>
+        </div>
+        
+        
+        <div class="s-content__next">
+            <a href="https://tsypuk.github.io/kafka-admin-commands" rel="prev">
+                <span>Next Post</span>Ops commands to maintain Kafka cluster
+            </a>
+        </div>
+        
+    </div>
+</div>
+<!--Page navigation section: End-->
+
+            <!--Author section: Start-->
+<div class="s-content__author">
+    <img src="https://tsypuk.github.io/images/avatar/rtsypuk.jpg" alt="">
+    <div class="s-content__author-about">
+        <h2 class="s-content__author-name">
+            <a href="#0">Roman Tsypuk</a>
+        </h2>
+        <p>
+            Big fan of JVM-based languages: Java, Kotlin, Groovy, Spring ecosystem with Cloud and K8S integration,
+            AWS cloud, TDD and DevOps practices. Speaker on meet-ups and conferences. Radio HAM and contributor to
+            open source projects.
+        </p>
+        <ul class="s-content__author-social">
+            <li>
+                <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143"><i class="fa fa-linkedin"
+                                                                                     aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://www.twitter.com/tsypuk_r"><i class="fa fa-twitter"
+                                                                                aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://github.com/tsypuk"><i class="fa fa-github"
+                                                                           aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+            </li>
+        </ul>
+
+    </div>
+</div>
+<!--Author section: End-->
+
+        </div>
+    </article>
+</section> <!-- s-content -->
+
+<!--Footer Section: Start-->
+<!-- s-footer
+================================================== -->
+<footer class="s-footer">
+    <div class="s-footer__bottom">
+        <div class="row">
+            <div class="col-full">
+                <div class="s-footer__copyright">
+                    <span>© Copyright Roman Tsypuk 2020</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer> <!-- end s-footer -->
+</html>
+<!--Footer Section: End-->
+</body>
+</html>
+<!--Single post template: End-->

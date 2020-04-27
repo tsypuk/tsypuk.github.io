@@ -1,0 +1,453 @@
+<!--Single post template: Start-->
+<!doctype html>
+<html>
+<head>
+    <!--HEAD section: Start-->
+
+<!--Google Analytics: Start-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155054471-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-155054471-1', { 'optimize_id': 'GTM-K8M5MPW'});
+</script>
+<!--Google Analytics: End-->
+
+
+<meta charset="UTF-8">
+<link type="application/atom+xml" rel="alternate" href="https://tsypuk.github.io/feed.xml" title="Roman Tsypuk Blog" />
+<!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>AWS BigData Specialty Certification: Preparation, Materials and the Exam | Roman Tsypuk Blog</title>
+<meta name="generator" content="Jekyll v3.8.6" />
+<meta property="og:title" content="AWS BigData Specialty Certification: Preparation, Materials and the Exam" />
+<meta name="author" content="Roman Tsypuk" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Preparation to AWS Big Data Specialty Certification, topics overview. Some tips for certification. Exam general approach." />
+<meta property="og:description" content="Preparation to AWS Big Data Specialty Certification, topics overview. Some tips for certification. Exam general approach." />
+<link rel="canonical" href="https://tsypuk.github.io/aws-big-data-certification" />
+<meta property="og:url" content="https://tsypuk.github.io/aws-big-data-certification" />
+<meta property="og:site_name" content="Roman Tsypuk Blog" />
+<meta property="og:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/my-university-library.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-01-14T00:00:00+02:00" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/aws-big-data-certification"},"author":{"@type":"Person","name":"Roman Tsypuk"},"url":"https://tsypuk.github.io/aws-big-data-certification","description":"Preparation to AWS Big Data Specialty Certification, topics overview. Some tips for certification. Exam general approach.","@type":"BlogPosting","image":"https://tsypuk.github.io/images/posts/thumbs/1000/my-university-library.jpg","headline":"AWS BigData Specialty Certification: Preparation, Materials and the Exam","dateModified":"2020-01-14T00:00:00+02:00","datePublished":"2020-01-14T00:00:00+02:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<!-- mobile specific metas-->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<!-- Google Card -->
+
+<meta itemprop="description" content="AWS BigData Specialty Certification: Preparation, Materials and the Exam">
+
+
+
+<meta itemprop="image" content="https://tsypuk.github.io/images/posts/thumbs/1000/my-university-library.jpg">
+
+
+<!--LinkedIn cards-->
+
+<meta property='og:image' content="https://tsypuk.github.io/images/posts/thumbs/1000/my-university-library.jpg">
+
+
+<meta name="author" content="Roman Tsypuk">
+<!--end of LinkedIn cards-->
+
+<!-- Twitter cards -->
+<meta name="twitter:site"    content="@tsypuk_r">
+<meta name="twitter:creator" content="@tsypuk_r">
+<meta name="twitter:title"   content="AWS BigData Specialty Certification: Preparation, Materials and the Exam">
+
+
+<meta name="twitter:description" content="Preparation to AWS Big Data Specialty Certification, topics overview. Some tips for certification. Exam general approach.">
+
+
+
+<meta name="twitter:card"  content="summary_large_image">
+<meta name="twitter:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/my-university-library.jpg">
+
+<!-- end of Twitter cards -->
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/css/asciidoctor.css">
+<link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/a11y-dark.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- CSS
+================================================== -->
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/vendor.css">
+<link rel="stylesheet" href="/css/main.css">
+
+<!-- favicons
+================================================== -->
+<link rel="shortcut icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<link rel="icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<!--HEAD section: End-->
+
+    <title>AWS BigData Specialty Certification: Preparation, Materials and the Exam</title>
+</head>
+<body id="top" data-aos-easing="ease-in-sine" data-aos-duration="600" data-aos-delay="100" class="pace-done">
+<!--HEADER: Start-->
+<!-- pageheader
+================================================== -->
+<section class="s-pageheader">
+    <header class="header">
+        <div class="header__content row">
+            <ul class="header__social">
+                <li>
+                    <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143">
+                        <i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="https://www.twitter.com/tsypuk_r">
+                        <i class="fa fa-twitter" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                <li>
+                    <a href="https://github.com/tsypuk">
+                        <i class="fa fa-github" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/" title="Tsypuk Blog">Tsypuk Blog</a>
+                </li>
+            </ul> <!-- end header__social -->
+        </div> <!-- header-content -->
+    </header> <!-- header -->
+
+
+</section> <!-- end s-pageheader -->
+<!--HEADER: End-->
+
+<section class="s-content s-content--narrow s-content--no-padding-bottom">
+    <article class="row format-standard">
+        <div class="s-content__header col-full">
+            <h1 class="s-content__header-title">AWS BigData Specialty Certification: Preparation, Materials and the Exam</h1>
+            <ul class="s-content__header-meta">
+                <li class="date">Jan 14th, 2020</li>
+                <li class="cat">~8 minutes to read</li>
+                <li class="cat"><!--Share this page section: Start-->
+<div class="share-page">
+    share this article with:
+    <a href="https://twitter.com/intent/tweet?text=AWS+BigData+Specialty+Certification%3A+Preparation%2C+Materials+and+the+Exam&url=https://tsypuk.github.io/aws-big-data-certification&via=tsypuk_r&related=tsypuk_r"
+       rel="nofollow" target="_blank" title="Share on Twitter"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Ftsypuk.github.io%2Faws-big-data-certification&title=AWS+BigData+Specialty+Certification%3A+Preparation%2C+Materials+and+the+Exam&summary=%3Cdiv+class%3D%22paragraph%22%3E%0A%3Cp%3EPreparation+to+AWS+Big+Data+Specialty+Certification%2C+topics+overview.+Some+tips+for+certification.+Exam+general+approach.%3C%2Fp%3E%0A%3C%2Fdiv%3E&source=https%3A%2F%2Ftsypuk.github.io"
+       rel="nofollow" target="_blank" title="Share on LinkedIn"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+    <a href="https://facebook.com/sharer.php?u=https://tsypuk.github.io/aws-big-data-certification" rel="nofollow" target="_blank"
+       title="Share on Facebook"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=https://tsypuk.github.io/aws-big-data-certification" rel="nofollow" target="_blank"
+       title="Share on Google+"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+</div>
+<!--Share this page section: End-->
+</li>
+                <!--                <li class="cat">In awsbigdatacertificationexam</li>-->
+                <li class="cat"><!--Twitter follow me button: Start-->
+<li>
+    <a href="https://twitter.com/tsypuk_r?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @tsypuk_r</a>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</li>
+<!--Twitter follow me button: End-->
+</li>
+                <!--                <li class="cat">In awsbigdatacertificationexam</li>-->
+            </ul>
+        </div> <!-- end s-content__header -->
+        <div class="s-content__media col-full">
+            <div class="s-content__post-thumb">
+                
+                <picture>
+                    <source media="(min-width: 1024px)" srcset="https://tsypuk.github.io/images/posts/thumbs/1000/my-university-library.jpg">
+                    <source media="(min-width: 600px)" srcset="https://tsypuk.github.io/images/posts/thumbs/800/my-university-library.jpg">
+                    <source media="(min-width: 400px)" srcset="https://tsypuk.github.io/images/posts/thumbs/500/my-university-library.jpg">
+                    <source media="(min-width: 100px)" srcset="https://tsypuk.github.io/images/posts/thumbs/400/my-university-library.jpg">
+                    <img src="https://tsypuk.github.io/images/posts/thumbs/1000/my-university-library.jpg" alt="AWS BigData Specialty Certification: Preparation, Materials and the Exam" style="width:auto;">
+                </picture>
+                
+            </div>
+        </div> <!-- end s-content__media -->
+        <!--Tags on the page: Start-->
+<p class="s-content__tags" align="center">
+    <span>Post Tags:</span>
+    <span class="s-content__tag-list">
+    
+        <a href="#0">aws</a>
+    
+        <a href="#0">bigdata</a>
+    
+        <a href="#0">certification</a>
+    
+        <a href="#0">exam</a>
+    
+    </span>
+</p>
+<!--Tags on the page: End-->
+
+        <div class="col-full s-content__main">
+            <div class="sect1">
+<h2 id="why_aws_and_not_other_cloud_providers_certification">Why AWS, and not other cloud providers certification?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Based on the regularly reported statistics (link to Gartner&#8217;s report is available in <a href="#resources">Resources</a> section), AWS is staying as the leader in the global cloud competition.
+The number of clients that are with AWS now also making a good projection to choose exactly this certification.
+It would be wrong to say that all these exam topics are only AWS-specific and could not be applied with on-premise solutions or other cloud providers' infrastructure.
+There are some services dedicated to AWS only, but the overall approach, principles and fundamentals with majority of components are cloud-agnostic.
+So switching from one cloud provider’s stack to another should not be an issue and this knowledge is fully reusable.
+Preparing and passing the Certification are absolute win-win in this case.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="it_is_bigdata_exam_and_the_amount_of_topics_is_big">It is BigData exam and the amount of topics is BIG</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Exam&#8217;s content is under NDA so I will not explicitly explain and retell questions here, but I want to highlight the topics and the general approach used on the exam.
+The area of topics is the same as described in the AWS exam guide.
+It covers all the areas from Streaming, Processing, Analytics, Security, Visualization, IoT, Machine Learning.
+You can check the distribution in the percentages of each topic in the exam on the guide page.</p>
+</div>
+<div class="paragraph">
+<p>You should know Kinesis, Spark streaming, DynamoDB with streaming and DAX caching, and its integration.
+Know how to calculate Capacity Units for Eventually Consistent or Strongly Consistent Reads of DynamoDB, limitations of shards on the Kinesis Stream.</p>
+</div>
+<div class="paragraph">
+<p>Hadoop and MapReduce were present for decades and you still can meet them in the technical stack of lots of companies, so having this knowledge is desired.
+In AWS infrastructure it is represented by EMR service that has integration with both HDFS and S3 storage system (EMRFS instead of classic HDFS volumes).
+S3 topic is also widely covered on the exam, so review storage types, lifecycle rules, Glacier Vaults, security.
+RDS, Elastic Cache, Redshift DWH data ingestion and partitioning, Glue, Lambda integration and troubleshooting issues, Hive, Kinesis Analytics are met too.</p>
+</div>
+<div class="paragraph">
+<p>Check QuickSight dashboards integration and what graphs types are good enough for particular business use cases.
+IoT infrastructure and its integration with other services.
+Security per service (what encryption in rest and in transit are applied), integrations in AWS VPC, IAM with its limitation, integration with IdP and Federations, HSM, RBAC for DWH based on opensource tools like Apache Ranger.</p>
+</div>
+<div class="paragraph">
+<p>And this is not a final list of course…​</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the_questions_are_mostly_situational">The questions are mostly situational</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Be ready to see a lot of text in questions.
+Some are in 4-5 sentences long with values and metrics present.
+Question describes some situation or business case to solve and identifies several answers for verification.
+Such situational questions are more interesting than obvious YES/NO. The certification center provides you markers and papers for notes.
+So, while reading the content and understanding the current architecture described in the question it is good to draw diagrams.
+Also, I was noting some keywords that could narrow the choice of components, f.e. <strong>realtime is required</strong> or <strong>data delay in 1 month is ok</strong> or <strong>need historical data</strong>, etc.
+Answers are multichoice and you need to identify between them the most appropriate solution.</p>
+</div>
+<div class="paragraph">
+<p>There are questions where all answers can be applied as possible, for such situations it is important to understand the root of the question - the challenge that is defined to solve.
+You will have markers like <strong>define solution with LEAST time to implement</strong> or <strong>that covers all defined aspects</strong>, etc.</p>
+</div>
+<div class="paragraph">
+<p>Another interesting aspect of the exam is that it not only tests your knowledge of each service in isolation but verifies your understanding of interaction in the chain of components.
+And it is more close to real life.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="knowledge_and_hands_on_experience_with_open_sourced_stack_is_a_bonus_in_preparation">Knowledge and hands-on experience with open-sourced stack is a bonus in preparation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It is not a secret that all public cloud providers are using different distributions of Big Data Stack underneath, like Hortonworks, MapR, Cloudera.
+AWS f.e. uses Amazon and MapR distribution for EMR, Athena engine is based on Presto, etc. So if you had a chance to work with some of these products in the past - it is an extra point for you.</p>
+</div>
+<div class="paragraph">
+<p>But some non-agnostic and aws-specific services and tools are in use on AWS BigData, so knowledge of open-source tools only is not enough.
+And of course, you should understand the infrastructure with security implementation and each component&#8217;s place in the global AWS landscape.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the_previous_certifications_could_compliment_your_knowledge">The previous certifications could compliment your knowledge</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>AWS-specific knowledge from previous exams especially for components like S3, Kinesis, SQS, DynamoDB, Lambda, VPC Endpoint, CloudWatch, SecurityGroups will be a good bridge in moving to learn and understand deeper BigData stack.</p>
+</div>
+<div class="paragraph">
+<p>But be ready that this Specialty exam has much deeper questions and the area of material is wider.
+FYI: my preparation notes from the previous Architect, Developer and SysOps Exams were written in the single notebook and there is even extra free space for notes.
+For BigData Exam I have the same size second notebook that is fully filled with notes and diagrams.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="materials_and_resources_for_preparation">Materials and resources for preparation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As for me, Frank Kane&#8217;s BigData course that is based on the Hortonworks Distribution can be a good pre-requisite before going deeper into AWS-specific BigData stack.
+Very popular training resources with AWS related content are <strong>CloudGuru</strong>, <strong>Udemi</strong> and <strong>Oreilly</strong> I enjoyed the way how Stephane Maarek and Frank Kane deliver the materials.
+I&#8217;m also a big fan of visual associations that are developed in our brain, so good diagrams, visualization as for me is better that just a text with voice in background.</p>
+</div>
+<div class="paragraph">
+<p>Unfortunately, at this moment there is no AWS Practical Test for Big Data Specialty - where you can try and get the feeling of questions and timing (there are lots of practice tests for other AWS Exams). So there is no clear landmark to align if you are prepared enough or not. Just be ready that questions on the exam will be harder and deeper than in CloudGuru or Oreilly exam courses.</p>
+</div>
+<div class="paragraph">
+<p>AWS has excellent open library with blueprints and white-papers (link is in <a href="#resources">Resources</a> section below).
+It is good to read these resources not only in terms of exam preparation, but for regular practices.
+Hands-on activity is the glue that could better structure your knowledge and build deeper understanding on the mechanical reproducible memory levels.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="extra_30_mins_tip_for_non_native_speakers">Extra +30 mins: tip for non-native speakers</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The exam is scheduled in several languages and if you are not a native speaker you can ask for an extra 30 min to be added to your exam timeline.
+To do this, login into your account of Amazon Training and Certification Exam Accommodations and request <strong>ESL +30 MINUTES</strong>.
+Once it is approved - you will have an extra 30 min for each scheduled exam in the future.
+So first create and pass through approvement of <strong>ESL + 30 MINUTES</strong> request and then schedule the exam.
+With this option enabled you will have 200 min for AWS BigData Specialty Exam.</p>
+</div>
+<div class="paragraph">
+<p>Based on my personal experience and feedback from other persons exam time is very tight to answer all questions.
+So having an extra 30min time is good to review your answers or think over the hard questions.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="summary">Summary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Hope, that this review and tips will be useful for those of you who are on their way to certification preparation.
+It will be interesting to hear your unique story of preparation and passing exam as well.
+So feel free to add them in comments.</p>
+</div>
+<div class="paragraph">
+<p>Good Luck with your Certification !!!</p>
+</div>
+<div class='jekyll-twitter-plugin'><blockquote class="twitter-tweet" data-width="500"><p lang="en" dir="ltr"><a href="https://twitter.com/hashtag/AWSCertified?src=hash&amp;ref_src=twsrc%5Etfw">#AWSCertified</a> for Big Data Specialty <a href="https://twitter.com/hashtag/AWS?src=hash&amp;ref_src=twsrc%5Etfw">#AWS</a> <a href="https://t.co/fEWTGAUiIy">pic.twitter.com/fEWTGAUiIy</a></p>&mdash; Roman Tsypuk (@tsypuk_r) <a href="https://twitter.com/tsypuk_r/status/1217011720566255616?ref_src=twsrc%5Etfw">January 14, 2020</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="resources">Resources</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Gartner report: <a href="https://aws.amazon.com/blogs/aws/aws-named-as-a-leader-in-gartners-infrastructure-as-a-service-iaas-magic-quadrant-for-the-9th-consecutiveyear/" class="bare">https://aws.amazon.com/blogs/aws/aws-named-as-a-leader-in-gartners-infrastructure-as-a-service-iaas-magic-quadrant-for-the-9th-consecutiveyear/</a>)</p>
+</li>
+<li>
+<p>AWS guide BigData exam: <a href="https://d1.awsstatic.com/training-and-certification/docs-bigdata-spec/AWS%20Certified%20Big%20Data%20-%20Specialty_Exam%20Guide_v1.4_FINAL.pdf" class="bare">https://d1.awsstatic.com/training-and-certification/docs-bigdata-spec/AWS%20Certified%20Big%20Data%20-%20Specialty_Exam%20Guide_v1.4_FINAL.pdf</a></p>
+</li>
+<li>
+<p>AWS sample questions: <a href="https://d1.awsstatic.com/training-and-certification/docs-bigdata-spec/BD-S%20Sample%20Questions%20for%20Web.pdf" class="bare">https://d1.awsstatic.com/training-and-certification/docs-bigdata-spec/BD-S%20Sample%20Questions%20for%20Web.pdf</a></p>
+</li>
+<li>
+<p>AWS White Paper on Big Data Analytics: <a href="https://d1.awsstatic.com/whitepapers/Big_Data_Analytics_Options_on_AWS.pdf?did=wp_card&amp;trk=wp_card" class="bare">https://d1.awsstatic.com/whitepapers/Big_Data_Analytics_Options_on_AWS.pdf?did=wp_card&amp;trk=wp_card</a></p>
+</li>
+<li>
+<p>AWS White Paper Kinesis: <a href="https://d0.awsstatic.com/whitepapers/whitepaper-streaming-data-solutions-on-aws-with-amazon-kinesis.pdf" class="bare">https://d0.awsstatic.com/whitepapers/whitepaper-streaming-data-solutions-on-aws-with-amazon-kinesis.pdf</a></p>
+</li>
+<li>
+<p>EMR security: <a href="https://aws.amazon.com/blogs/big-data/best-practices-for-securing-amazon-emr/" class="bare">https://aws.amazon.com/blogs/big-data/best-practices-for-securing-amazon-emr/</a></p>
+</li>
+<li>
+<p>EMR best practices: <a href="https://d0.awsstatic.com/whitepapers/aws-amazon-emr-best-practices.pdf" class="bare">https://d0.awsstatic.com/whitepapers/aws-amazon-emr-best-practices.pdf</a></p>
+</li>
+<li>
+<p>AWS well architected framework: <a href="https://aws.amazon.com/architecture/well-architected/" class="bare">https://aws.amazon.com/architecture/well-architected/</a></p>
+</li>
+<li>
+<p>Redshift encryption: <a href="https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-db-encryption.html" class="bare">https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-db-encryption.html</a></p>
+</li>
+<li>
+<p>AWS Machine Learining: <a href="https://docs.aws.amazon.com/machine-learning/latest/dg/the-machine-learning-process.html" class="bare">https://docs.aws.amazon.com/machine-learning/latest/dg/the-machine-learning-process.html</a></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+            <!--Page navigation section: Start-->
+<div class="s-content__pagenav">
+    <div class="s-content__nav">
+        
+        <div class="s-content__prev">
+            <a href="https://tsypuk.github.io/git-hooks-makefile-jekyll" rel="prev">
+                <span>Previous Post</span>git hooks: automatic assemble and publish your Jekyll Blog site on push command
+            </a>
+        </div>
+        
+        
+        <div class="s-content__next">
+            <a href="https://tsypuk.github.io/git-advanced" rel="prev">
+                <span>Next Post</span>How actually git tracks objects. Snapshotting and the Illusion of git Diff.
+            </a>
+        </div>
+        
+    </div>
+</div>
+<!--Page navigation section: End-->
+
+            <!--Author section: Start-->
+<div class="s-content__author">
+    <img src="https://tsypuk.github.io/images/avatar/rtsypuk.jpg" alt="">
+    <div class="s-content__author-about">
+        <h2 class="s-content__author-name">
+            <a href="#0">Roman Tsypuk</a>
+        </h2>
+        <p>
+            Big fan of JVM-based languages: Java, Kotlin, Groovy, Spring ecosystem with Cloud and K8S integration,
+            AWS cloud, TDD and DevOps practices. Speaker on meet-ups and conferences. Radio HAM and contributor to
+            open source projects.
+        </p>
+        <ul class="s-content__author-social">
+            <li>
+                <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143"><i class="fa fa-linkedin"
+                                                                                     aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://www.twitter.com/tsypuk_r"><i class="fa fa-twitter"
+                                                                                aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://github.com/tsypuk"><i class="fa fa-github"
+                                                                           aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+            </li>
+        </ul>
+
+    </div>
+</div>
+<!--Author section: End-->
+
+        </div>
+    </article>
+</section> <!-- s-content -->
+
+<!--Footer Section: Start-->
+<!-- s-footer
+================================================== -->
+<footer class="s-footer">
+    <div class="s-footer__bottom">
+        <div class="row">
+            <div class="col-full">
+                <div class="s-footer__copyright">
+                    <span>© Copyright Roman Tsypuk 2020</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer> <!-- end s-footer -->
+</html>
+<!--Footer Section: End-->
+</body>
+</html>
+<!--Single post template: End-->

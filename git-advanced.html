@@ -1,0 +1,797 @@
+<!--Single post template: Start-->
+<!doctype html>
+<html>
+<head>
+    <!--HEAD section: Start-->
+
+<!--Google Analytics: Start-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-155054471-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-155054471-1', { 'optimize_id': 'GTM-K8M5MPW'});
+</script>
+<!--Google Analytics: End-->
+
+
+<meta charset="UTF-8">
+<link type="application/atom+xml" rel="alternate" href="https://tsypuk.github.io/feed.xml" title="Roman Tsypuk Blog" />
+<!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>How actually git tracks objects. Snapshotting and the Illusion of git Diff. | Roman Tsypuk Blog</title>
+<meta name="generator" content="Jekyll v3.8.6" />
+<meta property="og:title" content="How actually git tracks objects. Snapshotting and the Illusion of git Diff." />
+<meta name="author" content="Roman Tsypuk" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Git advanced internals. How git Snapshotting works. There are no diffs on filesystem in git between commits. They are created on the fly." />
+<meta property="og:description" content="Git advanced internals. How git Snapshotting works. There are no diffs on filesystem in git between commits. They are created on the fly." />
+<link rel="canonical" href="https://tsypuk.github.io/git-advanced" />
+<meta property="og:url" content="https://tsypuk.github.io/git-advanced" />
+<meta property="og:site_name" content="Roman Tsypuk Blog" />
+<meta property="og:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/new-york-streets-3-1551331.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-01-20T00:00:00+02:00" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/git-advanced"},"author":{"@type":"Person","name":"Roman Tsypuk"},"url":"https://tsypuk.github.io/git-advanced","description":"Git advanced internals. How git Snapshotting works. There are no diffs on filesystem in git between commits. They are created on the fly.","@type":"BlogPosting","image":"https://tsypuk.github.io/images/posts/thumbs/1000/new-york-streets-3-1551331.jpg","headline":"How actually git tracks objects. Snapshotting and the Illusion of git Diff.","dateModified":"2020-01-20T00:00:00+02:00","datePublished":"2020-01-20T00:00:00+02:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<!-- mobile specific metas-->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<!-- Google Card -->
+
+<meta itemprop="description" content="How actually git tracks objects. Snapshotting and the Illusion of git Diff.">
+
+
+
+<meta itemprop="image" content="https://tsypuk.github.io/images/posts/thumbs/1000/new-york-streets-3-1551331.jpg">
+
+
+<!--LinkedIn cards-->
+
+<meta property='og:image' content="https://tsypuk.github.io/images/posts/thumbs/1000/new-york-streets-3-1551331.jpg">
+
+
+<meta name="author" content="Roman Tsypuk">
+<!--end of LinkedIn cards-->
+
+<!-- Twitter cards -->
+<meta name="twitter:site"    content="@tsypuk_r">
+<meta name="twitter:creator" content="@tsypuk_r">
+<meta name="twitter:title"   content="How actually git tracks objects. Snapshotting and the Illusion of git Diff.">
+
+
+<meta name="twitter:description" content="Git advanced internals. How git Snapshotting works. There are no diffs on filesystem in git between commits. They are created on the fly.">
+
+
+
+<meta name="twitter:card"  content="summary_large_image">
+<meta name="twitter:image" content="https://tsypuk.github.io/images/posts/thumbs/1000/new-york-streets-3-1551331.jpg">
+
+<!-- end of Twitter cards -->
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/css/asciidoctor.css">
+<link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/a11y-dark.css">
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- CSS
+================================================== -->
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/vendor.css">
+<link rel="stylesheet" href="/css/main.css">
+
+<!-- favicons
+================================================== -->
+<link rel="shortcut icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<link rel="icon" href="https://tsypuk.github.io/site_icon.ico" type="image/x-icon">
+<!--HEAD section: End-->
+
+    <title>How actually git tracks objects. Snapshotting and the Illusion of git Diff.</title>
+</head>
+<body id="top" data-aos-easing="ease-in-sine" data-aos-duration="600" data-aos-delay="100" class="pace-done">
+<!--HEADER: Start-->
+<!-- pageheader
+================================================== -->
+<section class="s-pageheader">
+    <header class="header">
+        <div class="header__content row">
+            <ul class="header__social">
+                <li>
+                    <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143">
+                        <i class="fa fa-linkedin" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="https://www.twitter.com/tsypuk_r">
+                        <i class="fa fa-twitter" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                <li>
+                    <a href="https://github.com/tsypuk">
+                        <i class="fa fa-github" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <a href="/" title="Tsypuk Blog">Tsypuk Blog</a>
+                </li>
+            </ul> <!-- end header__social -->
+        </div> <!-- header-content -->
+    </header> <!-- header -->
+
+
+</section> <!-- end s-pageheader -->
+<!--HEADER: End-->
+
+<section class="s-content s-content--narrow s-content--no-padding-bottom">
+    <article class="row format-standard">
+        <div class="s-content__header col-full">
+            <h1 class="s-content__header-title">How actually git tracks objects. Snapshotting and the Illusion of git Diff.</h1>
+            <ul class="s-content__header-meta">
+                <li class="date">Jan 20th, 2020</li>
+                <li class="cat">~13 minutes to read</li>
+                <li class="cat"><!--Share this page section: Start-->
+<div class="share-page">
+    share this article with:
+    <a href="https://twitter.com/intent/tweet?text=How+actually+git+tracks+objects.+Snapshotting+and+the+Illusion+of+git+Diff.&url=https://tsypuk.github.io/git-advanced&via=tsypuk_r&related=tsypuk_r"
+       rel="nofollow" target="_blank" title="Share on Twitter"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Ftsypuk.github.io%2Fgit-advanced&title=How+actually+git+tracks+objects.+Snapshotting+and+the+Illusion+of+git+Diff.&summary=%3Cdiv+class%3D%22paragraph%22%3E%0A%3Cp%3EGit+advanced+internals.+How+git+Snapshotting+works.+There+are+no+diffs+on+filesystem+in+git+between+commits.+They+are+created+on+the+fly.%3C%2Fp%3E%0A%3C%2Fdiv%3E&source=https%3A%2F%2Ftsypuk.github.io"
+       rel="nofollow" target="_blank" title="Share on LinkedIn"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+    <a href="https://facebook.com/sharer.php?u=https://tsypuk.github.io/git-advanced" rel="nofollow" target="_blank"
+       title="Share on Facebook"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+    <a href="https://plus.google.com/share?url=https://tsypuk.github.io/git-advanced" rel="nofollow" target="_blank"
+       title="Share on Google+"><i class="fa fa-google-plus" aria-hidden="true"></i></a>
+</div>
+<!--Share this page section: End-->
+</li>
+                <!--                <li class="cat">In gitadvanced</li>-->
+                <li class="cat"><!--Twitter follow me button: Start-->
+<li>
+    <a href="https://twitter.com/tsypuk_r?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @tsypuk_r</a>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</li>
+<!--Twitter follow me button: End-->
+</li>
+                <!--                <li class="cat">In gitadvanced</li>-->
+            </ul>
+        </div> <!-- end s-content__header -->
+        <div class="s-content__media col-full">
+            <div class="s-content__post-thumb">
+                
+                <picture>
+                    <source media="(min-width: 1024px)" srcset="https://tsypuk.github.io/images/posts/thumbs/1000/new-york-streets-3-1551331.jpg">
+                    <source media="(min-width: 600px)" srcset="https://tsypuk.github.io/images/posts/thumbs/800/new-york-streets-3-1551331.jpg">
+                    <source media="(min-width: 400px)" srcset="https://tsypuk.github.io/images/posts/thumbs/500/new-york-streets-3-1551331.jpg">
+                    <source media="(min-width: 100px)" srcset="https://tsypuk.github.io/images/posts/thumbs/400/new-york-streets-3-1551331.jpg">
+                    <img src="https://tsypuk.github.io/images/posts/thumbs/1000/new-york-streets-3-1551331.jpg" alt="How actually git tracks objects. Snapshotting and the Illusion of git Diff." style="width:auto;">
+                </picture>
+                
+            </div>
+        </div> <!-- end s-content__media -->
+        <!--Tags on the page: Start-->
+<p class="s-content__tags" align="center">
+    <span>Post Tags:</span>
+    <span class="s-content__tag-list">
+    
+        <a href="#0">git</a>
+    
+        <a href="#0">advanced</a>
+    
+    </span>
+</p>
+<!--Tags on the page: End-->
+
+        <div class="col-full s-content__main">
+            <div class="sect1">
+<h2 id="the_illusion_of_git_diff">The Illusion of Git Diff</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Git stores the full latest snapshot of the entire file when you modify the file and perform commit operations.
+There are <strong>NO</strong> diffs of modified lines that are stored on the filesystem or somewhere else after commit.</p>
+</div>
+<div class="paragraph">
+<p>The <strong>"diff illusion"</strong> appeared in engineers' minds because we used to see file diffs modifications in many tools,
+like VCS of IDEA, gitk, etc. The actual diff of modifications between different commits is calculated on the fly and
+is represented in an understandable form for us.</p>
+</div>
+<div class="paragraph">
+<p>I will explain this git’s snapshotting model behavior in the following commit-by-commit actions.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="1_init_git_repository_add_first_txt_file_to_repo">1. Init git repository. Add first.txt file to repo</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Listing 1. Content of .git/ directory</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git init
+$ ls -la .git
+total 16
+drwxr-xr-x  7 rtsypuk  staff  224 Jan 20 15:21 .
+drwxr-xr-x  3 rtsypuk  staff   96 Jan 20 15:21 ..
+-rw-r--r--  1 rtsypuk  staff   23 Jan 20 15:21 HEAD
+-rw-r--r--  1 rtsypuk  staff  137 Jan 20 15:21 config
+drwxr-xr-x  5 rtsypuk  staff  160 Jan 20 15:21 hooks
+drwxr-xr-x  4 rtsypuk  staff  128 Jan 20 15:21 objects
+drwxr-xr-x  4 rtsypuk  staff  128 Jan 20 15:21 refs</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Listing 2. Adding first.txt file with the single "First line"</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ echo "First line" &gt;&gt; first.txt
+$ git add .
+$ git commit -m "first commit"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we can see that there are 3 new files created in the .git/objects folder.</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 3. Content of .git/objects directory</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ find .git/objects -type f
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can check their type by applying <strong>-t</strong> option to command <strong>cat-file</strong> and content by applying option <strong>-p</strong>.
+These new objects types are: commit, blob and tree.</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 4. using -t cat-file command we can check types of the objects</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -t 2aae0a6496aba985dcf01e7ddf684c49ada7c5db
+commit
+$ git cat-file -t 9649cde946d8d0896fa80977b9bcd76439f99e6b
+blob
+$ git cat-file -t 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+tree</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each object&#8217;s filename is the SHA1 hash of its content. But there is special trick in git to remap SHA1 into file structure.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+E.g. <strong>.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d</strong> has actual hash 5d9ddc8ff39ad75d0f98e71780cbbf56478dbb8d.
+Git uses SHA1, 160-bit hexadecimal hash number with 40 characters long to form filenames. Tha actual SHA1 of the object
+is split into 2 chunks: the first 2 chars define the folder and the last 38 chars create a filename that is placed under
+this folder. This approach allows better distribution to access files in git filesystem and allows avoid scan entire parent directory .git/objects
+(in case if all sha1 objects will be placed here with no subdirectories).
+If you are from Java world you can think about this improvement as accessing the HashMap by key and retrieving the list of objects as the value.
+Such structures are much efficient than full-length list search.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you will try to calculate SHA1 of added file by yourself and compare it to SHA1 hexadecimal number stored in git you will not find the matching</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell" class="language-shell hljs">$ shasum first.txt
+9b6a082673a0e60b1804797a367e01671cfdb92b  first.txt</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is because git uses standard SHA1 algorithm, but does not apply it directly to the file&#8217;s content. Instead, it also uses
+concatenated keyword <strong>blob</strong>, the actual file size, <strong>"\0"</strong> character and finally the content of the entire file.
+So the actual "git-based SHA1" can be calculated using the following formula:</p>
+</div>
+<div class="paragraph">
+<p><strong>git_sha = SHA1("blob " + [file_size] + "\0" + [file_content])</strong></p>
+</div>
+<div class="paragraph">
+<p>Git has command to get hash of the object, e.g. <strong>git-like SHA1</strong> for a file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell" class="language-shell hljs">$ git hash-object first.txt
+9649cde946d8d0896fa80977b9bcd76439f99e6b</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="1_1_commit_object">1.1. Commit object</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Listing 5. Content of 2aae0a6496aba985dcf01e7ddf684c49ada7c5db commit object</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -p 2aae0a6496aba985dcf01e7ddf684c49ada7c5db
+tree 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+author Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579528773 +0200
+committer Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579528773 +0200
+first commit</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Commit object contains reference to a tree and commit details - author, committer and commit message.
+If you are using PGP verification, PGP signature also will be included here.
+The same SHA1 commit information is present in regular <strong>git log</strong> command output, e.g.:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 6. Content of .git/objects directory</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git log
+commit 2aae0a6496aba985dcf01e7ddf684c49ada7c5db (HEAD -&gt; master)
+Author: Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt;
+Date:   Mon Jan 20 15:59:33 2020 +0200
+first commit</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="1_2_tree_object">1.2. Tree object</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Listing 7. Content of 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d tree object</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -p 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	first.txt</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Tree object has references to the list of objects that have been modified in the current commit. Each file item represents
+a line that starts with the Unix permission followed by blob/tree depending if current object is file(blob) or directory(tree).
+Next follows git-sha1 of the object and its filename.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="1_3_blob_object">1.3. Blob object</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Contains the actual content of the file:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 8. Content of 9649cde946d8d0896fa80977b9bcd76439f99e6b blob object</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -p 9649cde946d8d0896fa80977b9bcd76439f99e6b
+First line</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The DAG (Direct Acyclic Graph) diagram looks like this:</p>
+</div>
+<center>
+<div class="imageblock">
+<div class="content">
+<img src="/images/b96db934-b862-4d8d-8688-d6a4c627216b.png" alt="b96db934 b862 4d8d 8688 d6a4c627216b" width="200" height="200">
+</div>
+<div class="title">Figure 1. Git repository snapshot: 1 commits, 1 trees, 1 blobs, 2 refs: HEAD,refs/heads/master</div>
+</div>
+</center>
+</div>
+</div>
+<div class="sect1">
+<h2 id="2_adding_second_txt_file_with_the_same_content_to_repository">2. Adding second.txt file with the same content to repository</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Listing 9. Adding second.txt</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ echo "First line" &gt;&gt; second.txt
+$ git add .
+$ git commit -m "second commit"</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Listing 10. Content of .git/objects directory</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ find .git/objects -type f
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we have 2 more new object:
+73/d4372bc1049b80935ee2b36d4ade2d7187afe9 and
+6b/3a79276e9bfa58e64cb7e5def587f593e7ae20</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 11. Commit2: .git/objects/6b3a79276e9bfa58e64cb7e5def587f593e7ae20</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -p 6b3a79276e9bfa58e64cb7e5def587f593e7ae20
+tree 73d4372bc1049b80935ee2b36d4ade2d7187afe9
+parent 2aae0a6496aba985dcf01e7ddf684c49ada7c5db
+author Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579530262 +0200
+committer Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579530262 +0200
+second commit</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Listing 12. Tree2: .git/objects/73d4372bc1049b80935ee2b36d4ade2d7187afe9</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -p 73d4372bc1049b80935ee2b36d4ade2d7187afe9
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As we can see from the new TREE file, now git manages 2 records - filename first.txt and second.txt, but both of them are referencing
+the same blob record. Git has identified that the content of <strong>first.txt</strong> and <strong>second.txt</strong> files is absolutely the same (SHA1 equals) and there is no need to
+keep duplicate of the same object. Remember that only file size and file content are used in SHA1 calculation. Filename does not play here.</p>
+</div>
+<div class="paragraph">
+<p>Git commits represent the DAG, each next commit has a reference to the previous parent commit,
+creating the graph structure. The <strong>tree</strong> git object represents the node of the graph that can be associated with different <strong>blob</strong> objects.</p>
+</div>
+<div class="paragraph">
+<p>At the second commit step, we see that <strong>commit2 (sha1 6b3a79276e9bfa58e64cb7e5def587f593e7ae20)</strong> has reference to parent commit1 (sha1 2aae0a6496aba985dcf01e7ddf684c49ada7c5db)
+as well as reference to <strong>tree2 object (sha1 73d4372bc1049b80935ee2b36d4ade2d7187afe9)</strong>, which maintains two references to first.txt and seconds.txt but both mapped to the same <strong>blob object</strong>.</p>
+</div>
+<center>
+<div class="imageblock">
+<div class="content">
+<img src="/images/51e3679a-9dd9-44dd-bdfd-de55606b4cbc.png" alt="51e3679a 9dd9 44dd bdfd de55606b4cbc" width="500" height="500">
+</div>
+<div class="title">Figure 2. Git repository snapshot: 2 commits, 2 trees, 1 blobs, 2 refs: HEAD,refs/heads/master</div>
+</div>
+</center>
+</div>
+</div>
+<div class="sect1">
+<h2 id="3_adding_third_txt_file_with_the_same_content_to_git_repo">3. Adding third.txt file with the same content to git repo</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Listing 13 Adding third.txt</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ echo "First line" &gt;&gt; third.txt
+$ git add .
+$ git commit -m "third commit"</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Listing 14. Content of .git/objects directory</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ find .git/objects -type f
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+.git/objects/d4/9117a72fc08b1991572d363bd43bdfe6c56c9f
+.git/objects/e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We have 2 new object: d4/9117a72fc08b1991572d363bd43bdfe6c56c9f and e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 15. Tree3 .git/objects/d49117a72fc08b1991572d363bd43bdfe6c56c9f</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -p d49117a72fc08b1991572d363bd43bdfe6c56c9f
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	third.txt</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Listing 16. Commit3: .git/objects/e9c3f660695d448fd33fa0b3e731f4ea7d9d4eed</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -p e9c3f660695d448fd33fa0b3e731f4ea7d9d4eed
+tree d49117a72fc08b1991572d363bd43bdfe6c56c9f
+parent 6b3a79276e9bfa58e64cb7e5def587f593e7ae20
+author Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579531622 +0200
+committer Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579531622 +0200
+third commit
+(base)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And the same happening here again: after adding a third.txt with the same content ("First line"), we have
+2 new objects only - the tree3 and the commit3. But tree3 is referencing to the same blob object.</p>
+</div>
+<center>
+<div class="imageblock">
+<div class="content">
+<img src="/images/70cd2d87-0e52-4f0f-b2ff-7b9901e04999.png" alt="70cd2d87 0e52 4f0f b2ff 7b9901e04999" width="1000" height="1000">
+</div>
+<div class="title">Figure 3. Git repository snapshot: 3 commits, 3 trees, 1 blobs, 2 refs: HEAD,refs/heads/master</div>
+</div>
+</center>
+</div>
+</div>
+<div class="sect1">
+<h2 id="4_appending_first_txt_with_second_line">4. Appending first.txt with "Second line"</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now let&#8217;s do several commits that will modify the actual files content and track the modification in git objects.</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 17. Append "Second line" to first.txt</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ echo "Second line" &gt;&gt; first.txt
+$ git add .
+$ git commit -m "fourth commit"</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Listing 18. Content of .git/objects directory</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ find .git/objects -type f
+.git/objects/04/c8335e36222638af3c52ad7cb90d2f8ff68ad6
+.git/objects/a5/ed01df2450ce61d01d05803ec75983a38eaff6
+.git/objects/7d/91453217afc429984c4706e8df22aaac47c9ce
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+.git/objects/d4/9117a72fc08b1991572d363bd43bdfe6c56c9f
+.git/objects/e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We have 3 new objects:
+.git/objects/04/c8335e36222638af3c52ad7cb90d2f8ff68ad6
+.git/objects/a5/ed01df2450ce61d01d05803ec75983a38eaff6
+.git/objects/7d/91453217afc429984c4706e8df22aaac47c9ce</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 19. Commit4: .git/objects/04c8335e36222638af3c52ad7cb90d2f8ff68ad6</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -t 04c8335e36222638af3c52ad7cb90d2f8ff68ad6
+commit
+$ git cat-file -p 04c8335e36222638af3c52ad7cb90d2f8ff68ad6
+tree a5ed01df2450ce61d01d05803ec75983a38eaff6
+parent e9c3f660695d448fd33fa0b3e731f4ea7d9d4eed
+author Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579532082 +0200
+committer Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579532082 +0200
+fourth commit
+(base)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Listing 20. Tree4: .git/objects/a5ed01df2450ce61d01d05803ec75983a38eaff6</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -t a5ed01df2450ce61d01d05803ec75983a38eaff6
+tree
+$ git cat-file -p a5ed01df2450ce61d01d05803ec75983a38eaff6
+100644 blob 7d91453217afc429984c4706e8df22aaac47c9ce	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	third.txt</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Listing 21. Modified first.txt</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -t 7d91453217afc429984c4706e8df22aaac47c9ce
+blob
+$ git cat-file -p 7d91453217afc429984c4706e8df22aaac47c9ce
+First line
+Second line</code></pre>
+</div>
+</div>
+<center>
+<div class="imageblock">
+<div class="content">
+<img src="/images/209dbfe5-9ae1-4af2-a6e6-b78a89937a81.png" alt="209dbfe5 9ae1 4af2 a6e6 b78a89937a81" width="800" height="800">
+</div>
+<div class="title">Figure 4. Git repository snapshot: 4 commits, 4 trees, 2 blobs, 2 refs: HEAD,refs/heads/master</div>
+</div>
+</center>
+<div class="paragraph">
+<p>The new Blob2 with "First line" and "Second line" is created. Now new Tree4 object has reference to it as well as to Blob1, that
+represents second.txt. At the same time wee see the old version of first.txt (with "First line only") That is referenced in Commit1-Commit3.
+So, for modified files git creates a new Blob records with the full entire snapshot of the files content. There are no diffs of modified lines of code!!!</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="5_appending_first_txt_with_third_line">5. Appending first.txt with "Third line"</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="title">Listing 22. Appending "Third line" &gt;&gt; first.txt</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ echo "Third line" &gt;&gt; first.txt
+$ git add .
+$ git commit -m "fifth commit"</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Listing 23. Content of .git/objects directory</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ find .git/objects -type f
+.git/objects/04/c8335e36222638af3c52ad7cb90d2f8ff68ad6
+.git/objects/3c/fa938b257bccd12320093fd62e5e5c3b0c05fc
+.git/objects/a5/ed01df2450ce61d01d05803ec75983a38eaff6
+.git/objects/7d/91453217afc429984c4706e8df22aaac47c9ce
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/91/ddeac3958b9c3f335c723852ed2e3869fad6ba
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+.git/objects/6d/a4d3e0a797240aefaa9c8009e49c57ded3b59e
+.git/objects/d4/9117a72fc08b1991572d363bd43bdfe6c56c9f
+.git/objects/e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We have 3 new object:
+.git/objects/3c/fa938b257bccd12320093fd62e5e5c3b0c05fc
+.git/objects/91/ddeac3958b9c3f335c723852ed2e3869fad6ba
+.git/objects/6d/a4d3e0a797240aefaa9c8009e49c57ded3b59e</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing 24. Tree5: .git/objects/3cfa938b257bccd12320093fd62e5e5c3b0c05fc</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -t 3cfa938b257bccd12320093fd62e5e5c3b0c05fc
+tree
+$ git cat-file -p 3cfa938b257bccd12320093fd62e5e5c3b0c05fc
+100644 blob 6da4d3e0a797240aefaa9c8009e49c57ded3b59e	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	third.txt</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Listing 25. Commit5: .git/objects/91ddeac3958b9c3f335c723852ed2e3869fad6ba</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -t 91ddeac3958b9c3f335c723852ed2e3869fad6ba
+commit
+$ git cat-file -p 91ddeac3958b9c3f335c723852ed2e3869fad6ba
+tree 3cfa938b257bccd12320093fd62e5e5c3b0c05fc
+parent 04c8335e36222638af3c52ad7cb90d2f8ff68ad6
+author Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579533662 +0200
+committer Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579533662 +0200
+fifth commit
+(base)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Listing 26. All 3 versions of first.txt are present in git</div>
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="shell session" class="language-shell session hljs">$ git cat-file -t 6da4d3e0a797240aefaa9c8009e49c57ded3b59e
+blob
+$ git cat-file -p 6da4d3e0a797240aefaa9c8009e49c57ded3b59e
+First line
+Second line
+Third line
+$ git cat-file -p 7d91453217afc429984c4706e8df22aaac47c9ce
+First line
+Second line
+$ git cat-file -p 9649cde946d8d0896fa80977b9bcd76439f99e6b
+First line</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But in the same time we have the old version of file with 9649cde946d8d0896fa80977b9bcd76439f99e6b object</p>
+</div>
+<center>
+<div class="imageblock">
+<div class="content">
+<img src="/images/ea71d96f-03bf-4147-872f-3cc0bc12ca08.png" alt="ea71d96f 03bf 4147 872f 3cc0bc12ca08" width="1000" height="1000">
+</div>
+<div class="title">Figure 5. Git repository snapshot: 5 commits, 5 trees, 3 blobs, 2 refs: HEAD,refs/heads/master</div>
+</div>
+</center>
+<div class="paragraph">
+<p>As you can see, all three versions of first.txt are stored now in different Blob1 - Blob3 objects. By checking the desired commit
+we can switch between attached versions of the files.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="summary">Summary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Following this hands-on step-by-step interaction, we have identified that git creates a whole file snapshot if it was
+modified in the commit and maps it using a tree object. It does not use delta, diff, etc. Exact the latest snapshot is stored.
+Another interesting behavior is that files with the same content are stored as a single object on the file system with managing multiple
+references and filename aliases from the tree objects only.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+There is also a compaction mechanism and pack files format in git that is triggered by git gc. It allows reorganize the filesystem structure
+more efficiently and use deltas in files. I will do an overview of pack files in the next article.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+            <!--Page navigation section: Start-->
+<div class="s-content__pagenav">
+    <div class="s-content__nav">
+        
+        <div class="s-content__prev">
+            <a href="https://tsypuk.github.io/aws-big-data-certification" rel="prev">
+                <span>Previous Post</span>AWS BigData Specialty Certification: Preparation, Materials and the Exam
+            </a>
+        </div>
+        
+        
+        <div class="s-content__next">
+            <a href="https://tsypuk.github.io/git-branches" rel="prev">
+                <span>Next Post</span>Git branches, where do they lead ?
+            </a>
+        </div>
+        
+    </div>
+</div>
+<!--Page navigation section: End-->
+
+            <!--Author section: Start-->
+<div class="s-content__author">
+    <img src="https://tsypuk.github.io/images/avatar/rtsypuk.jpg" alt="">
+    <div class="s-content__author-about">
+        <h2 class="s-content__author-name">
+            <a href="#0">Roman Tsypuk</a>
+        </h2>
+        <p>
+            Big fan of JVM-based languages: Java, Kotlin, Groovy, Spring ecosystem with Cloud and K8S integration,
+            AWS cloud, TDD and DevOps practices. Speaker on meet-ups and conferences. Radio HAM and contributor to
+            open source projects.
+        </p>
+        <ul class="s-content__author-social">
+            <li>
+                <a href="https://www.linkedin.com/in/roman-tsypuk-03a884143"><i class="fa fa-linkedin"
+                                                                                     aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://www.twitter.com/tsypuk_r"><i class="fa fa-twitter"
+                                                                                aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="https://github.com/tsypuk"><i class="fa fa-github"
+                                                                           aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="mailto: tsypuk.conf@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+            </li>
+            <li>
+                <a href="/feed.xml"><i class="fa fa-rss" aria-hidden="true"></i></a>
+            </li>
+        </ul>
+
+    </div>
+</div>
+<!--Author section: End-->
+
+        </div>
+    </article>
+</section> <!-- s-content -->
+
+<!--Footer Section: Start-->
+<!-- s-footer
+================================================== -->
+<footer class="s-footer">
+    <div class="s-footer__bottom">
+        <div class="row">
+            <div class="col-full">
+                <div class="s-footer__copyright">
+                    <span>© Copyright Roman Tsypuk 2020</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer> <!-- end s-footer -->
+</html>
+<!--Footer Section: End-->
+</body>
+</html>
+<!--Single post template: End-->
