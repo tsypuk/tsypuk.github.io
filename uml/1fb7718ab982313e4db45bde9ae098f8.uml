@@ -1,0 +1,94 @@
+@startuml
+
+class Commit4 <<(C,yellow)>> {
+-sha: 04c8335e
+--
+message: fourth commit
+
+--
+timestamp: 1580924403
+}
+class Commit3 <<(C,orange)>> {
+-sha: e9c3f660
+--
+message: third commit
+
+--
+timestamp: 1580924395
+}
+class Commit2 <<(C,lightblue)>> {
+-sha: 6b3a7927
+--
+message: second commit
+
+--
+timestamp: 1580924386
+}
+class Commit1 <<(C,lightgreen)>> {
+-sha: 2aae0a64
+--
+message: first commit
+
+--
+timestamp: 1580924369
+}
+class Tree4 <<(T,yellow)>> {
+-sha: a5ed01df
+--
+# first.txt 100644 7d914532
+# second.txt 100644 9649cde9
+# third.txt 100644 9649cde9
+
+}
+class Tree3 <<(T,orange)>> {
+-sha: d49117a7
+--
+# first.txt 100644 9649cde9
+# second.txt 100644 9649cde9
+# third.txt 100644 9649cde9
+
+}
+class Tree2 <<(T,lightblue)>> {
+-sha: 73d4372b
+--
+# first.txt 100644 9649cde9
+# second.txt 100644 9649cde9
+
+}
+class Tree1 <<(T,lightgreen)>> {
+-sha: 5b9ddc8f
+--
+# first.txt 100644 9649cde9
+
+}
+class Blob1 <<(B,lightgreen)>> {
+-sha: 9649cde9
+--
+First line
+
+}
+class Blob2 <<(B,yellow)>> {
+-sha: 7d914532
+--
+First line
+Second line
+
+}
+Commit4 --> Tree4
+Commit3 --> Tree3
+Commit2 --> Tree2
+Commit1 --> Tree1
+Tree4 --> Blob2
+Tree4 --> Blob1
+Tree4 --> Blob1
+Tree3 --> Blob1
+Tree3 --> Blob1
+Tree3 --> Blob1
+Tree2 --> Blob1
+Tree2 --> Blob1
+Tree1 --> Blob1
+Commit4 -l-> Commit3
+Commit3 -l-> Commit2
+Commit2 -l-> Commit1
+
+@enduml
