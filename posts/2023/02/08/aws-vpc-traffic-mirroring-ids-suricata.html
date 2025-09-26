@@ -1,0 +1,397 @@
+<!doctype html><html lang="en" ><head> <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); </script><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="viewport" content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover" ><meta name="generator" content="Jekyll v4.3.3" /><meta property="og:title" content="AWS VPC traffic mirroring to IDS. Deep dive with Wireshark. | by Roman Tsypuk" /><meta name="author" content="Roman Tsypuk" /><meta property="og:locale" content="en" /><meta name="description" content="Traffic mirroring refers to the process of copying network traffic from one network port or interface to another for analysis, monitoring, or security purposes. There are multiple options for traffic mirroring depending on what hardware/virtual setup is in use. The most popular modes of interaction with the system during traffic inspection are:" /><meta property="og:description" content="Traffic mirroring refers to the process of copying network traffic from one network port or interface to another for analysis, monitoring, or security purposes. There are multiple options for traffic mirroring depending on what hardware/virtual setup is in use. The most popular modes of interaction with the system during traffic inspection are:" /><meta property="twitter:description" content="Traffic mirroring refers to the process of copying network traffic from one network port or interface to another for analysis, monitoring, or security purposes. There are multiple options for traffic mirroring depending on what hardware/virtual setup is in use. The most popular modes of interaction with the system during traffic inspection are:" /><link rel="canonical" href="https://tsypuk.github.io/posts/2023/02/08/aws-vpc-traffic-mirroring-ids-suricata.html" /><meta property="og:url" content="https://tsypuk.github.io/posts/2023/02/08/aws-vpc-traffic-mirroring-ids-suricata.html" /><meta property="og:site_name" content="Engineer’s Notes | Roman Tsypuk" /><meta property="og:image" content="https://tsypuk.github.io/images/banners/twitter/banner-vpc-mirroring.png" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2023-02-08T12:00:00+02:00" /><meta name="publish_date" property="og:publish_date" content="2023-02-08T12:00:00+02:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://tsypuk.github.io/images/banners/twitter/banner-vpc-mirroring.png" /><meta property="twitter:title" content="AWS VPC traffic mirroring to IDS. Deep dive with Wireshark. | by Roman Tsypuk" /><meta name="twitter:site" content="@roman_tsypuk" /><meta name="twitter:creator" content="@roman_tsypuk" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Roman Tsypuk"},"dateModified":"2024-02-25T18:38:06+02:00","datePublished":"2023-02-08T12:00:00+02:00","description":"Traffic mirroring refers to the process of copying network traffic from one network port or interface to another for analysis, monitoring, or security purposes. There are multiple options for traffic mirroring depending on what hardware/virtual setup is in use. The most popular modes of interaction with the system during traffic inspection are:","headline":"AWS VPC traffic mirroring to IDS. Deep dive with Wireshark.","image":{"twitter":"/images/banners/twitter/banner-vpc-mirroring.png","url":"https://tsypuk.github.io/images/banners/twitter/banner-vpc-mirroring.png","@type":"imageObject"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/posts/2023/02/08/aws-vpc-traffic-mirroring-ids-suricata.html"},"url":"https://tsypuk.github.io/posts/2023/02/08/aws-vpc-traffic-mirroring-ids-suricata.html"}</script><title>AWS VPC traffic mirroring to IDS. Deep dive with Wireshark. | Engineer's Notes</title><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/site.webmanifest"><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico"><meta name="apple-mobile-web-app-title" content="Engineer's Notes"><meta name="application-name" content="Engineer's Notes"><meta name="msapplication-TileColor" content="#da532c"><meta name="msapplication-config" content="/assets/img/favicons/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.googleapis.com" ><link rel="dns-prefetch" href="https://fonts.googleapis.com" ><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="dns-prefetch" href="https://fonts.gstatic.com" ><link rel="preconnect" href="https://cdn.jsdelivr.net" ><link rel="dns-prefetch" href="https://cdn.jsdelivr.net" ><link rel="stylesheet" href="/assets/css/jekyll-theme-chirpy.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&family=Source+Sans+Pro:wght@400;600;700;900&display=swap"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.32.2/dist/tocbot.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css"> <script src="/assets/js/dist/theme.min.js"></script> <script defer src="https://cdn.jsdelivr.net/combine/npm/simple-jekyll-search@1.10.0/dest/simple-jekyll-search.min.js,npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.umd.min.js,npm/glightbox@3.3.0/dist/js/glightbox.min.js,npm/clipboard@2.0.11/dist/clipboard.min.js,npm/dayjs@1.11.13/dayjs.min.js,npm/dayjs@1.11.13/locale/en.js,npm/dayjs@1.11.13/plugin/relativeTime.js,npm/dayjs@1.11.13/plugin/localizedFormat.js,npm/tocbot@4.32.2/dist/tocbot.min.js,npm/mermaid@11.4.0/dist/mermaid.min.js"></script> <script defer src="/assets/js/dist/post.min.js"></script> <script defer src="/app.min.js?baseurl=&register=" ></script> <script defer src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> document.addEventListener('DOMContentLoaded', () => { window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); }); </script><body><aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end"><header class="profile-wrapper"> <a href="/" id="avatar" class="rounded-circle"><img src="/images/avatar/rtsypuk.jpg" width="112" height="112" alt="avatar" onerror="this.style.display='none'"></a> <a class="site-title d-block" href="/">Engineer's Notes</a><p class="site-subtitle fst-italic mb-0">Cloud, Infrastructure, Architecture, Networking</p></header><nav class="flex-column flex-grow-1 w-100 ps-0"><ul class="nav"><li class="nav-item"> <a href="/" class="nav-link"> <i class="fa-fw fas fa-home"></i> <span>HOME</span> </a><li class="nav-item"> <a href="/categories.html" class="nav-link"> <i class="fa-fw fas fa-stream"></i> <span>CATEGORIES</span> </a><li class="nav-item"> <a href="/tags.html" class="nav-link"> <i class="fa-fw fas fa-tag"></i> <span>TAGS</span> </a><li class="nav-item"> <a href="/archived_posts.html" class="nav-link"> <i class="fa-fw fas fa-archive"></i> <span>ARCHIVES</span> </a><li class="nav-item"> <a href="/roman_tsypuk.html" class="nav-link"> <i class="fa-fw fas fa-info-circle"></i> <span>ABOUT</span> </a></ul></nav><div class="sidebar-bottom d-flex flex-wrap align-items-center w-100"> <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle"> <i class="fas fa-adjust"></i> </button> <span class="icon-border"></span> <a href="https://github.com/tsypuk" aria-label="github" target="_blank" rel="noopener noreferrer" > <i class="fab fa-github"></i> </a> <a href="https://twitter.com/roman_tsypuk" aria-label="twitter" target="_blank" rel="noopener noreferrer" > <i class="fab fa-twitter"></i> </a> <a href="https://www.linkedin.com/in/roman-tsypuk" aria-label="linkedin" target="_blank" rel="noopener noreferrer" > <i class="fab fa-linkedin"></i> </a> <a href="javascript:location.href = 'mailto:' + ['tsypuk_conf','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a></div></aside><div id="main-wrapper" class="d-flex justify-content-center"><div class="container d-flex flex-column px-xxl-5"><header id="topbar-wrapper" aria-label="Top Bar"><div id="topbar" class="d-flex align-items-center justify-content-between px-lg-3 h-100" ><nav id="breadcrumb" aria-label="Breadcrumb"> <span> <a href="/">Home</a> </span> <span>AWS VPC traffic mirroring to IDS. Deep dive with Wireshark.</span></nav><button type="button" id="sidebar-trigger" class="btn btn-link" aria-label="Sidebar"> <i class="fas fa-bars fa-fw"></i> </button><div id="topbar-title"> Post</div><button type="button" id="search-trigger" class="btn btn-link" aria-label="Search"> <i class="fas fa-search fa-fw"></i> </button> <search id="search" class="align-items-center ms-3 ms-lg-0"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" autocomplete="off" placeholder="Search..." > </search> <button type="button" class="btn btn-link text-decoration-none" id="search-cancel">Cancel</button></div></header><div class="row flex-grow-1"><main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4"><article class="px-1" data-toc="true"><header><h1 data-toc-skip>AWS VPC traffic mirroring to IDS. Deep dive with Wireshark.</h1><div class="post-meta text-muted"> <span> Posted <time data-ts="1675850400" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Feb 8, 2023 </time> </span> <span> Updated <time data-ts="1708879086" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Feb 25, 2024 </time> </span><div class="mt-3 mb-3"> <a href="/images/banners/1200/pexels-brett-sayles-2881229.jpeg" class="popup img-link preview-img shimmer"><img src="/images/banners/1200/pexels-brett-sayles-2881229.jpeg" alt="Preview Image" width="1200" height="630" loading="lazy"></a></div><div class="d-flex justify-content-between"> <span> By <em> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a> </em> </span><div> <span class="readtime" data-bs-toggle="tooltip" data-bs-placement="bottom" title="2065 words" > <em>11 min</em> read</span></div></div></div></header><div id="toc-bar" class="d-flex align-items-center justify-content-between invisible"> <span class="label text-truncate">AWS VPC traffic mirroring to IDS. Deep dive with Wireshark.</span> <button type="button" class="toc-trigger btn me-1"> <i class="fa-solid fa-list-ul fa-fw"></i> </button></div><button id="toc-solo-trigger" type="button" class="toc-trigger btn btn-outline-secondary btn-sm"> <span class="label ps-2 pe-1">Contents</span> <i class="fa-solid fa-angle-right fa-fw"></i> </button> <dialog id="toc-popup" class="p-0"><div class="header d-flex flex-row align-items-center justify-content-between"><div class="label text-truncate py-2 ms-4">AWS VPC traffic mirroring to IDS. Deep dive with Wireshark.</div><button id="toc-popup-close" type="button" class="btn mx-1 my-1 opacity-75"> <i class="fas fa-close"></i> </button></div><div id="toc-popup-content" class="px-4 py-3 pb-4"></div></dialog><div class="content"><h2 id="abstract"><span class="me-2">Abstract</span><a href="#abstract" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Traffic mirroring refers to the process of copying network traffic from one network port or interface to another for analysis, monitoring, or security purposes. There are multiple options for traffic mirroring depending on what hardware/virtual setup is in use. The most popular modes of interaction with the system during traffic inspection are:</p><ul><li>IDS (Intrusion Detection System) - This system detects suspicious network behavior and generates alerts or notifications if any rules are violated, such as unexpected source/port/protocol. The rules are declared in predefined format (we will check the popular <a href="https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html">Suricata-based format of rules</a>).<li>IPS (Intrusion Prevention System) - This system goes a step further than IDS and not only detects and alerts about suspicious behavior, but also has the capability to influence the traffic, such as dropping packets or changing values.</ul><blockquote class="prompt-tip"><p>AWS offers multiple options to achieve these and probably the top is a managed AWS Network Firewall service that operates as an IPS allowing for traffic inspection and application of different rules. This solution is built on the open-source Suricata system. Also, there is option with Transient Gateway and Centralized Egress Appliance VPC but here you should be careful in setup not to have asymmetric traffic drops. Since 2020 newly introduced AWS Gateway Load Balancer can cover IPS scenario.</p></blockquote><p>Here, we will take a look at option with VPC traffic mirroring to check how it works and what happens with packets.</p><h2 id="network-setup-for-traffic-mirroring"><span class="me-2">Network setup for traffic mirroring</span><a href="#network-setup-for-traffic-mirroring" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>In current setup we will configure VPC traffic mirroring and will use Suricata to inspect packets. You can use any other IDS/IPS - personally I more like Snort, but for this setup Suricata will be used.</p><p>To make it easy compared captured packets we will apply filter on top of traffic mirroring session to mirror only incoming and outgoing IMCP ping packets.</p><p>To start traffic flow on the source origin instance, we will run ping command to one of Google’s public IPs.</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre>ping 142.251.42.79
+</pre></table></code></div></div><p><a href="/images/posts/vpc-mirroring/vpc_mirroring.png" class="popup img-link w-90 align-center shimmer"><img src="/images/posts/vpc-mirroring/vpc_mirroring.png" alt="img.png" loading="lazy"></a></p><h2 id="configuring-vpc-traffic-mirroring"><span class="me-2">Configuring VPC traffic mirroring</span><a href="#configuring-vpc-traffic-mirroring" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>If you are from Cisco world, the setup process is very similar to configuring port span on equipment. We need to follow step of mapping the target - this can be ENI, NLB or Gateway LB endpoint:</p><p><a href="/images/posts/vpc-mirroring/1.traffic_target.png" class="popup img-link w-100 align-center shimmer"><img src="/images/posts/vpc-mirroring/1.traffic_target.png" alt="img.png" loading="lazy"></a></p><p>We have control over Inbound and Outbound Rules in traffic filter. If you are interested in specific data traffic that can be classified by source/destinatio CIDRs and ports, by applying them in these filters you will mirror only traffic that is compatible with filter.</p><p><a href="/images/posts/vpc-mirroring/2.mirror_filter.png" class="popup img-link w-100 align-center shimmer"><img src="/images/posts/vpc-mirroring/2.mirror_filter.png" alt="img.png" loading="lazy"></a></p><p>And do not forget to start mirror session. Here we specify the traffic source - the ENI of our application instance, target (previously created) and VNI. If VNI is not specified it will be randomly generated. But here we will explicitly define it with value <strong>333</strong>, so later in captured traffic we will track this value.</p><p><a href="/images/posts/vpc-mirroring/3.mirror_session.png" class="popup img-link w-100 align-center shimmer"><img src="/images/posts/vpc-mirroring/3.mirror_session.png" alt="img.png" loading="lazy"></a></p><p><a href="/images/posts/vpc-mirroring/3.1.additional_params.png" class="popup img-link w-100 align-center shimmer"><img src="/images/posts/vpc-mirroring/3.1.additional_params.png" alt="img.png" loading="lazy"></a></p><h3 id="suricata-installation"><span class="me-2">Suricata installation</span><a href="#suricata-installation" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><p>Next, lets login into appliance instance, install and configure Suricata. Here we are configuring Suricata rules:</p><ul><li>will alert for ICMP from/to any src/dst with message “ICMP traffic detected”</ul><p>Later we will check why UDP and 4789 port are used.</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre><td class="rouge-code"><pre><span class="nb">sudo</span> <span class="nt">-s</span>
+<span class="c"># Install epel-release</span>
+amazon-linux-extras <span class="nb">install</span> <span class="nt">-y</span> epel
+<span class="c"># Install suricata</span>
+yum <span class="nb">install</span> <span class="nt">-y</span> suricata
+<span class="c"># Create the default suricata rules directory</span>
+<span class="nb">mkdir</span> /var/lib/suricata/rules
+<span class="c"># Add a rule to match all UDP traffic</span>
+<span class="nb">echo</span> <span class="s1">'alert icmp any any -&gt; any any (msg:"ICMP traffic detected"; sid:200001; rev:1;)'</span> <span class="o">&gt;</span> /var/lib/suricata/rules/suricata.rules
+<span class="c"># Start suricata listening on eth0 in daemon mode</span>
+suricata <span class="nt">-c</span> /etc/suricata/suricata.yaml <span class="nt">-k</span> none <span class="nt">-i</span> eth0 <span class="nt">-D</span>
+<span class="c"># Capture logs can be found in /var/log/suricata/fast.log</span>
+yum <span class="nb">install</span> <span class="nt">-y</span> jq
+<span class="nb">tail</span> <span class="nt">-f</span> /var/log/suricata/eve.json  | jq <span class="s1">'select(.event_type=="alert")'</span>
+</pre></table></code></div></div><p>Let’s disable Jumbo-frames for this setup:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre><span class="nb">sudo </span>ip <span class="nb">link set </span>dev eth0 mtu 1500
+</pre></table></code></div></div><p>NW interfaces on application server</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre><td class="rouge-code"><pre>eth0: <span class="nv">flags</span><span class="o">=</span>4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500
+        inet 172.31.9.144  netmask 255.255.240.0  broadcast 172.31.15.255
+        inet6 fe80::8d3:93ff:fee4:27b2  prefixlen 64  scopeid 0x20&lt;<span class="nb">link</span><span class="o">&gt;</span>
+        ether 0a:d3:93:e4:27:b2  txqueuelen 1000  <span class="o">(</span>Ethernet<span class="o">)</span>
+        RX packets 67739  bytes 91125253 <span class="o">(</span>86.9 MiB<span class="o">)</span>
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 8329  bytes 777401 <span class="o">(</span>759.1 KiB<span class="o">)</span>
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+</pre></table></code></div></div><p>NW interfaces Suricata appliance</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre><td class="rouge-code"><pre>eth0: <span class="nv">flags</span><span class="o">=</span>4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500
+        inet 172.31.4.131  netmask 255.255.240.0  broadcast 172.31.15.255
+        inet6 fe80::836:d2ff:fefc:942e  prefixlen 64  scopeid 0x20&lt;<span class="nb">link</span><span class="o">&gt;</span>
+        ether 0a:36:d2:fc:94:2e  txqueuelen 1000  <span class="o">(</span>Ethernet<span class="o">)</span>
+        RX packets 147218  bytes 194694578 <span class="o">(</span>185.6 MiB<span class="o">)</span>
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 22560  bytes 2819722 <span class="o">(</span>2.6 MiB<span class="o">)</span>
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+</pre></table></code></div></div><h2 id="running-a-ping-from-application-server"><span class="me-2">Running a ping from application server</span><a href="#running-a-ping-from-application-server" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>First lets monitor Suricata logs:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre><span class="o">[</span>root@ip-172-31-4-131 ec2-user]# <span class="nb">tail</span> <span class="nt">-f</span> /var/log/suricata/fast.log
+</pre></table></code></div></div><p>Running ping from application server to public IP - there are no new records in Suricata log.</p><p>But when are trying to directly ping Suricata appliance from Application server we see new entries:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="o">[</span>root@ip-172-31-4-131 ec2-user]# <span class="nb">tail</span> <span class="nt">-f</span> /var/log/suricata/fast.log
+02/08/2023-XX:19:07.005845  <span class="o">[</span><span class="k">**</span><span class="o">]</span> <span class="o">[</span>1:200001:1] ICMP traffic detected <span class="o">[</span><span class="k">**</span><span class="o">]</span> <span class="o">[</span>Classification: <span class="o">(</span>null<span class="o">)]</span> <span class="o">[</span>Priority: 3] <span class="o">{</span>ICMP<span class="o">}</span> 172.31.9.144:3 -&gt; 172.31.4.131:3
+02/08/2023-XX:19:07.006011  <span class="o">[</span><span class="k">**</span><span class="o">]</span> <span class="o">[</span>1:200001:1] ICMP traffic detected <span class="o">[</span><span class="k">**</span><span class="o">]</span> <span class="o">[</span>Classification: <span class="o">(</span>null<span class="o">)]</span> <span class="o">[</span>Priority: 3] <span class="o">{</span>ICMP<span class="o">}</span> 172.31.4.131:3 -&gt; 172.31.9.144:3
+</pre></table></code></div></div><p>Buy the way, Suricata also supports logging in JSON format, very useful to query using JQ utility, we can see same entries but with more details:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+</pre><td class="rouge-code"><pre><span class="nb">tail</span> <span class="nt">-f</span> /var/log/suricata/eve.json  | jq <span class="s1">'select(.event_type=="alert")'</span>
+<span class="o">{</span>
+  <span class="s2">"timestamp"</span>: <span class="s2">"2023-02-08TXX:56:10.323036+0000"</span>,
+  <span class="s2">"flow_id"</span>: 1671295421574620,
+  <span class="s2">"in_iface"</span>: <span class="s2">"eth0"</span>,
+  <span class="s2">"event_type"</span>: <span class="s2">"alert"</span>,
+  <span class="s2">"src_ip"</span>: <span class="s2">"172.31.9.144"</span>,
+  <span class="s2">"dest_ip"</span>: <span class="s2">"172.31.4.131"</span>,
+  <span class="s2">"proto"</span>: <span class="s2">"ICMP"</span>,
+  <span class="s2">"icmp_type"</span>: 8,
+  <span class="s2">"icmp_code"</span>: 0,
+  <span class="s2">"alert"</span>: <span class="o">{</span>
+    <span class="s2">"action"</span>: <span class="s2">"allowed"</span>,
+    <span class="s2">"gid"</span>: 1,
+    <span class="s2">"signature_id"</span>: 200001,
+    <span class="s2">"rev"</span>: 1,
+    <span class="s2">"signature"</span>: <span class="s2">"ICMP traffic detected"</span>,
+    <span class="s2">"category"</span>: <span class="s2">""</span>,
+    <span class="s2">"severity"</span>: 3
+  <span class="o">}</span>,
+  <span class="s2">"flow"</span>: <span class="o">{</span>
+    <span class="s2">"pkts_toserver"</span>: 1,
+    <span class="s2">"pkts_toclient"</span>: 0,
+    <span class="s2">"bytes_toserver"</span>: 98,
+    <span class="s2">"bytes_toclient"</span>: 0,
+    <span class="s2">"start"</span>: <span class="s2">"2023-02-08TXX:56:10.323036+0000"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+<span class="o">{</span>
+  <span class="s2">"timestamp"</span>: <span class="s2">"2023-02-08TXX:56:10.323195+0000"</span>,
+  <span class="s2">"flow_id"</span>: 1671295421574620,
+  <span class="s2">"in_iface"</span>: <span class="s2">"eth0"</span>,
+  <span class="s2">"event_type"</span>: <span class="s2">"alert"</span>,
+  <span class="s2">"src_ip"</span>: <span class="s2">"172.31.4.131"</span>,
+  <span class="s2">"dest_ip"</span>: <span class="s2">"172.31.9.144"</span>,
+  <span class="s2">"proto"</span>: <span class="s2">"ICMP"</span>,
+  <span class="s2">"icmp_type"</span>: 0,
+  <span class="s2">"icmp_code"</span>: 0,
+  <span class="s2">"alert"</span>: <span class="o">{</span>
+    <span class="s2">"action"</span>: <span class="s2">"allowed"</span>,
+    <span class="s2">"gid"</span>: 1,
+    <span class="s2">"signature_id"</span>: 200001,
+    <span class="s2">"rev"</span>: 1,
+    <span class="s2">"signature"</span>: <span class="s2">"ICMP traffic detected"</span>,
+    <span class="s2">"category"</span>: <span class="s2">""</span>,
+    <span class="s2">"severity"</span>: 3
+  <span class="o">}</span>,
+  <span class="s2">"flow"</span>: <span class="o">{</span>
+    <span class="s2">"pkts_toserver"</span>: 1,
+    <span class="s2">"pkts_toclient"</span>: 1,
+    <span class="s2">"bytes_toserver"</span>: 98,
+    <span class="s2">"bytes_toclient"</span>: 98,
+    <span class="s2">"start"</span>: <span class="s2">"2023-02-08TXX:56:10.323036+0000"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></table></code></div></div><h2 id="capture-and-inspect-traffic-with-wireshark"><span class="me-2">Capture and inspect traffic with Wireshark</span><a href="#capture-and-inspect-traffic-with-wireshark" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Now lets capture ENIs of both application and appliance instances and compare them.</p><p><a href="/images/posts/vpc-mirroring/vpc_mirroring_wireshark.png" class="popup img-link w-90 align-center shimmer"><img src="/images/posts/vpc-mirroring/vpc_mirroring_wireshark.png" alt="img.png" loading="lazy"></a></p><p>This is a capture of ping response from 142.251.42.79 to our 172.31.9.144 Application server.</p><p><a href="/images/posts/vpc-mirroring/wireshark_eth0_eth0.png" class="popup img-link shimmer"><img src="/images/posts/vpc-mirroring/wireshark_eth0_eth0.png" alt="img.png" loading="lazy"></a></p><p>As we can observe, the packets are different. Left side of the screen is a capture of Application server, right - Appliance instance. The initial source ICMP packet is wrapped by VPC traffic mirroring session by UDP packet with additional headers. Here we have capture same ICMP packet sequence number - you can see there is no difference in the inner encapsulated payload.</p><p>The outer packet has source of ENI that we are capturing and destination of ENI on target appliance. Also, this is UDP packet sent to 4789 port. That is why initially we did not see any records in log in ICMP ping commands. Also take a look at header <strong>VXLAN Network Identifier (VNI)</strong> it has value <strong>333</strong> that we have configured previously in session mirror setup.</p><p><a href="/images/posts/vpc-mirroring/vxlan_packets.png" class="popup img-link shimmer"><img src="/images/posts/vpc-mirroring/vxlan_packets.png" alt="img.png" loading="lazy"></a></p><p>On the right bottom section of the screen you can see how packet encapsulation is applied in a binary form.</p><h2 id="udp-traffic-mirroring-logging"><span class="me-2">UDP traffic mirroring logging:</span><a href="#udp-traffic-mirroring-logging" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>If we update Suricata with new rule:</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre>RULE: alert udp any any -&gt; any 4789 (msg:"UDP Mirror traffic detected"; sid:200001; rev:1;)
+</pre></table></code></div></div><p>Now we can see all mirrored UDP packet incoming into Appliance instance. But with one remark, that these are encapsulated UDP packets and the src/dst are not the same as in origin packet. So it is just for observation, but we can not create and apply any rule for them. We will fix it in a while.</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+</pre><td class="rouge-code"><pre>
+<span class="nb">tail</span> <span class="nt">-f</span> /var/log/suricata/eve.json  | jq <span class="s1">'select(.event_type=="alert")'</span>
+<span class="o">{</span>
+  <span class="s2">"timestamp"</span>: <span class="s2">"2023-01-27T13:10:48.181155+0000"</span>,
+  <span class="s2">"flow_id"</span>: 1642158420968355,
+  <span class="s2">"in_iface"</span>: <span class="s2">"eth0"</span>,
+  <span class="s2">"event_type"</span>: <span class="s2">"alert"</span>,
+  <span class="s2">"src_ip"</span>: <span class="s2">"172.31.9.144"</span>,
+  <span class="s2">"src_port"</span>: 65511,
+  <span class="s2">"dest_ip"</span>: <span class="s2">"172.31.4.131"</span>,
+  <span class="s2">"dest_port"</span>: 4789,
+  <span class="s2">"proto"</span>: <span class="s2">"UDP"</span>,
+  <span class="s2">"alert"</span>: <span class="o">{</span>
+    <span class="s2">"action"</span>: <span class="s2">"allowed"</span>,
+    <span class="s2">"gid"</span>: 1,
+    <span class="s2">"signature_id"</span>: 200001,
+    <span class="s2">"rev"</span>: 1,
+    <span class="s2">"signature"</span>: <span class="s2">"UDP Mirror traffic detected"</span>,
+    <span class="s2">"category"</span>: <span class="s2">""</span>,
+    <span class="s2">"severity"</span>: 3
+  <span class="o">}</span>,
+  <span class="s2">"app_proto"</span>: <span class="s2">"failed"</span>,
+  <span class="s2">"flow"</span>: <span class="o">{</span>
+    <span class="s2">"pkts_toserver"</span>: 1,
+    <span class="s2">"pkts_toclient"</span>: 0,
+    <span class="s2">"bytes_toserver"</span>: 148,
+    <span class="s2">"bytes_toclient"</span>: 0,
+    <span class="s2">"start"</span>: <span class="s2">"2023-01-27T13:10:48.181155+0000"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></table></code></div></div><h2 id="this-is-actually-how-vxlan-works"><span class="me-2">This is actually how VXLan works</span><a href="#this-is-actually-how-vxlan-works" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>VXLAN (Virtual Extensible LAN) is a network virtualization technology that uses a VLAN-like encapsulation technique to encapsulate MAC-based OSI Layer 2 Ethernet frames within Layer 3 IP packets. This allows communication between virtualized network segments, providing network isolation and enables the creation of multiple virtual LANs on a single physical infrastructure.</p><p><a href="/images/posts/vpc-mirroring/vxlan_encapsulation.svg" class="popup img-link shimmer"><img src="/images/posts/vpc-mirroring/vxlan_encapsulation.svg" alt="vxlan_encapsulation.svg" loading="lazy"></a></p><p>Here’s a summary of how VXLAN works:</p><ul><li>Endpoints (VMs or physical hosts) communicate with each other as if they were on the same LAN, despite being located in different physical locations.<li>The VXLAN encapsulation process adds a VXLAN header to the original Ethernet frame, including a 24-bit VXLAN Network Identifier (VNI), which acts as a segment ID for the virtual network.<li>The encapsulated frame is then sent as a standard IP packet to the destination endpoint.<li>The destination endpoint removes the VXLAN header and processes the original Ethernet frame as if it had never left the local network.</ul><h2 id="adding-vxlan-interface"><span class="me-2">Adding vxlan interface</span><a href="#adding-vxlan-interface" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Usually appliance instance can operate with vxlan traffic and extract encapsulated inner packages. To achieve this - we can add virtual interface on top of eth0 that will perform these actions.</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre>
+<span class="nb">sudo </span>ip <span class="nb">link </span>add vxlan100 <span class="nb">type </span>vxlan <span class="nb">id </span>333 dstport 4789 <span class="nb">local </span>172.31.4.131 dev eth0
+<span class="nb">sudo </span>ip <span class="nb">link set </span>vxlan100 up
+</pre></table></code></div></div><p>Suricata appliance is now showing second interface:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre><td class="rouge-code"><pre>ifconfig
+eth0: <span class="nv">flags</span><span class="o">=</span>4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500
+        inet 172.31.4.131  netmask 255.255.240.0  broadcast 172.31.15.255
+        inet6 fe80::836:d2ff:fefc:942e  prefixlen 64  scopeid 0x20&lt;<span class="nb">link</span><span class="o">&gt;</span>
+        ether 0a:36:d2:fc:94:2e  txqueuelen 1000  <span class="o">(</span>Ethernet<span class="o">)</span>
+        RX packets 147579  bytes 194728353 <span class="o">(</span>185.7 MiB<span class="o">)</span>
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 22902  bytes 2910203 <span class="o">(</span>2.7 MiB<span class="o">)</span>
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+vxlan100: <span class="nv">flags</span><span class="o">=</span>4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1450
+        inet6 fe80::ecb1:f6ff:fe9a:c044  prefixlen 64  scopeid 0x20&lt;<span class="nb">link</span><span class="o">&gt;</span>
+        ether ee:b1:f6:9a:c0:44  txqueuelen 1000  <span class="o">(</span>Ethernet<span class="o">)</span>
+        RX packets 2  bytes 168 <span class="o">(</span>168.0 B<span class="o">)</span>
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 <span class="o">(</span>0.0 B<span class="o">)</span>
+        TX errors 0  dropped 5 overruns 0  carrier 0  collisions 0
+</pre></table></code></div></div><p>And now if capture Suricata to vxlan100 port - we will see original packet data, src/dst/proto to which we can apply proper rules:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+</pre><td class="rouge-code"><pre><span class="o">[</span>root@ip-172-31-4-131 ec2-user]# suricata <span class="nt">-c</span> /etc/suricata/suricata.yaml <span class="nt">-k</span> none <span class="nt">-i</span> vxlan100: <span class="nt">-D</span>
+<span class="o">[</span>root@ip-172-31-4-131 ec2-user]# <span class="nb">tail</span> <span class="nt">-f</span> /var/log/suricata/eve.json  | jq <span class="s1">'select(.event_type=="alert")'</span>
+<span class="o">{</span>
+  <span class="s2">"timestamp"</span>: <span class="s2">"2023-02-08TXX:59:54.986033+0000"</span>,
+  <span class="s2">"flow_id"</span>: 650854156340145,
+  <span class="s2">"in_iface"</span>: <span class="s2">"vxlan100:"</span>,
+  <span class="s2">"event_type"</span>: <span class="s2">"alert"</span>,
+  <span class="s2">"src_ip"</span>: <span class="s2">"172.31.9.144"</span>,
+  <span class="s2">"dest_ip"</span>: <span class="s2">"142.251.42.79"</span>,
+  <span class="s2">"proto"</span>: <span class="s2">"ICMP"</span>,
+  <span class="s2">"icmp_type"</span>: 8,
+  <span class="s2">"icmp_code"</span>: 0,
+  <span class="s2">"alert"</span>: <span class="o">{</span>
+    <span class="s2">"action"</span>: <span class="s2">"allowed"</span>,
+    <span class="s2">"gid"</span>: 1,
+    <span class="s2">"signature_id"</span>: 200001,
+    <span class="s2">"rev"</span>: 1,
+    <span class="s2">"signature"</span>: <span class="s2">"ICMP traffic detected"</span>,
+    <span class="s2">"category"</span>: <span class="s2">""</span>,
+    <span class="s2">"severity"</span>: 3
+  <span class="o">}</span>,
+  <span class="s2">"flow"</span>: <span class="o">{</span>
+    <span class="s2">"pkts_toserver"</span>: 1,
+    <span class="s2">"pkts_toclient"</span>: 0,
+    <span class="s2">"bytes_toserver"</span>: 98,
+    <span class="s2">"bytes_toclient"</span>: 0,
+    <span class="s2">"start"</span>: <span class="s2">"2023-02-08TXX:59:54.986033+0000"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+<span class="o">{</span>
+  <span class="s2">"timestamp"</span>: <span class="s2">"2023-02-08TXX:59:54.987442+0000"</span>,
+  <span class="s2">"flow_id"</span>: 650854156340145,
+  <span class="s2">"in_iface"</span>: <span class="s2">"vxlan100:"</span>,
+  <span class="s2">"event_type"</span>: <span class="s2">"alert"</span>,
+  <span class="s2">"src_ip"</span>: <span class="s2">"142.251.42.79"</span>,
+  <span class="s2">"dest_ip"</span>: <span class="s2">"172.31.9.144"</span>,
+  <span class="s2">"proto"</span>: <span class="s2">"ICMP"</span>,
+  <span class="s2">"icmp_type"</span>: 0,
+  <span class="s2">"icmp_code"</span>: 0,
+  <span class="s2">"alert"</span>: <span class="o">{</span>
+    <span class="s2">"action"</span>: <span class="s2">"allowed"</span>,
+    <span class="s2">"gid"</span>: 1,
+    <span class="s2">"signature_id"</span>: 200001,
+    <span class="s2">"rev"</span>: 1,
+    <span class="s2">"signature"</span>: <span class="s2">"ICMP traffic detected"</span>,
+    <span class="s2">"category"</span>: <span class="s2">""</span>,
+    <span class="s2">"severity"</span>: 3
+  <span class="o">}</span>,
+  <span class="s2">"flow"</span>: <span class="o">{</span>
+    <span class="s2">"pkts_toserver"</span>: 1,
+    <span class="s2">"pkts_toclient"</span>: 1,
+    <span class="s2">"bytes_toserver"</span>: 98,
+    <span class="s2">"bytes_toclient"</span>: 98,
+    <span class="s2">"start"</span>: <span class="s2">"2023-02-08TXX:59:54.986033+0000"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></table></code></div></div><h2 id="wireshark-capture-on-vxlan100"><span class="me-2">Wireshark capture on vxlan100</span><a href="#wireshark-capture-on-vxlan100" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Let’s capture traffic again on both instances, but this time on appliance instace we will use vxlan port.</p><p><a href="/images/posts/vpc-mirroring/vpc_ids.png" class="popup img-link w-90 align-center shimmer"><img src="/images/posts/vpc-mirroring/vpc_ids.png" alt="img.png" loading="lazy"></a></p><p>vxlan interface capture (filtered ICMP packets only): <a href="/images/posts/vpc-mirroring/wireshark_ping.png" class="popup img-link w-90 align-center shimmer"><img src="/images/posts/vpc-mirroring/wireshark_ping.png" alt="img.png" loading="lazy"></a></p><p>Compare both captures - the data is the same (now there is no encapsulation with UDP, and we can see native raw packets as on the origin). <a href="/images/posts/vpc-mirroring/wirehshark_identical.png" class="popup img-link shimmer"><img src="/images/posts/vpc-mirroring/wirehshark_identical.png" alt="img.png" loading="lazy"></a></p><h2 id="conclusions"><span class="me-2">Conclusions</span><a href="#conclusions" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>AWS VPC traffic mirroring is a powerful tool that can help improve the security of a network by allowing network administrators to monitor and inspect all incoming and outgoing traffic in real-time. This feature can be particularly useful when used in conjunction with an Intrusion Detection System (IDS) as it provides valuable insights into network activity that can be used to detect and prevent malicious activity.</p><h2 id="links"><span class="me-2">Links</span><a href="#links" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><ul><li><a href="https://docs.aws.amazon.com/network-firewall/latest/developerguide/what-is-aws-network-firewall.html">AWS Network Firewall</a><li><a href="https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html">Suricata rules format</a><li><a href="https://docs.aws.amazon.com/vpc/latest/mirroring/traffic-mirroring-how-it-works.html">AWS VPC traffic mirroring</a></ul></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw me-1"></i> <a href="/categories/aws/">aws</a>, <a href="/categories/vpc/">vpc</a>, <a href="/categories/ids/">ids</a>, <a href="/categories/security/">security</a>, <a href="/categories/suricata/">suricata</a>, <a href="/categories/network/">network</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw me-1"></i> <a href="/tags/aws/" class="post-tag no-text-decoration" >aws</a> <a href="/tags/vpc/" class="post-tag no-text-decoration" >vpc</a> <a href="/tags/ids/" class="post-tag no-text-decoration" >ids</a> <a href="/tags/security/" class="post-tag no-text-decoration" >security</a> <a href="/tags/suricata/" class="post-tag no-text-decoration" >suricata</a> <a href="/tags/network/" class="post-tag no-text-decoration" >network</a></div><div class=" post-tail-bottom d-flex justify-content-between align-items-center mt-5 pb-2 " ><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0 </a> by the author.</div><div class="share-wrapper d-flex align-items-center"> <span class="share-label text-muted">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=AWS%20VPC%20traffic%20mirroring%20to%20IDS.%20Deep%20dive%20with%20Wireshark.%20-%20Engineer's%20Notes&url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2023%2F02%2F08%2Faws-vpc-traffic-mirroring-ids-suricata.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitter" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=AWS%20VPC%20traffic%20mirroring%20to%20IDS.%20Deep%20dive%20with%20Wireshark.%20-%20Engineer's%20Notes&u=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2023%2F02%2F08%2Faws-vpc-traffic-mirroring-ids-suricata.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Facebook" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://t.me/share/url?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2023%2F02%2F08%2Faws-vpc-traffic-mirroring-ids-suricata.html&text=AWS%20VPC%20traffic%20mirroring%20to%20IDS.%20Deep%20dive%20with%20Wireshark.%20-%20Engineer's%20Notes" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Telegram" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2023%2F02%2F08%2Faws-vpc-traffic-mirroring-ids-suricata.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Linkedin" aria-label="Linkedin"> <i class="fa-fw fab fa-linkedin"></i> </a> <button id="copy-link" aria-label="Copy link" class="btn small" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link" data-title-succeed="Link copied successfully!" > <i class="fa-fw fas fa-link pe-none fs-6"></i> </button> </span></div></div></div></article></main><aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted"><div class="access"><section id="access-lastmod"><h2 class="panel-heading">Recently Updated</h2><ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2"><li class="text-truncate lh-lg"> <a href="/posts/2025/09/26/multiagnet-n8n-bedrock.html">Orchestrating AI multi-agent infrastructure with AWS Bedrock, OpenAI and n8n</a><li class="text-truncate lh-lg"> <a href="/posts/2025/07/20/elastic-cache-vector.html">Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts</a><li class="text-truncate lh-lg"> <a href="/posts/2025/09/17/duckdb-s3.html">Running analytics queries from your machine with Zero-BigData stack needed on top of AWS S3(compressed JSON, Parquet, csv) or other DataSources</a><li class="text-truncate lh-lg"> <a href="/posts/2023/10/02/dynamo-design.html">DynamoDB Table Design Principles - NoSQL Modeling</a><li class="text-truncate lh-lg"> <a href="/posts/2023/10/04/dynamo-one-to-many.html">DynamoDB Table Design Principles - One-To-Many Relationships in NoSQL</a></ul></section><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div class="toc-border-cover z-3"></div><section id="toc-wrapper" class="invisible position-sticky ps-0 pe-4 pb-4"><h2 class="panel-heading ps-3 pb-2 mb-0">Contents</h2><nav id="toc"></nav></section></aside></div><div class="row"><div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 px-md-4"><aside id="related-posts" aria-labelledby="related-label"><h3 class="mb-4" id="related-label">Further Reading</h3><nav class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4"><article class="col"> <a href="/posts/2023/02/12/aws-network-analyzer.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1676210400" data-df="ll" > Feb 12, 2023 </time><h4 class="pt-0 my-2">Troubleshooting Network Issues with AWS Network Access Analyzer and Reachability Analyzer</h4><div class="text-muted"><p>Abstract AWS has recently introduced two powerful network tools: the Network Access Analyzer and the Reachability Analyzer. Both of these tools utilize a similar algorithm, producing similarly com...</p></div></div></a></article><article class="col"> <a href="/posts/2024/02/11/system-manager.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1707660000" data-df="ll" > Feb 11, 2024 </time><h4 class="pt-0 my-2">AWS SSM Session Manager as secure Hub to establish multiple Connections to instances and Port Forwarding</h4><div class="text-muted"><p>Abstract Port forwarding or SSH tunnelling is technic widely used to map remote ports to a client machine with possibility of remapping. The data traffic is encrypted and transferred within SSH tu...</p></div></div></a></article><article class="col"> <a href="/posts/2024/02/04/ecs-exec.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1707055200" data-df="ll" > Feb 4, 2024 </time><h4 class="pt-0 my-2">Securely accessing ECS Fargate containers shell, without SSH or exposed ports</h4><div class="text-muted"><p>Abstract Very often as a SysOps or Developer we need login into running container in ECS cluster for troubleshooting or verification. To have such possibilities some companies are exposing 22 port...</p></div></div></a></article></nav></aside><nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation"> <a href="/posts/2023/01/29/aws-whisper.html" class="btn btn-outline-primary" aria-label="Older" ><p>Generation code with AWS CodeWhisperer</p></a> <a href="/posts/2023/02/12/aws-network-analyzer.html" class="btn btn-outline-primary" aria-label="Newer" ><p>Troubleshooting Network Issues with AWS Network Access Analyzer and Reachability Analyzer</p></a></nav><footer aria-label="Site Info" class=" d-flex flex-column justify-content-center text-muted flex-lg-row justify-content-lg-between align-items-lg-center pb-lg-3 " ><p>© <time>2025</time> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a>. <span data-bs-toggle="tooltip" data-bs-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author." >Some rights reserved.</span> <span data-bs-toggle="tooltip" data-bs-placement="top" title="2025-09-26 20:11:52 +0300 &#013;be60bb44e6416aa69b8fd68791db025be40c523c">Build version: be60bb4</span></p><p>Using the <a data-bs-toggle="tooltip" data-bs-placement="top" title="v7.2.4" href="https://github.com/cotes2020/jekyll-theme-chirpy" target="_blank" rel="noopener" >Chirpy</a> theme for <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>.</p></footer></div></div><div id="search-result-wrapper" class="d-flex justify-content-center d-none"><div class="col-11 content"><div id="search-hints"><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><aside aria-label="Scroll to Top"> <button id="back-to-top" type="button" class="btn btn-lg btn-box-shadow"> <i class="fas fa-angle-up"></i> </button></aside></div><div id="mask" class="d-none position-fixed w-100 h-100 z-1"></div><aside id="notification" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-animation="true" data-bs-autohide="false" ><div class="toast-header"> <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast" aria-label="Close" ></button></div><div class="toast-body text-center pt-0"><p class="px-2 mb-3">A new version of content is available.</p><button type="button" class="btn btn-primary" aria-label="Update"> Update </button></div></aside><script> (function () { const themeMapper = Theme.getThemeMapper('light', 'dark_dimmed'); const initTheme = themeMapper[Theme.visualState]; let lang = 'en';if (lang.length > 2 && !lang.startsWith('zh')) { lang = lang.slice(0, 2); } let giscusAttributes = { src: 'https://giscus.app/client.js', 'data-repo': 'tsypuk/tsypuk.github.io', 'data-repo-id': 'R_kgDOIxaFiw', 'data-category': 'General', 'data-category-id': 'DIC_kwDOIxaFi84CUSfn', 'data-mapping': 'og:title', 'data-strict' : '0', 'data-reactions-enabled': '1', 'data-emit-metadata': '0', 'data-theme': initTheme, 'data-input-position': 'top', 'data-lang': lang, 'data-loading': 'lazy', crossorigin: 'anonymous', async: '' }; let giscusNode = document.createElement('script'); Object.entries(giscusAttributes).forEach(([key, value]) => giscusNode.setAttribute(key, value) ); const $footer = document.querySelector('footer'); $footer.insertAdjacentElement("beforebegin", giscusNode); addEventListener('message', (event) => { if (event.source === window && event.data && event.data.id === Theme.ID) { const newTheme = themeMapper[Theme.visualState]; const message = { setConfig: { theme: newTheme } }; const giscus = document.getElementsByClassName('giscus-frame')[0].contentWindow; giscus.postMessage({ giscus: message }, 'https://giscus.app'); } }); })(); </script> <script> document.addEventListener('DOMContentLoaded', () => { SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<article class="px-1 px-sm-2 px-lg-4 px-xl-0"><header><h2><a href="{url}">{title}</a></h2><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags}</div></header><p>{content}</p></article>', noResultsText: '<p class="mt-5">Oops! No results found.</p>', templateMiddleware: function(prop, value, template) { if (prop === 'categories') { if (value === '') { return `${value}`; } else { return `<div class="me-sm-4"><i class="far fa-folder fa-fw"></i>${value}</div>`; } } if (prop === 'tags') { if (value === '') { return `${value}`; } else { return `<div><i class="fa fa-tag fa-fw"></i>${value}</div>`; } } } }); }); </script>

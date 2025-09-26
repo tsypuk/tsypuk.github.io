@@ -1,0 +1,319 @@
+<!doctype html><html lang="en" ><head> <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); </script><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="viewport" content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover" ><meta name="generator" content="Jekyll v4.3.3" /><meta property="og:title" content="How actually git tracks objects. Snapshotting and the Illusion of git Diff. | by Roman Tsypuk" /><meta name="author" content="Roman Tsypuk" /><meta property="og:locale" content="en" /><meta name="description" content="The Illusion of Git Diff Git stores the full latest snapshot of the entire file when you modify the file and perform commit operations. There are NO diffs of modified lines that are stored on the filesystem or somewhere else after commit." /><meta property="og:description" content="The Illusion of Git Diff Git stores the full latest snapshot of the entire file when you modify the file and perform commit operations. There are NO diffs of modified lines that are stored on the filesystem or somewhere else after commit." /><meta property="twitter:description" content="The Illusion of Git Diff Git stores the full latest snapshot of the entire file when you modify the file and perform commit operations. There are NO diffs of modified lines that are stored on the filesystem or somewhere else after commit." /><link rel="canonical" href="https://tsypuk.github.io/posts/2020/01/20/git-diff-illusion.html" /><meta property="og:url" content="https://tsypuk.github.io/posts/2020/01/20/git-diff-illusion.html" /><meta property="og:site_name" content="Engineer’s Notes | Roman Tsypuk" /><meta property="og:image" content="https://tsypuk.github.io/images/banners/1200/new-york-streets-3-1551331.jpg" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2020-01-20T16:00:00+02:00" /><meta name="publish_date" property="og:publish_date" content="2020-01-20T16:00:00+02:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://tsypuk.github.io/images/banners/1200/new-york-streets-3-1551331.jpg" /><meta property="twitter:title" content="How actually git tracks objects. Snapshotting and the Illusion of git Diff. | by Roman Tsypuk" /><meta name="twitter:site" content="@roman_tsypuk" /><meta name="twitter:creator" content="@roman_tsypuk" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Roman Tsypuk"},"dateModified":"2024-02-25T18:38:06+02:00","datePublished":"2020-01-20T16:00:00+02:00","description":"The Illusion of Git Diff Git stores the full latest snapshot of the entire file when you modify the file and perform commit operations. There are NO diffs of modified lines that are stored on the filesystem or somewhere else after commit.","headline":"How actually git tracks objects. Snapshotting and the Illusion of git Diff.","image":"https://tsypuk.github.io/images/banners/1200/new-york-streets-3-1551331.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/posts/2020/01/20/git-diff-illusion.html"},"url":"https://tsypuk.github.io/posts/2020/01/20/git-diff-illusion.html"}</script><title>How actually git tracks objects. Snapshotting and the Illusion of git Diff. | Engineer's Notes</title><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/site.webmanifest"><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico"><meta name="apple-mobile-web-app-title" content="Engineer's Notes"><meta name="application-name" content="Engineer's Notes"><meta name="msapplication-TileColor" content="#da532c"><meta name="msapplication-config" content="/assets/img/favicons/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.googleapis.com" ><link rel="dns-prefetch" href="https://fonts.googleapis.com" ><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="dns-prefetch" href="https://fonts.gstatic.com" ><link rel="preconnect" href="https://cdn.jsdelivr.net" ><link rel="dns-prefetch" href="https://cdn.jsdelivr.net" ><link rel="stylesheet" href="/assets/css/jekyll-theme-chirpy.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&family=Source+Sans+Pro:wght@400;600;700;900&display=swap"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.32.2/dist/tocbot.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css"> <script src="/assets/js/dist/theme.min.js"></script> <script defer src="https://cdn.jsdelivr.net/combine/npm/simple-jekyll-search@1.10.0/dest/simple-jekyll-search.min.js,npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.umd.min.js,npm/glightbox@3.3.0/dist/js/glightbox.min.js,npm/clipboard@2.0.11/dist/clipboard.min.js,npm/dayjs@1.11.13/dayjs.min.js,npm/dayjs@1.11.13/locale/en.js,npm/dayjs@1.11.13/plugin/relativeTime.js,npm/dayjs@1.11.13/plugin/localizedFormat.js,npm/tocbot@4.32.2/dist/tocbot.min.js"></script> <script defer src="/assets/js/dist/post.min.js"></script> <script async src="/assets/js/data/mathjax.js"></script> <script async src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script> <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script> <script defer src="/app.min.js?baseurl=&register=" ></script> <script defer src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> document.addEventListener('DOMContentLoaded', () => { window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); }); </script><body><aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end"><header class="profile-wrapper"> <a href="/" id="avatar" class="rounded-circle"><img src="/images/avatar/rtsypuk.jpg" width="112" height="112" alt="avatar" onerror="this.style.display='none'"></a> <a class="site-title d-block" href="/">Engineer's Notes</a><p class="site-subtitle fst-italic mb-0">Cloud, Infrastructure, Architecture, Networking</p></header><nav class="flex-column flex-grow-1 w-100 ps-0"><ul class="nav"><li class="nav-item"> <a href="/" class="nav-link"> <i class="fa-fw fas fa-home"></i> <span>HOME</span> </a><li class="nav-item"> <a href="/categories.html" class="nav-link"> <i class="fa-fw fas fa-stream"></i> <span>CATEGORIES</span> </a><li class="nav-item"> <a href="/tags.html" class="nav-link"> <i class="fa-fw fas fa-tag"></i> <span>TAGS</span> </a><li class="nav-item"> <a href="/archived_posts.html" class="nav-link"> <i class="fa-fw fas fa-archive"></i> <span>ARCHIVES</span> </a><li class="nav-item"> <a href="/roman_tsypuk.html" class="nav-link"> <i class="fa-fw fas fa-info-circle"></i> <span>ABOUT</span> </a></ul></nav><div class="sidebar-bottom d-flex flex-wrap align-items-center w-100"> <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle"> <i class="fas fa-adjust"></i> </button> <span class="icon-border"></span> <a href="https://github.com/tsypuk" aria-label="github" target="_blank" rel="noopener noreferrer" > <i class="fab fa-github"></i> </a> <a href="https://twitter.com/roman_tsypuk" aria-label="twitter" target="_blank" rel="noopener noreferrer" > <i class="fab fa-twitter"></i> </a> <a href="https://www.linkedin.com/in/roman-tsypuk" aria-label="linkedin" target="_blank" rel="noopener noreferrer" > <i class="fab fa-linkedin"></i> </a> <a href="javascript:location.href = 'mailto:' + ['tsypuk_conf','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a></div></aside><div id="main-wrapper" class="d-flex justify-content-center"><div class="container d-flex flex-column px-xxl-5"><header id="topbar-wrapper" aria-label="Top Bar"><div id="topbar" class="d-flex align-items-center justify-content-between px-lg-3 h-100" ><nav id="breadcrumb" aria-label="Breadcrumb"> <span> <a href="/">Home</a> </span> <span>How actually git tracks objects. Snapshotting and the Illusion of git Diff.</span></nav><button type="button" id="sidebar-trigger" class="btn btn-link" aria-label="Sidebar"> <i class="fas fa-bars fa-fw"></i> </button><div id="topbar-title"> Post</div><button type="button" id="search-trigger" class="btn btn-link" aria-label="Search"> <i class="fas fa-search fa-fw"></i> </button> <search id="search" class="align-items-center ms-3 ms-lg-0"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" autocomplete="off" placeholder="Search..." > </search> <button type="button" class="btn btn-link text-decoration-none" id="search-cancel">Cancel</button></div></header><div class="row flex-grow-1"><main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4"><article class="px-1" data-toc="true"><header><h1 data-toc-skip>How actually git tracks objects. Snapshotting and the Illusion of git Diff.</h1><div class="post-meta text-muted"> <span> Posted <time data-ts="1579528800" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Jan 20, 2020 </time> </span> <span> Updated <time data-ts="1708879086" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Feb 25, 2024 </time> </span><div class="mt-3 mb-3"> <a href="/images/banners/1200/new-york-streets-3-1551331.jpg" class="popup img-link preview-img shimmer"><img src="/images/banners/1200/new-york-streets-3-1551331.jpg" alt="Preview Image" width="1200" height="630" loading="lazy"></a></div><div class="d-flex justify-content-between"> <span> By <em> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a> </em> </span><div> <span class="readtime" data-bs-toggle="tooltip" data-bs-placement="bottom" title="1860 words" > <em>10 min</em> read</span></div></div></div></header><div id="toc-bar" class="d-flex align-items-center justify-content-between invisible"> <span class="label text-truncate">How actually git tracks objects. Snapshotting and the Illusion of git Diff.</span> <button type="button" class="toc-trigger btn me-1"> <i class="fa-solid fa-list-ul fa-fw"></i> </button></div><button id="toc-solo-trigger" type="button" class="toc-trigger btn btn-outline-secondary btn-sm"> <span class="label ps-2 pe-1">Contents</span> <i class="fa-solid fa-angle-right fa-fw"></i> </button> <dialog id="toc-popup" class="p-0"><div class="header d-flex flex-row align-items-center justify-content-between"><div class="label text-truncate py-2 ms-4">How actually git tracks objects. Snapshotting and the Illusion of git Diff.</div><button id="toc-popup-close" type="button" class="btn mx-1 my-1 opacity-75"> <i class="fas fa-close"></i> </button></div><div id="toc-popup-content" class="px-4 py-3 pb-4"></div></dialog><div class="content"><h2 id="the-illusion-of-git-diff"><span class="me-2">The Illusion of Git Diff</span><a href="#the-illusion-of-git-diff" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Git stores the full latest snapshot of the entire file when you modify the file and perform commit operations. There are <strong>NO</strong> diffs of modified lines that are stored on the filesystem or somewhere else after commit. The <strong>“diff illusion”</strong> appeared in engineers’ minds because we used to see file diffs modifications in many tools, like VCS of IDEA, gitk, etc. The actual diff of modifications between different commits is calculated on the fly and is represented in an understandable form for us.</p><p>I will explain this git’s snapshotting model behavior in the following commit-by-commit actions.</p><h2 id="1-init-git-repository-add-firsttxt-file-to-repo"><span class="me-2">1. Init git repository. Add first.txt file to repo</span><a href="#1-init-git-repository-add-firsttxt-file-to-repo" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><div file=".git/" class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text=".git/"><i class="far fa-file-code fa-fw"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git init
+<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-la</span> .git
+total 16
+drwxr-xr-x  7 rtsypuk  staff  224 Jan 20 15:21 <span class="nb">.</span>
+drwxr-xr-x  3 rtsypuk  staff   96 Jan 20 15:21 ..
+<span class="nt">-rw-r--r--</span>  1 rtsypuk  staff   23 Jan 20 15:21 HEAD
+<span class="nt">-rw-r--r--</span>  1 rtsypuk  staff  137 Jan 20 15:21 config
+drwxr-xr-x  5 rtsypuk  staff  160 Jan 20 15:21 hooks
+drwxr-xr-x  4 rtsypuk  staff  128 Jan 20 15:21 objects
+drwxr-xr-x  4 rtsypuk  staff  128 Jan 20 15:21 refs
+</pre></table></code></div></div><p>title=Listing {counter:refnum}. Adding first.txt file with the single “First line”</p><div title=".git/" class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="nb">echo</span> <span class="s2">"First line"</span> <span class="o">&gt;&gt;</span> first.txt
+git add <span class="nb">.</span>
+git commit <span class="nt">-m</span> <span class="s2">"first commit"</span>
+</pre></table></code></div></div><p>Now we can see that there are 3 new files created in the .git/objects folder.</p><p>Listing {counter:refnum}. Content of .git/objects directory]</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>find .git/objects <span class="nt">-type</span> f
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+</pre></table></code></div></div><p>We can check types by applying <strong>-t</strong> option to command <strong>cat-file</strong> and content by applying option <strong>-p</strong>. These new objects types are: commit, blob and tree.</p><p>Listing {counter:refnum}. using -t cat-file command we can check types of the objects]</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-t</span> 2aae0a6496aba985dcf01e7ddf684c49ada7c5db
+commit
+<span class="nv">$ </span>git cat-file <span class="nt">-t</span> 9649cde946d8d0896fa80977b9bcd76439f99e6b
+blob
+<span class="nv">$ </span>git cat-file <span class="nt">-t</span> 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+tree
+</pre></table></code></div></div><p>Each object’s filename is the SHA1 hash of its content. But there is special trick in git to remap SHA1 into file structure.</p><blockquote class="prompt-tip"><p>E.g. <strong>.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d</strong> has actual hash 5d9ddc8ff39ad75d0f98e71780cbbf56478dbb8d. Git uses SHA1, 160-bit hexadecimal hash number with 40 characters long to form filenames. Tha actual SHA1 of the object is split into 2 chunks: the first 2 chars define the folder and the last 38 chars create a filename that is placed under this folder. This approach allows better distribution to access files in git filesystem and allows avoid scan entire parent directory .git/objects (in case if all sha1 objects will be placed here with no subdirectories). If you are from Java world you can think about this improvement as accessing the HashMap by key and retrieving the list of objects as the value. Such structures are much efficient than full-length list search.</p></blockquote><p>If you will try to calculate SHA1 of added file by yourself and compare it to SHA1 hexadecimal number stored in git you will not find the matching</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>shasum first.txt
+9b6a082673a0e60b1804797a367e01671cfdb92b  first.txt
+</pre></table></code></div></div><p>It is because git uses standard SHA1 algorithm, but does not apply it directly to the file’s content. Instead, it also uses concatenated keyword <strong>blob</strong>, the actual file size, <strong>“\0”</strong> character and finally the content of the entire file. So the actual “git-based SHA1” can be calculated using the following formula:</p>\[gitSHA = SHA1(blob + [filesize] + \0 + [filecontent])\]<p>Git has command to get hash of the object, e.g. <strong>git-like SHA1</strong> for a file:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git hash-object first.txt
+9649cde946d8d0896fa80977b9bcd76439f99e6b
+</pre></table></code></div></div><h2 id="11-commit-object"><span class="me-2">1.1. Commit object</span><a href="#11-commit-object" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Content of 2aae0a6496aba985dcf01e7ddf684c49ada7c5db commit object</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-p</span> 2aae0a6496aba985dcf01e7ddf684c49ada7c5db
+tree 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+author Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579528773 +0200
+committer Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579528773 +0200
+first commit
+</pre></table></code></div></div><p>Commit object contains reference to a tree and commit details - author, committer and commit message. If you are using PGP verification, PGP signature also will be included here. The same SHA1 commit information is present in regular <em>git log</em> command output, e.g.:</p><p>Content of .git/objects directory</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git log
+commit 2aae0a6496aba985dcf01e7ddf684c49ada7c5db <span class="o">(</span>HEAD -&gt; master<span class="o">)</span>
+Author: Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt;
+Date:   Mon Jan 20 15:59:33 2020 +0200
+first commit
+</pre></table></code></div></div><h2 id="12-tree-object"><span class="me-2">1.2. Tree object</span><a href="#12-tree-object" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Content of 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d tree object]</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-p</span> 5b9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	first.txt
+</pre></table></code></div></div><p>Tree object has references to the list of objects that have been modified in the current commit. Each file item represents a line that starts with the Unix permission followed by blob/tree depending if current object is file(blob) or directory(tree). Next follows git-sha1 of the object and its filename.</p><h2 id="13-blob-object"><span class="me-2">1.3. Blob object</span><a href="#13-blob-object" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Contains the actual content of the file:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre>Listing<span class="o">{</span>counter:refnum<span class="o">}</span><span class="nb">.</span> Content of 9649cde946d8d0896fa80977b9bcd76439f99e6b blob object]
+<span class="nv">$ </span>git cat-file <span class="nt">-p</span> 9649cde946d8d0896fa80977b9bcd76439f99e6b
+First line
+</pre></table></code></div></div><p>The DAG (Direct Acyclic Graph) diagram looks like this:</p><center><p><object data="/uml/e3c44d040ca31439fa6f81f6dc2dd733.svg" type="image/svg+xml" width="180" class="plantuml"></object></p></center><h2 id="2-adding-secondtxt-file-with-the-same-content-to-repository"><span class="me-2">2. Adding second.txt file with the same content to repository</span><a href="#2-adding-secondtxt-file-with-the-same-content-to-repository" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Adding second.txt</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="nb">echo</span> <span class="s2">"First line"</span> <span class="o">&gt;&gt;</span> second.txt
+git add <span class="nb">.</span>
+git commit <span class="nt">-m</span> <span class="s2">"second commit"</span>
+</pre></table></code></div></div><p>Content of .git/objects directory</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>find .git/objects <span class="nt">-type</span> f
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+</pre></table></code></div></div><p>Now we have 2 more new object:</p><ul><li>73/d4372bc1049b80935ee2b36d4ade2d7187afe9<li>6b/3a79276e9bfa58e64cb7e5def587f593e7ae20</ul><p>Commit2: .git/objects/6b3a79276e9bfa58e64cb7e5def587f593e7ae20</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-p</span> 6b3a79276e9bfa58e64cb7e5def587f593e7ae20
+tree 73d4372bc1049b80935ee2b36d4ade2d7187afe9
+parent 2aae0a6496aba985dcf01e7ddf684c49ada7c5db
+author Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579530262 +0200
+committer Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579530262 +0200
+second commit
+</pre></table></code></div></div><p>Tree2: .git/objects/73d4372bc1049b80935ee2b36d4ade2d7187afe9</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-p</span> 73d4372bc1049b80935ee2b36d4ade2d7187afe9
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt
+</pre></table></code></div></div><p>As we can see from the new TREE file, now git manages 2 records - filename first.txt and second.txt, but both of them are referencing the same blob record. Git has identified that the content of <strong>first.txt</strong> and <strong>second.txt</strong> files is absolutely the same (SHA1 equals) and there is no need to keep duplicate of the same object. Remember that only file size and file content are used in SHA1 calculation. Filename does not play here.</p><p>Git commits represent the DAG, each next commit has a reference to the previous parent commit, creating the graph structure. The <strong>tree</strong> git object represents the node of the graph that can be associated with different <em>blob</em> objects.</p><p>At the second commit step, we see that <strong>commit2 (sha1 6b3a79276e9bfa58e64cb7e5def587f593e7ae20)</strong> has reference to parent commit1 (sha1 2aae0a6496aba985dcf01e7ddf684c49ada7c5db) as well as reference to <strong>tree2 object (sha1 73d4372bc1049b80935ee2b36d4ade2d7187afe9)</strong>, which maintains two references to first.txt and seconds.txt but both mapped to the same <strong>blob object</strong>.</p><p>Git repository snapshot:</p><ul><li>2 commits<li>2 trees<li>1 blobs<li>2 refs: HEAD,refs/heads/master</ul><center><p><object data="/uml/fef2cc6dfa6d5062be78f31eb871d02d.svg" type="image/svg+xml" width="400" class="plantuml"></object></p></center><h2 id="3-adding-thirdtxt-file-with-the-same-content-to-git-repo"><span class="me-2">3. Adding third.txt file with the same content to git repo</span><a href="#3-adding-thirdtxt-file-with-the-same-content-to-git-repo" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Adding third.txt</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="nb">echo</span> <span class="s2">"First line"</span> <span class="o">&gt;&gt;</span> third.txt
+git add <span class="nb">.</span>
+git commit <span class="nt">-m</span> <span class="s2">"third commit"</span>
+</pre></table></code></div></div><p>Content of .git/objects directory</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>find .git/objects <span class="nt">-type</span> f
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+.git/objects/d4/9117a72fc08b1991572d363bd43bdfe6c56c9f
+.git/objects/e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed
+</pre></table></code></div></div><p>We have 2 new object:</p><ul><li>d4/9117a72fc08b1991572d363bd43bdfe6c56c9f<li>e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed</ul><p>Tree3 .git/objects/d49117a72fc08b1991572d363bd43bdfe6c56c9f</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-p</span> d49117a72fc08b1991572d363bd43bdfe6c56c9f
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	third.txt
+</pre></table></code></div></div><p>Commit3: .git/objects/e9c3f660695d448fd33fa0b3e731f4ea7d9d4eed</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-p</span> e9c3f660695d448fd33fa0b3e731f4ea7d9d4eed
+tree d49117a72fc08b1991572d363bd43bdfe6c56c9f
+parent 6b3a79276e9bfa58e64cb7e5def587f593e7ae20
+author Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579531622 +0200
+committer Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579531622 +0200
+third commit
+<span class="o">(</span>base<span class="o">)</span>
+</pre></table></code></div></div><p>And the same happening here again: after adding a third.txt with the same content (“First line”), we have 2 new objects only - the tree3 and the commit3. But tree3 is referencing to the same blob object.</p><p>Git repository snapshot:</p><ul><li>3 commits<li>3 trees<li>1 blobs<li>2 refs: HEAD,refs/heads/master</ul><center><p><object data="/uml/50f51321536a8ed9e7ae81bdd7728f4b.svg" type="image/svg+xml" width="650" class="plantuml"></object></p></center><h2 id="4-appending-firsttxt-with-second-line"><span class="me-2">4. Appending first.txt with “Second line”</span><a href="#4-appending-firsttxt-with-second-line" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Now let’s do several commits that will modify the actual files content and track the modification in git objects.</p><p>Append “Second line” to first.txt</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="nb">echo</span> <span class="s2">"Second line"</span> <span class="o">&gt;&gt;</span> first.txt
+git add <span class="nb">.</span>
+git commit <span class="nt">-m</span> <span class="s2">"fourth commit"</span>
+</pre></table></code></div></div><p>Content of .git/objects directory</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>find .git/objects <span class="nt">-type</span> f
+.git/objects/04/c8335e36222638af3c52ad7cb90d2f8ff68ad6
+.git/objects/a5/ed01df2450ce61d01d05803ec75983a38eaff6
+.git/objects/7d/91453217afc429984c4706e8df22aaac47c9ce
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+.git/objects/d4/9117a72fc08b1991572d363bd43bdfe6c56c9f
+.git/objects/e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed
+</pre></table></code></div></div><p>We have 3 new objects:</p><ul><li>.git/objects/04/c8335e36222638af3c52ad7cb90d2f8ff68ad6<li>.git/objects/a5/ed01df2450ce61d01d05803ec75983a38eaff6<li>.git/objects/7d/91453217afc429984c4706e8df22aaac47c9ce</ul><p>Commit4: .git/objects/04c8335e36222638af3c52ad7cb90d2f8ff68ad6</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-t</span> 04c8335e36222638af3c52ad7cb90d2f8ff68ad6
+commit
+git cat-file <span class="nt">-p</span> 04c8335e36222638af3c52ad7cb90d2f8ff68ad6
+tree a5ed01df2450ce61d01d05803ec75983a38eaff6
+parent e9c3f660695d448fd33fa0b3e731f4ea7d9d4eed
+author Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579532082 +0200
+committer Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579532082 +0200
+fourth commit
+<span class="o">(</span>base<span class="o">)</span>
+</pre></table></code></div></div><p>Tree4: .git/objects/a5ed01df2450ce61d01d05803ec75983a38eaff6</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-t</span> a5ed01df2450ce61d01d05803ec75983a38eaff6
+tree
+<span class="nv">$ </span>git cat-file <span class="nt">-p</span> a5ed01df2450ce61d01d05803ec75983a38eaff6
+100644 blob 7d91453217afc429984c4706e8df22aaac47c9ce	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	third.txt
+</pre></table></code></div></div><p>Modified first.txt</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-t</span> 7d91453217afc429984c4706e8df22aaac47c9ce
+blob
+<span class="nv">$ </span>git cat-file <span class="nt">-p</span> 7d91453217afc429984c4706e8df22aaac47c9ce
+First line
+Second line
+</pre></table></code></div></div><p>Git repository snapshot:</p><ul><li>4 commits<li>4 trees<li>2 blobs<li>2 refs: HEAD,refs/heads/master</ul><center><p><object data="/uml/1fb7718ab982313e4db45bde9ae098f8.svg" type="image/svg+xml" width="800" class="plantuml"></object></p></center><p>The new Blob2 with “First line” and “Second line” is created. Now new Tree4 object has reference to it as well as to Blob1, that represents second.txt. At the same time wee see the old version of first.txt (with “First line only”) That is referenced in Commit1-Commit3. So, for modified files git creates a new Blob records with the full entire snapshot of the files content. There are no diffs of modified lines of code!!!</p><h2 id="5-appending-firsttxt-with-third-line"><span class="me-2">5. Appending first.txt with “Third line”</span><a href="#5-appending-firsttxt-with-third-line" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Appending “Third line” » first.txt</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="nb">echo</span> <span class="s2">"Third line"</span> <span class="o">&gt;&gt;</span> first.txt
+git add <span class="nb">.</span>
+git commit <span class="nt">-m</span> <span class="s2">"fifth commit"</span>
+</pre></table></code></div></div><p>Content of .git/objects directory</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>find .git/objects <span class="nt">-type</span> f
+.git/objects/04/c8335e36222638af3c52ad7cb90d2f8ff68ad6
+.git/objects/3c/fa938b257bccd12320093fd62e5e5c3b0c05fc
+.git/objects/a5/ed01df2450ce61d01d05803ec75983a38eaff6
+.git/objects/7d/91453217afc429984c4706e8df22aaac47c9ce
+.git/objects/73/d4372bc1049b80935ee2b36d4ade2d7187afe9
+.git/objects/2a/ae0a6496aba985dcf01e7ddf684c49ada7c5db
+.git/objects/6b/3a79276e9bfa58e64cb7e5def587f593e7ae20
+.git/objects/91/ddeac3958b9c3f335c723852ed2e3869fad6ba
+.git/objects/96/49cde946d8d0896fa80977b9bcd76439f99e6b
+.git/objects/5b/9ddc8ff39ad75d0f98e71780cbbf56478dbb8d
+.git/objects/6d/a4d3e0a797240aefaa9c8009e49c57ded3b59e
+.git/objects/d4/9117a72fc08b1991572d363bd43bdfe6c56c9f
+.git/objects/e9/c3f660695d448fd33fa0b3e731f4ea7d9d4eed
+</pre></table></code></div></div><p>We have 3 new object:</p><ul><li>.git/objects/3c/fa938b257bccd12320093fd62e5e5c3b0c05fc<li>.git/objects/91/ddeac3958b9c3f335c723852ed2e3869fad6ba<li>.git/objects/6d/a4d3e0a797240aefaa9c8009e49c57ded3b59e</ul><p>Tree5: .git/objects/3cfa938b257bccd12320093fd62e5e5c3b0c05fc</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-t</span> 3cfa938b257bccd12320093fd62e5e5c3b0c05fc
+tree
+<span class="nv">$ </span>git cat-file <span class="nt">-p</span> 3cfa938b257bccd12320093fd62e5e5c3b0c05fc
+100644 blob 6da4d3e0a797240aefaa9c8009e49c57ded3b59e	first.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	second.txt
+100644 blob 9649cde946d8d0896fa80977b9bcd76439f99e6b	third.txt
+</pre></table></code></div></div><p>Commit5: .git/objects/91ddeac3958b9c3f335c723852ed2e3869fad6ba</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-t</span> 91ddeac3958b9c3f335c723852ed2e3869fad6ba
+commit
+<span class="nv">$ </span>git cat-file <span class="nt">-p</span> 91ddeac3958b9c3f335c723852ed2e3869fad6ba
+tree 3cfa938b257bccd12320093fd62e5e5c3b0c05fc
+parent 04c8335e36222638af3c52ad7cb90d2f8ff68ad6
+author Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579533662 +0200
+committer Roman Tsypuk &lt;tsypuk.conf@gmail.com&gt; 1579533662 +0200
+fifth commit
+<span class="o">(</span>base<span class="o">)</span>
+</pre></table></code></div></div><p>All 3 versions of first.txt are present in git</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre><td class="rouge-code"><pre><span class="nv">$ </span>git cat-file <span class="nt">-t</span> 6da4d3e0a797240aefaa9c8009e49c57ded3b59e
+blob
+<span class="nv">$ </span>git cat-file <span class="nt">-p</span> 6da4d3e0a797240aefaa9c8009e49c57ded3b59e
+First line
+Second line
+Third line
+<span class="nv">$ </span>git cat-file <span class="nt">-p</span> 7d91453217afc429984c4706e8df22aaac47c9ce
+First line
+Second line
+<span class="nv">$ </span>git cat-file <span class="nt">-p</span> 9649cde946d8d0896fa80977b9bcd76439f99e6b
+First line
+</pre></table></code></div></div><p>But in the same time we have the old version of file with 9649cde946d8d0896fa80977b9bcd76439f99e6b object</p><p>Git repository snapshot:</p><ul><li>5 commits<li>5 trees<li>3 blobs<li>2 refs: HEAD,refs/heads/master</ul><center><p><object data="/uml/a1cb4c06d044ab50bfbedd38d3f517e9.svg" type="image/svg+xml" width="800" class="plantuml"></object></p></center><p>As you can see, all three versions of first.txt are stored now in different Blob1 - Blob3 objects. By checking the desired commit we can switch between attached versions of the files.</p><h2 id="summary"><span class="me-2">Summary</span><a href="#summary" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Following this hands-on step-by-step interaction, we have identified that git creates a whole file snapshot if it was modified in the commit and maps it using a tree object. It does not use delta, diff, etc. Exact the latest snapshot is stored. Another interesting behavior is that files with the same content are stored as a single object on the file system with managing multiple references and filename aliases from the tree objects only.</p><blockquote class="prompt-danger"><p>There is also a compaction mechanism and pack files format in git that is triggered by git gc. It allows reorganize the filesystem structure more efficiently and use deltas in files. I will do an overview of pack files in the next article.</p></blockquote></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw me-1"></i> <a href="/categories/git/">git</a>, <a href="/categories/objects/">objects</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw me-1"></i> <a href="/tags/git/" class="post-tag no-text-decoration" >git</a> <a href="/tags/objects/" class="post-tag no-text-decoration" >objects</a></div><div class=" post-tail-bottom d-flex justify-content-between align-items-center mt-5 pb-2 " ><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0 </a> by the author.</div><div class="share-wrapper d-flex align-items-center"> <span class="share-label text-muted">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=How%20actually%20git%20tracks%20objects.%20Snapshotting%20and%20the%20Illusion%20of%20git%20Diff.%20-%20Engineer's%20Notes&url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2020%2F01%2F20%2Fgit-diff-illusion.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitter" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=How%20actually%20git%20tracks%20objects.%20Snapshotting%20and%20the%20Illusion%20of%20git%20Diff.%20-%20Engineer's%20Notes&u=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2020%2F01%2F20%2Fgit-diff-illusion.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Facebook" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://t.me/share/url?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2020%2F01%2F20%2Fgit-diff-illusion.html&text=How%20actually%20git%20tracks%20objects.%20Snapshotting%20and%20the%20Illusion%20of%20git%20Diff.%20-%20Engineer's%20Notes" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Telegram" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2020%2F01%2F20%2Fgit-diff-illusion.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Linkedin" aria-label="Linkedin"> <i class="fa-fw fab fa-linkedin"></i> </a> <button id="copy-link" aria-label="Copy link" class="btn small" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link" data-title-succeed="Link copied successfully!" > <i class="fa-fw fas fa-link pe-none fs-6"></i> </button> </span></div></div></div></article></main><aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted"><div class="access"><section id="access-lastmod"><h2 class="panel-heading">Recently Updated</h2><ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2"><li class="text-truncate lh-lg"> <a href="/posts/2025/09/26/multiagnet-n8n-bedrock.html">Orchestrating AI multi-agent infrastructure with AWS Bedrock, OpenAI and n8n</a><li class="text-truncate lh-lg"> <a href="/posts/2025/07/20/elastic-cache-vector.html">Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts</a><li class="text-truncate lh-lg"> <a href="/posts/2025/09/17/duckdb-s3.html">Running analytics queries from your machine with Zero-BigData stack needed on top of AWS S3(compressed JSON, Parquet, csv) or other DataSources</a><li class="text-truncate lh-lg"> <a href="/posts/2023/10/02/dynamo-design.html">DynamoDB Table Design Principles - NoSQL Modeling</a><li class="text-truncate lh-lg"> <a href="/posts/2023/10/04/dynamo-one-to-many.html">DynamoDB Table Design Principles - One-To-Many Relationships in NoSQL</a></ul></section><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div class="toc-border-cover z-3"></div><section id="toc-wrapper" class="invisible position-sticky ps-0 pe-4 pb-4"><h2 class="panel-heading ps-3 pb-2 mb-0">Contents</h2><nav id="toc"></nav></section></aside></div><div class="row"><div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 px-md-4"><aside id="related-posts" aria-labelledby="related-label"><h3 class="mb-4" id="related-label">Further Reading</h3><nav class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4"><article class="col"> <a href="/posts/2024/06/08/git-updategpg-key.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1717855200" data-df="ll" > Jun 8, 2024 </time><h4 class="pt-0 my-2">Update GPG key by changing email address</h4><div class="text-muted"><p>Describes step that are required when you need to modify existing GPG key (add/remove email, additional information) List GPG keys 1 2 3 4 5 6 7 8 9 10 11 12 gpg --list-secret-keys --keyid-form...</p></div></div></a></article><article class="col"> <a href="/posts/2024/05/31/git-multiple-ssh-keys.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1717164000" data-df="ll" > May 31, 2024 </time><h4 class="pt-0 my-2">Using multiple ssh keys in different git projects and accounts</h4><div class="text-muted"><p>SSH besides standard configuration where we define what host uses which key and user can have advanced features. Let’s check the feature that allows to specify different ssh keys for the same host ...</p></div></div></a></article><article class="col"> <a href="/posts/2020/04/09/git-gpg-key.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1586440800" data-df="ll" > Apr 9, 2020 </time><h4 class="pt-0 my-2">Sign git commits with GPG key</h4><div class="text-muted"><p>Abstract Git provides the possibility to add a signature to each commit. By doing this you instrument you version control system with instructions to verify the identity of the person who performe...</p></div></div></a></article></nav></aside><nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation"> <a href="/posts/2020/01/14/aws-big-data-certification.html" class="btn btn-outline-primary" aria-label="Older" ><p>AWS BigData Specialty Certification: Preparation, Materials and the Exam</p></a> <a href="/posts/2020/02/04/git-branches.html" class="btn btn-outline-primary" aria-label="Newer" ><p>Git branches, where do they lead ?</p></a></nav><footer aria-label="Site Info" class=" d-flex flex-column justify-content-center text-muted flex-lg-row justify-content-lg-between align-items-lg-center pb-lg-3 " ><p>© <time>2025</time> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a>. <span data-bs-toggle="tooltip" data-bs-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author." >Some rights reserved.</span> <span data-bs-toggle="tooltip" data-bs-placement="top" title="2025-09-26 20:11:52 +0300 &#013;be60bb44e6416aa69b8fd68791db025be40c523c">Build version: be60bb4</span></p><p>Using the <a data-bs-toggle="tooltip" data-bs-placement="top" title="v7.2.4" href="https://github.com/cotes2020/jekyll-theme-chirpy" target="_blank" rel="noopener" >Chirpy</a> theme for <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>.</p></footer></div></div><div id="search-result-wrapper" class="d-flex justify-content-center d-none"><div class="col-11 content"><div id="search-hints"><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><aside aria-label="Scroll to Top"> <button id="back-to-top" type="button" class="btn btn-lg btn-box-shadow"> <i class="fas fa-angle-up"></i> </button></aside></div><div id="mask" class="d-none position-fixed w-100 h-100 z-1"></div><aside id="notification" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-animation="true" data-bs-autohide="false" ><div class="toast-header"> <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast" aria-label="Close" ></button></div><div class="toast-body text-center pt-0"><p class="px-2 mb-3">A new version of content is available.</p><button type="button" class="btn btn-primary" aria-label="Update"> Update </button></div></aside><script> (function () { const themeMapper = Theme.getThemeMapper('light', 'dark_dimmed'); const initTheme = themeMapper[Theme.visualState]; let lang = 'en';if (lang.length > 2 && !lang.startsWith('zh')) { lang = lang.slice(0, 2); } let giscusAttributes = { src: 'https://giscus.app/client.js', 'data-repo': 'tsypuk/tsypuk.github.io', 'data-repo-id': 'R_kgDOIxaFiw', 'data-category': 'General', 'data-category-id': 'DIC_kwDOIxaFi84CUSfn', 'data-mapping': 'og:title', 'data-strict' : '0', 'data-reactions-enabled': '1', 'data-emit-metadata': '0', 'data-theme': initTheme, 'data-input-position': 'top', 'data-lang': lang, 'data-loading': 'lazy', crossorigin: 'anonymous', async: '' }; let giscusNode = document.createElement('script'); Object.entries(giscusAttributes).forEach(([key, value]) => giscusNode.setAttribute(key, value) ); const $footer = document.querySelector('footer'); $footer.insertAdjacentElement("beforebegin", giscusNode); addEventListener('message', (event) => { if (event.source === window && event.data && event.data.id === Theme.ID) { const newTheme = themeMapper[Theme.visualState]; const message = { setConfig: { theme: newTheme } }; const giscus = document.getElementsByClassName('giscus-frame')[0].contentWindow; giscus.postMessage({ giscus: message }, 'https://giscus.app'); } }); })(); </script> <script> document.addEventListener('DOMContentLoaded', () => { SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<article class="px-1 px-sm-2 px-lg-4 px-xl-0"><header><h2><a href="{url}">{title}</a></h2><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags}</div></header><p>{content}</p></article>', noResultsText: '<p class="mt-5">Oops! No results found.</p>', templateMiddleware: function(prop, value, template) { if (prop === 'categories') { if (value === '') { return `${value}`; } else { return `<div class="me-sm-4"><i class="far fa-folder fa-fw"></i>${value}</div>`; } } if (prop === 'tags') { if (value === '') { return `${value}`; } else { return `<div><i class="fa fa-tag fa-fw"></i>${value}</div>`; } } } }); }); </script>

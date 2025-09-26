@@ -1,0 +1,347 @@
+<!doctype html><html lang="en" ><head> <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); </script><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="viewport" content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover" ><meta name="generator" content="Jekyll v4.3.3" /><meta property="og:title" content="Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts | by Roman Tsypuk" /><meta name="author" content="Roman Tsypuk" /><meta property="og:locale" content="en" /><meta name="description" content="Abstract" /><meta property="og:description" content="Abstract" /><meta property="twitter:description" content="Abstract" /><link rel="canonical" href="https://tsypuk.github.io/posts/2025/07/20/elastic-cache-vector.html" /><meta property="og:url" content="https://tsypuk.github.io/posts/2025/07/20/elastic-cache-vector.html" /><meta property="og:site_name" content="Engineer’s Notes | Roman Tsypuk" /><meta property="og:image" content="https://tsypuk.github.io/images/banners/1200/pr.jpg" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2025-07-20T17:00:00+03:00" /><meta name="publish_date" property="og:publish_date" content="2025-07-20T17:00:00+03:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://tsypuk.github.io/images/banners/1200/pr.jpg" /><meta property="twitter:title" content="Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts | by Roman Tsypuk" /><meta name="twitter:site" content="@roman_tsypuk" /><meta name="twitter:creator" content="@roman_tsypuk" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Roman Tsypuk"},"dateModified":"2025-09-18T08:47:24+03:00","datePublished":"2025-07-20T17:00:00+03:00","description":"Abstract","headline":"Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts","image":"https://tsypuk.github.io/images/banners/1200/pr.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/posts/2025/07/20/elastic-cache-vector.html"},"url":"https://tsypuk.github.io/posts/2025/07/20/elastic-cache-vector.html"}</script><title>Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts | Engineer's Notes</title><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/site.webmanifest"><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico"><meta name="apple-mobile-web-app-title" content="Engineer's Notes"><meta name="application-name" content="Engineer's Notes"><meta name="msapplication-TileColor" content="#da532c"><meta name="msapplication-config" content="/assets/img/favicons/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.googleapis.com" ><link rel="dns-prefetch" href="https://fonts.googleapis.com" ><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="dns-prefetch" href="https://fonts.gstatic.com" ><link rel="preconnect" href="https://cdn.jsdelivr.net" ><link rel="dns-prefetch" href="https://cdn.jsdelivr.net" ><link rel="stylesheet" href="/assets/css/jekyll-theme-chirpy.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&family=Source+Sans+Pro:wght@400;600;700;900&display=swap"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.32.2/dist/tocbot.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css"> <script src="/assets/js/dist/theme.min.js"></script> <script defer src="https://cdn.jsdelivr.net/combine/npm/simple-jekyll-search@1.10.0/dest/simple-jekyll-search.min.js,npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.umd.min.js,npm/glightbox@3.3.0/dist/js/glightbox.min.js,npm/clipboard@2.0.11/dist/clipboard.min.js,npm/dayjs@1.11.13/dayjs.min.js,npm/dayjs@1.11.13/locale/en.js,npm/dayjs@1.11.13/plugin/relativeTime.js,npm/dayjs@1.11.13/plugin/localizedFormat.js,npm/tocbot@4.32.2/dist/tocbot.min.js"></script> <script defer src="/assets/js/dist/post.min.js"></script> <script defer src="/app.min.js?baseurl=&register=" ></script> <script defer src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> document.addEventListener('DOMContentLoaded', () => { window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); }); </script><body><aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end"><header class="profile-wrapper"> <a href="/" id="avatar" class="rounded-circle"><img src="/images/avatar/rtsypuk.jpg" width="112" height="112" alt="avatar" onerror="this.style.display='none'"></a> <a class="site-title d-block" href="/">Engineer's Notes</a><p class="site-subtitle fst-italic mb-0">Cloud, Infrastructure, Architecture, Networking</p></header><nav class="flex-column flex-grow-1 w-100 ps-0"><ul class="nav"><li class="nav-item"> <a href="/" class="nav-link"> <i class="fa-fw fas fa-home"></i> <span>HOME</span> </a><li class="nav-item"> <a href="/categories.html" class="nav-link"> <i class="fa-fw fas fa-stream"></i> <span>CATEGORIES</span> </a><li class="nav-item"> <a href="/tags.html" class="nav-link"> <i class="fa-fw fas fa-tag"></i> <span>TAGS</span> </a><li class="nav-item"> <a href="/archived_posts.html" class="nav-link"> <i class="fa-fw fas fa-archive"></i> <span>ARCHIVES</span> </a><li class="nav-item"> <a href="/roman_tsypuk.html" class="nav-link"> <i class="fa-fw fas fa-info-circle"></i> <span>ABOUT</span> </a></ul></nav><div class="sidebar-bottom d-flex flex-wrap align-items-center w-100"> <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle"> <i class="fas fa-adjust"></i> </button> <span class="icon-border"></span> <a href="https://github.com/tsypuk" aria-label="github" target="_blank" rel="noopener noreferrer" > <i class="fab fa-github"></i> </a> <a href="https://twitter.com/roman_tsypuk" aria-label="twitter" target="_blank" rel="noopener noreferrer" > <i class="fab fa-twitter"></i> </a> <a href="https://www.linkedin.com/in/roman-tsypuk" aria-label="linkedin" target="_blank" rel="noopener noreferrer" > <i class="fab fa-linkedin"></i> </a> <a href="javascript:location.href = 'mailto:' + ['tsypuk_conf','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a></div></aside><div id="main-wrapper" class="d-flex justify-content-center"><div class="container d-flex flex-column px-xxl-5"><header id="topbar-wrapper" aria-label="Top Bar"><div id="topbar" class="d-flex align-items-center justify-content-between px-lg-3 h-100" ><nav id="breadcrumb" aria-label="Breadcrumb"> <span> <a href="/">Home</a> </span> <span>Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts</span></nav><button type="button" id="sidebar-trigger" class="btn btn-link" aria-label="Sidebar"> <i class="fas fa-bars fa-fw"></i> </button><div id="topbar-title"> Post</div><button type="button" id="search-trigger" class="btn btn-link" aria-label="Search"> <i class="fas fa-search fa-fw"></i> </button> <search id="search" class="align-items-center ms-3 ms-lg-0"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" autocomplete="off" placeholder="Search..." > </search> <button type="button" class="btn btn-link text-decoration-none" id="search-cancel">Cancel</button></div></header><div class="row flex-grow-1"><main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4"><article class="px-1" data-toc="true"><header><h1 data-toc-skip>Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts</h1><div class="post-meta text-muted"> <span> Posted <time data-ts="1753020000" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Jul 20, 2025 </time> </span> <span> Updated <time data-ts="1758174444" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Sep 18, 2025 </time> </span><div class="mt-3 mb-3"> <a href="/images/banners/1200/pr.jpg" class="popup img-link preview-img shimmer"><img src="/images/banners/1200/pr.jpg" alt="Preview Image" width="1200" height="630" loading="lazy"></a></div><div class="d-flex justify-content-between"> <span> By <em> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a> </em> </span><div> <span class="readtime" data-bs-toggle="tooltip" data-bs-placement="bottom" title="1913 words" > <em>10 min</em> read</span></div></div></div></header><div id="toc-bar" class="d-flex align-items-center justify-content-between invisible"> <span class="label text-truncate">Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts</span> <button type="button" class="toc-trigger btn me-1"> <i class="fa-solid fa-list-ul fa-fw"></i> </button></div><button id="toc-solo-trigger" type="button" class="toc-trigger btn btn-outline-secondary btn-sm"> <span class="label ps-2 pe-1">Contents</span> <i class="fa-solid fa-angle-right fa-fw"></i> </button> <dialog id="toc-popup" class="p-0"><div class="header d-flex flex-row align-items-center justify-content-between"><div class="label text-truncate py-2 ms-4">Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts</div><button id="toc-popup-close" type="button" class="btn mx-1 my-1 opacity-75"> <i class="fas fa-close"></i> </button></div><div id="toc-popup-content" class="px-4 py-3 pb-4"></div></dialog><div class="content"><h2 id="abstract"><span class="me-2">Abstract</span><a href="#abstract" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>The AWS Community Builders program has produced an enormous trove of insightful blog content over the years. These posts, authored by community members across the globe, capture deep technical expertise, innovative use cases, and countless hours of experience. But as this body of content grows, finding related information becomes increasingly difficult using traditional keyword search.</p><h2 id="challenge"><span class="me-2">Challenge</span><a href="#challenge" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>To tackle this challenge, I experimented with using <strong>Amazon ElastiCache for Redis</strong> as a vector store to power semantic search across all blog posts starting 2021.</p><p>This blog post outlines how I vectorized blog content, stored embeddings in Redis, and leveraged K-Nearest Neighbors ( KNN) to discover content semantically related to phrases or topic of interest, discover posts, cluster posts, identify the trends etc.</p><h2 id="why-use-redis-for-vector-search"><span class="me-2">Why Use Redis for Vector Search?</span><a href="#why-use-redis-for-vector-search" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Traditionally, Redis is used for caching and fast key-value operations. However, with the introduction of the Redis Vector Similarity Search (VSS) module, Redis can now be used as a high-performance vector database. This makes it a powerful choice when you need millisecond-latency search over large datasets of embeddings, such as blog post vectors.</p><p>Benefits of Redis VSS:</p><ul><li>Speed: In-memory performance with extremely low latency.<li>Simplicity: Store and retrieve vectors using Redis CLI or SDKs.<li>Scalability: Redis clusters on ElastiCache scale with demand.<li>Integration: Easy to integrate with Python NLP libraries and AWS services.</ul><h2 id="what-is-an-embedding-and-how-does-it-work"><span class="me-2">What is an Embedding and How Does it Work?</span><a href="#what-is-an-embedding-and-how-does-it-work" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>An embedding is a numerical representation of text that captures its meaning in a multi-dimensional space. Words, sentences, or even entire documents are transformed into fixed-size vectors of floating-point numbers using models like BERT or Sentence Transformers.</p><p>These vectors are constructed such that semantically similar content lies close together in vector space. For example, posts discussing “AWS re:Invent keynote” and “major AWS announcements” would have similar embeddings even if they use different words.</p><h3 id="target-architecture"><span class="me-2">Target Architecture:</span><a href="#target-architecture" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><p><a href="/images/posts/redis/arch.png" class="popup img-link shimmer"><img src="/images/posts/redis/arch.png" alt="arch.png" loading="lazy"></a></p><ul><li>Each blog post description and content was passed through a transformer-based model.<li>The output vector (e.g., 384 dimensions) was stored in Redis.<li>When a query is made (e.g., “golden jacket”), it is also converted into an embedding.<li>Redis performs a KNN search, returning the closest blog vectors by cosine similarity or Euclidean distance.</ul><h2 id="prepare-schema-in-redis"><span class="me-2">Prepare schema in Redis</span><a href="#prepare-schema-in-redis" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Once I have collected the <strong>raw</strong> data, I created index in Redis, all documents will be injected as <strong>json</strong> document also having postDescriptionEmbeddings defined as <strong>SchemaFieldTypes.VECTOR</strong></p><p>This vector will be calculated using same algorithm that will be used for the search.</p><blockquote class="prompt-info"><p>when creating index, the dimension should exactly match to the dimension of model that is used for embeddings Since Xenova/all-MiniLM-L6-v2 was used dimension 384. You can set any other model to check if accuracy is increased, but vector size can not be changed so new index creation and full data re-ingestion will be required.</p></blockquote><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+</pre><td class="rouge-code"><pre>/*    (RAW COMMAND)
+          FT.DROPINDEX idx:posts
+
+          FT.CREATE idx:posts
+          ON JSON
+              PREFIX 1 "posts:"
+          SCHEMA
+          '$.postDescriptionEmbeddings': {
+            type: SchemaFieldTypes.VECTOR,
+            TYPE: 'FLOAT32',
+            ALGORITHM: VectorAlgorithms.FLAT,
+            DIM: 384,
+            DISTANCE_METRIC: 'L2',
+            INITIAL_CAP: 111,
+            BLOCK_SIZE: 111,
+            AS: 'postDescriptionEmbeddings',
+          },
+          '$.postDescription': {
+              type: SchemaFieldTypes.TEXT,
+              NOSTEM: true,
+              SORTABLE: true,
+              AS: 'postDescription',
+          },
+          '$.link': {
+            type: SchemaFieldTypes.TEXT,
+            NOSTEM: true,
+            SORTABLE: true,
+            AS: 'link',
+          },
+</pre></table></code></div></div><h2 id="ingesting-data-into-vector-based-storage"><span class="me-2">Ingesting Data into Vector-based storage</span><a href="#ingesting-data-into-vector-based-storage" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>I choose <strong>Xenova/all-MiniLM-L6-v2</strong> for Embedding and vectorization, so once model is initialized, all data in a processing loop will be passed to it to augment blog post with on more field <strong>postDescriptionEmbeddings</strong></p><div class="language-ts highlighter-rouge"><div class="code-header"> <span data-label-text="TypeScript"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre><span class="kd">let</span> <span class="nx">modelName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Xenova/all-MiniLM-L6-v2</span><span class="dl">"</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">pipe</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">transformers</span><span class="p">.</span><span class="nf">pipeline</span><span class="p">(</span><span class="dl">"</span><span class="s2">feature-extraction</span><span class="dl">"</span><span class="p">,</span> <span class="nx">modelName</span><span class="p">);</span>
+
+<span class="kd">const</span> <span class="nx">strippedText</span> <span class="o">=</span> <span class="nf">stripHTML</span><span class="p">(</span><span class="nx">post</span><span class="p">.</span><span class="nx">description</span><span class="p">);</span>
+<span class="nx">post</span><span class="p">[</span><span class="dl">"</span><span class="s2">_id</span><span class="dl">"</span><span class="p">]</span> <span class="o">=</span> <span class="nx">post</span><span class="p">.</span><span class="nx">id</span>
+<span class="nx">post</span><span class="p">[</span><span class="dl">"</span><span class="s2">postDescription</span><span class="dl">"</span><span class="p">]</span> <span class="o">=</span> <span class="nx">strippedText</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">sentenceEmbedding</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">generateSentenceEmbeddings</span><span class="p">(</span><span class="nx">strippedText</span><span class="p">,</span> <span class="nx">pipe</span><span class="p">);</span>
+<span class="nx">post</span><span class="p">[</span><span class="dl">"</span><span class="s2">postDescriptionEmbeddings</span><span class="dl">"</span><span class="p">]</span> <span class="o">=</span> <span class="nx">sentenceEmbedding</span><span class="p">;</span>
+</pre></table></code></div></div><div class="language-ts highlighter-rouge"><div class="code-header"> <span data-label-text="TypeScript"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre><td class="rouge-code"><pre>
+<span class="k">await</span> <span class="nx">nodeRedisClient</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nf">set</span><span class="p">(</span><span class="s2">`</span><span class="p">${</span><span class="nx">POSTS_KEY_PREFIX</span><span class="p">}</span><span class="s2">:</span><span class="p">${</span><span class="nx">post</span><span class="p">.</span><span class="nx">id</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span> <span class="dl">"</span><span class="s2">$</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+  <span class="p">...</span><span class="nx">post</span>
+<span class="p">});</span>
+</pre></table></code></div></div><div class="language-ts highlighter-rouge"><div class="code-header"> <span data-label-text="TypeScript"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre><span class="k">async</span> <span class="kd">function</span> <span class="nf">generateSentenceEmbeddings</span><span class="p">(</span><span class="nx">_sentence</span><span class="p">,</span> <span class="nx">pipe</span><span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="kr">number</span><span class="p">[]</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">vectorOutput</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">pipe</span><span class="p">(</span><span class="nx">_sentence</span><span class="p">,</span> <span class="p">{</span>
+    <span class="na">pooling</span><span class="p">:</span> <span class="dl">"</span><span class="s2">mean</span><span class="dl">"</span><span class="p">,</span>
+    <span class="na">normalize</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+  <span class="p">});</span>
+
+  <span class="kd">const</span> <span class="na">embeddings</span><span class="p">:</span> <span class="kr">number</span><span class="p">[]</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nf">values</span><span class="p">(</span><span class="nx">vectorOutput</span><span class="p">?.</span><span class="nx">data</span><span class="p">);</span>
+  <span class="k">return</span> <span class="nx">embeddings</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></table></code></div></div><h2 id="ingested-data-in-redis"><span class="me-2">Ingested data in Redis:</span><a href="#ingested-data-in-redis" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>using <code class="language-plaintext highlighter-rouge">redis-cli</code> we can <code class="language-plaintext highlighter-rouge">JSON:GET</code> any random document and explore its fields:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre>JSON.GET posts:0a1a9e88-32e3-43af-86ce-c70b27ef9482
+</pre></table></code></div></div><p>Besides standard data now it contains also <code class="language-plaintext highlighter-rouge">postDescriptionEmbeddings</code> vector (here I’m cutting digits not to represent the full 384 size of it):</p><div class="language-json highlighter-rouge"><div class="code-header"> <span data-label-text="JSON"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre><td class="rouge-code"><pre><span class="p">{</span><span class="w">
+  </span><span class="nl">"link"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://dev.classmethod.jp/articles/awsbasics-s3-tables-athena-apache-iceberg/"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"createdAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-07-20T02:02:36.821Z"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"postDescription"</span><span class="p">:</span><span class="w"> </span><span class="s2">"This article introduces AWS S3 Tables, a new service simplifying Apache Iceberg table management on S3. It shows creating tables via console/CLI, CRUD operations with Athena, and highlights automatic optimization, ACID transactions, and seamless integration."</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"postDescriptionEmbeddings"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="mf">-0.05445345863699913</span><span class="p">,</span><span class="w">
+    </span><span class="mf">-0.03639936074614525</span><span class="p">,</span><span class="w">
+    </span><span class="mf">-0.09256941080093384</span><span class="p">,</span><span class="w">
+    </span><span class="mf">-0.02023949660360813</span><span class="p">,</span><span class="w">
+    </span><span class="mf">0.016897333785891533</span><span class="p">,</span><span class="w">
+    </span><span class="mf">-0.05080459639430046</span><span class="p">,</span><span class="w">
+    </span><span class="mf">-0.047063130885362625</span><span class="p">,</span><span class="w">
+    </span><span class="err">...</span><span class="w">
+
+    </span><span class="mf">0.05633614584803581</span><span class="p">,</span><span class="w">
+    </span><span class="mf">0.030490988865494728</span><span class="p">,</span><span class="w">
+    </span><span class="mf">-0.035038333386182785</span><span class="p">,</span><span class="w">
+    </span><span class="mf">-0.014955290593206882</span><span class="p">,</span><span class="w">
+    </span><span class="mf">0.03450820595026016</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre></table></code></div></div><p>Congratulations!!! Now we have a digital footprint of all CloudBuiders blog posts.</p><h2 id="algorithms-to-search-vectors"><span class="me-2">Algorithms to search vectors</span><a href="#algorithms-to-search-vectors" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>No using same model <code class="language-plaintext highlighter-rouge">Xenova/all-MiniLM-L6-v2</code> we can convert any search phrase into vector:</p><div class="language-ts highlighter-rouge"><div class="code-header"> <span data-label-text="TypeScript"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="kd">const</span> <span class="nx">nodeRedisClient</span> <span class="o">=</span> <span class="nf">getNodeRedisClient</span><span class="p">();</span>
+<span class="kd">let</span> <span class="nx">modelName</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">Xenova/all-MiniLM-L6-v2</span><span class="dl">"</span><span class="p">;</span>
+<span class="kd">let</span> <span class="nx">pipe</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">transformers</span><span class="p">.</span><span class="nf">pipeline</span><span class="p">(</span><span class="dl">"</span><span class="s2">feature-extraction</span><span class="dl">"</span><span class="p">,</span> <span class="nx">modelName</span><span class="p">);</span>
+
+<span class="kd">const</span> <span class="nx">searchTxtVectorArr</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">generateSentenceEmbeddings</span><span class="p">(</span><span class="nx">searchTxt</span><span class="p">,</span> <span class="nx">pipe</span><span class="p">);</span>
+</pre></table></code></div></div><p>Here is example of search phrase <code class="language-plaintext highlighter-rouge">Golden Jacket</code> that is transformed using Embedding model <code class="language-plaintext highlighter-rouge">Xenova/all-MiniLM-L6-v2</code> into a Vector, this is what vector looks like (with dimension 384):</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+</pre><td class="rouge-code"><pre>[
+      -0.0519644059240818,    0.08905413746833801,    0.01799578033387661,
+     0.049779586493968964,   0.035871658474206924,   0.020033041015267372,
+      0.18083901703357697,   -0.05256553739309311,  0.0003853921080008149,
+     -0.04665731266140938,    0.01234174519777298,   -0.02134784311056137,
+      0.03652122616767883,  0.0066316151060163975,   0.001835306640714407,
+      -0.0348852276802063,   0.026533348485827446,  -0.008266004733741283,
+     0.023030489683151245,  -0.025720935314893723,   -0.04542113095521927,
+   -0.0034457785077393055,   -0.00999429076910019,    0.05410130321979523,
+     -0.07294181734323502,    0.04549195244908333,   -0.03297987952828407,
+     0.039497267454862595,   -0.05792579427361488,   -0.08336731791496277,
+     0.028136223554611206, -0.0004739225551020354,   -0.03645763173699379,
+      0.02329356223344803,    -0.1444464474916458,   -0.02707810141146183,
+     0.033310066908597946,  0.0071496316231787205,   -0.11640160530805588,
+      0.10475143790245056,    -0.0539717860519886,  -0.039327893406152725,
+     -0.08680122345685959,   -0.03737214207649231,   -0.02752811089158058,
+     0.005382977891713381,  -0.037658315151929855,  -0.009982343763113022,
+    -0.014092876575887203,     0.0367547869682312,   -0.07399916648864746,
+     0.008599113672971725,   -0.07765820622444153,   0.013821756467223167,
+      0.06757687777280807,    0.09657421708106995,  -0.008364601992070675,
+     -0.05157032981514931,    -0.0255973469465971,   0.030314497649669647,
+    -0.036268994212150574,   0.004683461040258408,   -0.05857793241739273,
+     0.009458839893341064,     0.0592721663415432,     0.0403432659804821,
+     -0.06441762298345566,    0.05017191544175148,   -0.05505743995308876,
+     -0.04220070689916611,    0.05020679160952568,    0.02721044048666954,
+  0.000019773140593315475,  0.0006230986909940839, -0.0004238316905684769,
+       0.0330372080206871,  -0.040411293506622314,    0.02342337928712368,
+      0.09403083473443985,  -0.030885351821780205,    0.03300361707806587,
+     -0.06219857931137085,   -0.06710682064294815,    0.06534728407859802,
+      0.02729918621480465,  -0.021849708631634712,    0.04849373549222946,
+     -0.04060141369700432,   -0.01779020205140114,   0.015026750974357128,
+      0.03931884467601776,  -0.016998404636979103,   0.020048541948199272,
+      0.07344327867031097,  -0.027000991627573967,  -0.013987813144922256,
+      0.07202176004648209,   -0.10249660909175873,   -0.07182241231203079,
+        0.177199587225914,
+  ... 284 more items
+]
+</pre></table></code></div></div><p>Having search vector and all posts descriptions vectorized and stored in Redis, using <strong>KNN</strong> we will search the nearest neighbor similarities:</p><div class="language-ts highlighter-rouge"><div class="code-header"> <span data-label-text="TypeScript"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre><td class="rouge-code"><pre><span class="kd">const</span> <span class="nx">searchQuery</span> <span class="o">=</span>
+  <span class="s2">`*=&gt;[KNN </span><span class="p">${</span><span class="nx">_resultCount</span><span class="p">}</span><span class="s2"> @postDescriptionEmbeddings $searchBlob AS score]`</span><span class="p">;</span>
+<span class="nx">results</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">nodeRedisClient</span><span class="p">.</span><span class="nx">ft</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="nx">POSTS_INDEX_KEY</span><span class="p">,</span> <span class="nx">searchQuery</span><span class="p">,</span> <span class="p">{</span>
+  <span class="na">PARAMS</span><span class="p">:</span> <span class="p">{</span>
+    <span class="dl">"</span><span class="s2">searchBlob</span><span class="dl">"</span><span class="p">:</span> <span class="nf">float32Buffer</span><span class="p">(</span><span class="nx">searchTxtVectorArr</span><span class="p">)</span>
+  <span class="p">},</span>
+  <span class="na">RETURN</span><span class="p">:</span> <span class="p">[</span><span class="dl">"</span><span class="s2">score</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">description</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">createdAt</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">region</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">link</span><span class="dl">"</span><span class="p">],</span>
+  <span class="na">SORTBY</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">BY</span><span class="p">:</span> <span class="dl">"</span><span class="s2">score</span><span class="dl">"</span><span class="p">,</span>
+  <span class="p">},</span>
+  <span class="na">DIALECT</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+<span class="p">});</span>
+</pre></table></code></div></div><h2 id="lets-find-a-cloudbuilders-based-on-a-particular-topic"><span class="me-2">Let’s find a CloudBuilders based on a particular topic</span><a href="#lets-find-a-cloudbuilders-based-on-a-particular-topic" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Searching <code class="language-plaintext highlighter-rouge">Golden Jacket</code> relevant topics. Got search output:</p><ul><li>total, number of found documents found with limit<li>score, vectors compatibility for each document returned</ul><div class="language-json highlighter-rouge"><div class="code-header"> <span data-label-text="JSON"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+</pre><td class="rouge-code"><pre><span class="p">{</span><span class="w">
+  </span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"documents"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"posts:79256de8-00aa-4127-b025-df410fb63414"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"score"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.01139831543"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Although I cannot have a AWS 100% fully certified Golden Jacket now, I still buy myself a 25% fully certified Golden Hat 👒 for a little FUN 🤩 Never too late to learn Amazon Web Services (AWS) ! Start your cloud journeys TODAY ! You will become Fully Certified in the future."</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"link"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://www.linkedin.com/posts/walterwlee_aws-cloud-future-activity-7020547672751169536-T3r8?utm_source=share&amp;utm_medium=member_desktop"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"posts:e05e61f3-1cd9-4483-98c7-ad3681a1ea00"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"score"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.03479576111"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Thanks a lot to the Amazon Web Services (AWS) community builder jacket ! 😀 very warm and high quality with YKK zipper 🥰"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"link"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://www.linkedin.com/posts/walterwlee_aws-awscommunity-awscommunitybuilders-activity-7010055038479859712-ahY-?utm_source=share&amp;utm_medium=member_desktop"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"posts:2f63f16d-8080-4e27-baed-f5c582617106"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"score"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.07405209541"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A blog post sharing my experience doing the AWS certifications for the Golden Jacket, for others who might be interested in going through the same experience."</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"link"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://chamila.dev/blog/2024-10-28_completing-11-professional-certifications-in-8-weeks/"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"posts:554df865-951d-4937-abad-5ef84f6e67fe"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"score"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.12301290035"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"How you can achieve all AWS certifications and get the golden jacket - Part 1 "</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"link"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://dev.to/electrokat/how-you-can-achieve-all-aws-certifications-and-get-the-golden-jacket-part-1-16dp"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"posts:9a772e6c-f3fe-419a-afe2-b5b0038dbdcb"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"score"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.2975268364"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"How you can achieve all AWS certifications and get the golden jacket - Part 2 - How to study "</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"link"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://dev.to/electrokat/how-you-can-achieve-all-aws-certifications-and-get-the-golden-jacket-part-2-how-to-study-2b4c"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span></pre></table></code></div></div><h3 id="search-results-for-golden-jacket"><span class="me-2">search results for “Golden Jacket”:</span><a href="#search-results-for-golden-jacket" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><div class="table-wrapper"><table><thead><tr><th style="text-align: left">Score<th style="text-align: left">Details<tbody><tr><td style="text-align: left">1.01139831543<td style="text-align: left">Although I cannot have a AWS 100% fully certified Golden Jacket now, I still buy myself a 25% fully certified Golden Hat 👒 for a little FUN 🤩 Never too late to learn Amazon Web Services (AWS) ! Start your cloud journeys TODAY ! You will become Fully Certified in the future.<tr><td style="text-align: left">1.03479576111<td style="text-align: left">Thanks a lot to the Amazon Web Services (AWS) community builder jacket ! 😀 very warm and high quality with YKK zipper 🥰<tr><td style="text-align: left">1.07405209541<td style="text-align: left">A blog post sharing my experience doing the AWS certifications for the Golden Jacket, for others who might be interested in going through the same experience.<tr><td style="text-align: left">1.12301290035<td style="text-align: left">How you can achieve all AWS certifications and get the golden jacket - Part 1<tr><td style="text-align: left">1.2975268364<td style="text-align: left">How you can achieve all AWS certifications and get the golden jacket - Part 2 - How to study</table></div><h3 id="search-results-for-play-games"><span class="me-2">search results for “play games”:</span><a href="#search-results-for-play-games" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><div class="table-wrapper"><table><thead><tr><th style="text-align: left">Score<th style="text-align: left">Details<tbody><tr><td style="text-align: left">1.49744784832<td style="text-align: left">🚀 Vibe coding a simple STEM Game with Amazon Q CLI —so I created this simple game to help make learning easier with the help of Amazon Q CLI 🤖✨.<tr><td style="text-align: left">1.54997515678<td style="text-align: left">Learn DevOps By Doing Projects<tr><td style="text-align: left">1.56706357002<td style="text-align: left">I wrote a blog post about building a web-based game using only Amazon Q Developer. The post received 199 readers and 26 reactions from the community.<tr><td style="text-align: left">1.57633209229<td style="text-align: left">This article about my personal challenges as a sales and business developer to have interaction with tech. persons.<tr><td style="text-align: left">1.61025881767<td style="text-align: left">Join the AWS GenAI PartyRock hackathon!</table></div><h2 id="what-else-can-we-do-with-vectors"><span class="me-2">What else can we do with vectors?</span><a href="#what-else-can-we-do-with-vectors" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><ul><li>Discover similar blog posts and engage with authors.<li>Track evolving themes across community content.<li>Understand what topics resonate or need more visibility.<li>Retrieve relevant document chunks or paragraphs to feed into an LLM (e.g., via Retrieval-Augmented Generation or RAG).<li>Document Classification<li>Posts with similar embeddings can be linked with a virtual “related-to” edge. You have read a post and enjoy it, vectorDB can recommend other posts that have similar vector</ul><h2 id="observations"><span class="me-2">Observations:</span><a href="#observations" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><ul><li>The majority of CPU intensive work is on the producer that is running the model and performs the transformation.</ul><p>The important caviat is that model must be instantiated only once and all data is fed through it. Otherwise, if model is created for every data entry, it will take a lot of time to finish the ingession plus unneeded memory alocation will be performed.</p><ul><li>Redis instance based on htop info does not have spike during data ingestion, same when search queries are performed.<li>On data retrieval, the most time-consuming operation (1sec) was request transformation into vector</ul><p>There are some parameters that allow to adjust output:</p><ul><li>return results count — you can return different response batches or implement a cascaded system, that will do next batch call and lower the threshold to establish data<li>score threshold — the lower the value, the more closer vectors are. However, this is true for a mathematical model that was used but sometimes not to common scence.</ul><h2 id="conclusions"><span class="me-2">Conclusions</span><a href="#conclusions" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Using Elastic Cache Redis as a vector store offers a powerful, low-latency way to bring semantic search to the AWS Community Builder blog archive. By moving beyond keywords and enabling intelligent discovery, we help amplify the voices and contributions of community members everywhere.</p><p>This architecture is not limited to AWS community content—it can be adapted for any developer-driven knowledge base. The future of search is vectorized, and Redis makes that future fast, scalable, and accessible.</p><h2 id="links"><span class="me-2">Links:</span><a href="#links" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><ul><li><a href="https://redis.io/docs/latest/develop/ai/search-and-query/query/">https://redis.io/docs/latest/develop/ai/search-and-query/query/</a></ul></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw me-1"></i> <a href="/categories/aws/">aws</a>, <a href="/categories/redis/">redis</a>, <a href="/categories/vector/">vector</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw me-1"></i> <a href="/tags/aws/" class="post-tag no-text-decoration" >aws</a> <a href="/tags/redis/" class="post-tag no-text-decoration" >redis</a> <a href="/tags/vector/" class="post-tag no-text-decoration" >vector</a></div><div class=" post-tail-bottom d-flex justify-content-between align-items-center mt-5 pb-2 " ><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0 </a> by the author.</div><div class="share-wrapper d-flex align-items-center"> <span class="share-label text-muted">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Amazon%20ElastiCache%20Redis%20as%20a%20Vector%20Embeddings%20Storage%20for%20Semantic%20Search%20in%20AWS%20Community%20Blog%20posts%20-%20Engineer's%20Notes&url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2025%2F07%2F20%2Felastic-cache-vector.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitter" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Amazon%20ElastiCache%20Redis%20as%20a%20Vector%20Embeddings%20Storage%20for%20Semantic%20Search%20in%20AWS%20Community%20Blog%20posts%20-%20Engineer's%20Notes&u=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2025%2F07%2F20%2Felastic-cache-vector.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Facebook" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://t.me/share/url?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2025%2F07%2F20%2Felastic-cache-vector.html&text=Amazon%20ElastiCache%20Redis%20as%20a%20Vector%20Embeddings%20Storage%20for%20Semantic%20Search%20in%20AWS%20Community%20Blog%20posts%20-%20Engineer's%20Notes" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Telegram" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2025%2F07%2F20%2Felastic-cache-vector.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Linkedin" aria-label="Linkedin"> <i class="fa-fw fab fa-linkedin"></i> </a> <button id="copy-link" aria-label="Copy link" class="btn small" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link" data-title-succeed="Link copied successfully!" > <i class="fa-fw fas fa-link pe-none fs-6"></i> </button> </span></div></div></div></article></main><aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted"><div class="access"><section id="access-lastmod"><h2 class="panel-heading">Recently Updated</h2><ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2"><li class="text-truncate lh-lg"> <a href="/posts/2025/09/26/multiagnet-n8n-bedrock.html">Orchestrating AI multi-agent infrastructure with AWS Bedrock, OpenAI and n8n</a><li class="text-truncate lh-lg"> <a href="/posts/2025/07/20/elastic-cache-vector.html">Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts</a><li class="text-truncate lh-lg"> <a href="/posts/2025/09/17/duckdb-s3.html">Running analytics queries from your machine with Zero-BigData stack needed on top of AWS S3(compressed JSON, Parquet, csv) or other DataSources</a><li class="text-truncate lh-lg"> <a href="/posts/2023/10/02/dynamo-design.html">DynamoDB Table Design Principles - NoSQL Modeling</a><li class="text-truncate lh-lg"> <a href="/posts/2023/10/04/dynamo-one-to-many.html">DynamoDB Table Design Principles - One-To-Many Relationships in NoSQL</a></ul></section><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div class="toc-border-cover z-3"></div><section id="toc-wrapper" class="invisible position-sticky ps-0 pe-4 pb-4"><h2 class="panel-heading ps-3 pb-2 mb-0">Contents</h2><nav id="toc"></nav></section></aside></div><div class="row"><div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 px-md-4"><aside id="related-posts" aria-labelledby="related-label"><h3 class="mb-4" id="related-label">Further Reading</h3><nav class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4"><article class="col"> <a href="/posts/2025/01/11/elastic-cache-lua.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1736546400" data-df="ll" > Jan 11, 2025 </time><h4 class="pt-0 my-2">Making Extremely Fast AWS Elastic Cache Redis with Lua</h4><div class="text-muted"><p>AWS ElastiCache for Redis offers a managed, high-performance, in-memory data store that is widely adopted for caching, session management, real-time analytics, and more. To further enhance performa...</p></div></div></a></article><article class="col"> <a href="/posts/2023/03/21/xra-tracing-2.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1679407200" data-df="ll" > Mar 21, 2023 </time><h4 class="pt-0 my-2">AWS XRAY tracing. Part 2: Advanced. Querying & Grouping.</h4><div class="text-muted"><p>Abstract Welcome to the next part of our AWS X-Ray series. We’ll explore the flow of trace detection and how to specify different parameters like time ranges. Additionally, we’ll take a deep dive i...</p></div></div></a></article><article class="col"> <a href="/posts/2023/03/07/mingrammer.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1678165200" data-df="ll" > Mar 7, 2023 </time><h4 class="pt-0 my-2">Diagrams-as-a-Code DaC with Mingrammer for Public Cloud Providers and Agnostic Stacks.</h4><div class="text-muted"><p>Abstract During my analysis of open-source libraries that are suitable for rendering AWS components, in order to simplify the understanding and documenting of application architecture I discovered ...</p></div></div></a></article></nav></aside><nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation"> <a href="/posts/2025/05/13/amazon-nova-canvas.html" class="btn btn-outline-primary" aria-label="Older" ><p>Turning Text into Art: Using AWS Nova to augment Blog post with illustrations</p></a> <a href="/posts/2025/09/17/duckdb-s3.html" class="btn btn-outline-primary" aria-label="Newer" ><p>Running analytics queries from your machine with Zero-BigData stack needed on top of AWS S3(compressed JSON, Parquet, csv) or other DataSources</p></a></nav><footer aria-label="Site Info" class=" d-flex flex-column justify-content-center text-muted flex-lg-row justify-content-lg-between align-items-lg-center pb-lg-3 " ><p>© <time>2025</time> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a>. <span data-bs-toggle="tooltip" data-bs-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author." >Some rights reserved.</span> <span data-bs-toggle="tooltip" data-bs-placement="top" title="2025-09-26 20:11:52 +0300 &#013;be60bb44e6416aa69b8fd68791db025be40c523c">Build version: be60bb4</span></p><p>Using the <a data-bs-toggle="tooltip" data-bs-placement="top" title="v7.2.4" href="https://github.com/cotes2020/jekyll-theme-chirpy" target="_blank" rel="noopener" >Chirpy</a> theme for <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>.</p></footer></div></div><div id="search-result-wrapper" class="d-flex justify-content-center d-none"><div class="col-11 content"><div id="search-hints"><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><aside aria-label="Scroll to Top"> <button id="back-to-top" type="button" class="btn btn-lg btn-box-shadow"> <i class="fas fa-angle-up"></i> </button></aside></div><div id="mask" class="d-none position-fixed w-100 h-100 z-1"></div><aside id="notification" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-animation="true" data-bs-autohide="false" ><div class="toast-header"> <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast" aria-label="Close" ></button></div><div class="toast-body text-center pt-0"><p class="px-2 mb-3">A new version of content is available.</p><button type="button" class="btn btn-primary" aria-label="Update"> Update </button></div></aside><script> (function () { const themeMapper = Theme.getThemeMapper('light', 'dark_dimmed'); const initTheme = themeMapper[Theme.visualState]; let lang = 'en';if (lang.length > 2 && !lang.startsWith('zh')) { lang = lang.slice(0, 2); } let giscusAttributes = { src: 'https://giscus.app/client.js', 'data-repo': 'tsypuk/tsypuk.github.io', 'data-repo-id': 'R_kgDOIxaFiw', 'data-category': 'General', 'data-category-id': 'DIC_kwDOIxaFi84CUSfn', 'data-mapping': 'og:title', 'data-strict' : '0', 'data-reactions-enabled': '1', 'data-emit-metadata': '0', 'data-theme': initTheme, 'data-input-position': 'top', 'data-lang': lang, 'data-loading': 'lazy', crossorigin: 'anonymous', async: '' }; let giscusNode = document.createElement('script'); Object.entries(giscusAttributes).forEach(([key, value]) => giscusNode.setAttribute(key, value) ); const $footer = document.querySelector('footer'); $footer.insertAdjacentElement("beforebegin", giscusNode); addEventListener('message', (event) => { if (event.source === window && event.data && event.data.id === Theme.ID) { const newTheme = themeMapper[Theme.visualState]; const message = { setConfig: { theme: newTheme } }; const giscus = document.getElementsByClassName('giscus-frame')[0].contentWindow; giscus.postMessage({ giscus: message }, 'https://giscus.app'); } }); })(); </script> <script> document.addEventListener('DOMContentLoaded', () => { SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<article class="px-1 px-sm-2 px-lg-4 px-xl-0"><header><h2><a href="{url}">{title}</a></h2><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags}</div></header><p>{content}</p></article>', noResultsText: '<p class="mt-5">Oops! No results found.</p>', templateMiddleware: function(prop, value, template) { if (prop === 'categories') { if (value === '') { return `${value}`; } else { return `<div class="me-sm-4"><i class="far fa-folder fa-fw"></i>${value}</div>`; } } if (prop === 'tags') { if (value === '') { return `${value}`; } else { return `<div><i class="fa fa-tag fa-fw"></i>${value}</div>`; } } } }); }); </script>

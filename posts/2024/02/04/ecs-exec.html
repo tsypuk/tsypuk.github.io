@@ -1,0 +1,383 @@
+<!doctype html><html lang="en" ><head> <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); </script><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="viewport" content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover" ><meta name="generator" content="Jekyll v4.3.3" /><meta property="og:title" content="Securely accessing ECS Fargate containers shell, without SSH or exposed ports | by Roman Tsypuk" /><meta name="author" content="Roman Tsypuk" /><meta property="og:locale" content="en" /><meta name="description" content="Very often as a SysOps or Developer we need login into running container in ECS cluster for troubleshooting or verification. To have such possibilities some companies are exposing 22 port for SSH session. But such actions expose the container for external atacks. In this post we will check ecs exec feature that allows to access container runtime without exposing ssh ports or even for containers that do not have public network endpoints." /><meta property="og:description" content="Very often as a SysOps or Developer we need login into running container in ECS cluster for troubleshooting or verification. To have such possibilities some companies are exposing 22 port for SSH session. But such actions expose the container for external atacks. In this post we will check ecs exec feature that allows to access container runtime without exposing ssh ports or even for containers that do not have public network endpoints." /><meta property="twitter:description" content="Very often as a SysOps or Developer we need login into running container in ECS cluster for troubleshooting or verification. To have such possibilities some companies are exposing 22 port for SSH session. But such actions expose the container for external atacks. In this post we will check ecs exec feature that allows to access container runtime without exposing ssh ports or even for containers that do not have public network endpoints." /><link rel="canonical" href="https://tsypuk.github.io/posts/2024/02/04/ecs-exec.html" /><meta property="og:url" content="https://tsypuk.github.io/posts/2024/02/04/ecs-exec.html" /><meta property="og:site_name" content="Engineer’s Notes | Roman Tsypuk" /><meta property="og:image" content="https://tsypuk.github.io/images/banners/1200/pexels-cottonbro-studio-8721343.jpeg" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2024-02-04T16:00:00+02:00" /><meta name="publish_date" property="og:publish_date" content="2024-02-04T16:00:00+02:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://tsypuk.github.io/images/banners/1200/pexels-cottonbro-studio-8721343.jpeg" /><meta property="twitter:title" content="Securely accessing ECS Fargate containers shell, without SSH or exposed ports | by Roman Tsypuk" /><meta name="twitter:site" content="@roman_tsypuk" /><meta name="twitter:creator" content="@roman_tsypuk" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Roman Tsypuk"},"dateModified":"2024-02-25T18:38:06+02:00","datePublished":"2024-02-04T16:00:00+02:00","description":"Very often as a SysOps or Developer we need login into running container in ECS cluster for troubleshooting or verification. To have such possibilities some companies are exposing 22 port for SSH session. But such actions expose the container for external atacks. In this post we will check ecs exec feature that allows to access container runtime without exposing ssh ports or even for containers that do not have public network endpoints.","headline":"Securely accessing ECS Fargate containers shell, without SSH or exposed ports","image":"https://tsypuk.github.io/images/banners/1200/pexels-cottonbro-studio-8721343.jpeg","mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/posts/2024/02/04/ecs-exec.html"},"url":"https://tsypuk.github.io/posts/2024/02/04/ecs-exec.html"}</script><title>Securely accessing ECS Fargate containers shell, without SSH or exposed ports | Engineer's Notes</title><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/site.webmanifest"><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico"><meta name="apple-mobile-web-app-title" content="Engineer's Notes"><meta name="application-name" content="Engineer's Notes"><meta name="msapplication-TileColor" content="#da532c"><meta name="msapplication-config" content="/assets/img/favicons/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.googleapis.com" ><link rel="dns-prefetch" href="https://fonts.googleapis.com" ><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="dns-prefetch" href="https://fonts.gstatic.com" ><link rel="preconnect" href="https://cdn.jsdelivr.net" ><link rel="dns-prefetch" href="https://cdn.jsdelivr.net" ><link rel="stylesheet" href="/assets/css/jekyll-theme-chirpy.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&family=Source+Sans+Pro:wght@400;600;700;900&display=swap"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.32.2/dist/tocbot.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css"> <script src="/assets/js/dist/theme.min.js"></script> <script defer src="https://cdn.jsdelivr.net/combine/npm/simple-jekyll-search@1.10.0/dest/simple-jekyll-search.min.js,npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.umd.min.js,npm/glightbox@3.3.0/dist/js/glightbox.min.js,npm/clipboard@2.0.11/dist/clipboard.min.js,npm/dayjs@1.11.13/dayjs.min.js,npm/dayjs@1.11.13/locale/en.js,npm/dayjs@1.11.13/plugin/relativeTime.js,npm/dayjs@1.11.13/plugin/localizedFormat.js,npm/tocbot@4.32.2/dist/tocbot.min.js"></script> <script defer src="/assets/js/dist/post.min.js"></script> <script defer src="/app.min.js?baseurl=&register=" ></script> <script defer src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> document.addEventListener('DOMContentLoaded', () => { window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); }); </script><body><aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end"><header class="profile-wrapper"> <a href="/" id="avatar" class="rounded-circle"><img src="/images/avatar/rtsypuk.jpg" width="112" height="112" alt="avatar" onerror="this.style.display='none'"></a> <a class="site-title d-block" href="/">Engineer's Notes</a><p class="site-subtitle fst-italic mb-0">Cloud, Infrastructure, Architecture, Networking</p></header><nav class="flex-column flex-grow-1 w-100 ps-0"><ul class="nav"><li class="nav-item"> <a href="/" class="nav-link"> <i class="fa-fw fas fa-home"></i> <span>HOME</span> </a><li class="nav-item"> <a href="/categories.html" class="nav-link"> <i class="fa-fw fas fa-stream"></i> <span>CATEGORIES</span> </a><li class="nav-item"> <a href="/tags.html" class="nav-link"> <i class="fa-fw fas fa-tag"></i> <span>TAGS</span> </a><li class="nav-item"> <a href="/archived_posts.html" class="nav-link"> <i class="fa-fw fas fa-archive"></i> <span>ARCHIVES</span> </a><li class="nav-item"> <a href="/roman_tsypuk.html" class="nav-link"> <i class="fa-fw fas fa-info-circle"></i> <span>ABOUT</span> </a></ul></nav><div class="sidebar-bottom d-flex flex-wrap align-items-center w-100"> <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle"> <i class="fas fa-adjust"></i> </button> <span class="icon-border"></span> <a href="https://github.com/tsypuk" aria-label="github" target="_blank" rel="noopener noreferrer" > <i class="fab fa-github"></i> </a> <a href="https://twitter.com/roman_tsypuk" aria-label="twitter" target="_blank" rel="noopener noreferrer" > <i class="fab fa-twitter"></i> </a> <a href="https://www.linkedin.com/in/roman-tsypuk" aria-label="linkedin" target="_blank" rel="noopener noreferrer" > <i class="fab fa-linkedin"></i> </a> <a href="javascript:location.href = 'mailto:' + ['tsypuk_conf','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a></div></aside><div id="main-wrapper" class="d-flex justify-content-center"><div class="container d-flex flex-column px-xxl-5"><header id="topbar-wrapper" aria-label="Top Bar"><div id="topbar" class="d-flex align-items-center justify-content-between px-lg-3 h-100" ><nav id="breadcrumb" aria-label="Breadcrumb"> <span> <a href="/">Home</a> </span> <span>Securely accessing ECS Fargate containers shell, without SSH or exposed ports</span></nav><button type="button" id="sidebar-trigger" class="btn btn-link" aria-label="Sidebar"> <i class="fas fa-bars fa-fw"></i> </button><div id="topbar-title"> Post</div><button type="button" id="search-trigger" class="btn btn-link" aria-label="Search"> <i class="fas fa-search fa-fw"></i> </button> <search id="search" class="align-items-center ms-3 ms-lg-0"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" autocomplete="off" placeholder="Search..." > </search> <button type="button" class="btn btn-link text-decoration-none" id="search-cancel">Cancel</button></div></header><div class="row flex-grow-1"><main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4"><article class="px-1" data-toc="true"><header><h1 data-toc-skip>Securely accessing ECS Fargate containers shell, without SSH or exposed ports</h1><div class="post-meta text-muted"> <span> Posted <time data-ts="1707055200" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Feb 4, 2024 </time> </span> <span> Updated <time data-ts="1708879086" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Feb 25, 2024 </time> </span><div class="mt-3 mb-3"> <a href="/images/banners/1200/pexels-cottonbro-studio-8721343.jpeg" class="popup img-link preview-img shimmer"><img src="/images/banners/1200/pexels-cottonbro-studio-8721343.jpeg" alt="Preview Image" width="1200" height="630" loading="lazy"></a></div><div class="d-flex justify-content-between"> <span> By <em> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a> </em> </span><div> <span class="readtime" data-bs-toggle="tooltip" data-bs-placement="bottom" title="1874 words" > <em>10 min</em> read</span></div></div></div></header><div id="toc-bar" class="d-flex align-items-center justify-content-between invisible"> <span class="label text-truncate">Securely accessing ECS Fargate containers shell, without SSH or exposed ports</span> <button type="button" class="toc-trigger btn me-1"> <i class="fa-solid fa-list-ul fa-fw"></i> </button></div><button id="toc-solo-trigger" type="button" class="toc-trigger btn btn-outline-secondary btn-sm"> <span class="label ps-2 pe-1">Contents</span> <i class="fa-solid fa-angle-right fa-fw"></i> </button> <dialog id="toc-popup" class="p-0"><div class="header d-flex flex-row align-items-center justify-content-between"><div class="label text-truncate py-2 ms-4">Securely accessing ECS Fargate containers shell, without SSH or exposed ports</div><button id="toc-popup-close" type="button" class="btn mx-1 my-1 opacity-75"> <i class="fas fa-close"></i> </button></div><div id="toc-popup-content" class="px-4 py-3 pb-4"></div></dialog><div class="content"><h2 id="abstract"><span class="me-2">Abstract</span><a href="#abstract" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Very often as a SysOps or Developer we need login into running container in ECS cluster for troubleshooting or verification. To have such possibilities some companies are exposing 22 port for <code class="language-plaintext highlighter-rouge">SSH</code> session. But such actions expose the container for external atacks. In this post we will check <code class="language-plaintext highlighter-rouge">ecs exec</code> feature that allows to access container runtime without exposing <code class="language-plaintext highlighter-rouge">ssh</code> ports or even for containers that do not have public network endpoints.</p><p>It provides an interactive shell to troubleshoot or debug issues within your containers running in an ECS cluster. The ecs exec command is a part of the ECS CLI (Command Line Interface) and facilitates this functionality.</p><p>ECS Exec simplifies the process of debugging and troubleshooting applications running in ECS containers by providing a direct and secure way to interact with the containers without the need for SSH access to the underlying EC2 instances or having <code class="language-plaintext highlighter-rouge">Jump Box</code>.</p><h2 id="target-infrastructure"><span class="me-2">Target Infrastructure</span><a href="#target-infrastructure" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p><a href="/images/posts/ecs-exec/infra.png" class="popup img-link shimmer"><img src="/images/posts/ecs-exec/infra.png" alt="infra.png" loading="lazy"></a></p><h2 id="prepare-client-machine-by-installing-session-manager"><span class="me-2">Prepare client machine, by installing Session Manager</span><a href="#prepare-client-machine-by-installing-session-manager" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+</pre><td class="rouge-code"><pre><span class="o">&gt;</span> curl <span class="s2">"https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac/sessionmanager-bundle.zip"</span> <span class="nt">-o</span> <span class="s2">"sessionmanager-bundle.zip"</span>
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 3761k  100 3761k    0     0  2229k      0  0:00:01  0:00:01 <span class="nt">--</span>:--:-- 2247k
+
+<span class="o">&gt;</span> unzip sessionmanager-bundle.zip
+Archive:  sessionmanager-bundle.zip
+   creating: sessionmanager-bundle/
+  inflating: sessionmanager-bundle/seelog.xml.template
+  inflating: sessionmanager-bundle/THIRD-PARTY
+  inflating: sessionmanager-bundle/LICENSE
+  inflating: sessionmanager-bundle/RELEASENOTES.md
+  inflating: sessionmanager-bundle/NOTICE
+  inflating: sessionmanager-bundle/install
+   creating: sessionmanager-bundle/bin/
+  inflating: sessionmanager-bundle/bin/session-manager-plugin
+  inflating: sessionmanager-bundle/README.md
+ extracting: sessionmanager-bundle/VERSION
+
+<span class="o">&gt;</span> <span class="nb">sudo</span> ./sessionmanager-bundle/install <span class="nt">-i</span> /usr/local/sessionmanagerplugin <span class="nt">-b</span> /usr/local/bin/session-manager-plugin
+
+<span class="o">&gt;</span> session-manager-plugin
+
+The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
+</pre></table></code></div></div><h2 id="enable-execute-command-for-service"><span class="me-2">Enable execute command for service</span><a href="#enable-execute-command-for-service" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>First, we need update container configuration by enabling <code class="language-plaintext highlighter-rouge">--enable-execute-command</code> (this can be done in <strong>IaC</strong> or through <strong>cli</strong>) following details required:</p><div class="table-wrapper"><table><thead><tr><th style="text-align: left">params<th style="text-align: left">value<tbody><tr><td style="text-align: left">cluster<td style="text-align: left">prod-fargate-cluster<tr><td style="text-align: left">service<td style="text-align: left">prod-fg-svc</table></div><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre><span class="o">&gt;</span> aws ecs update-service <span class="nt">--cluster</span> prod-fargate-cluster <span class="nt">--enable-execute-command</span> <span class="nt">--service</span> prod-fg-svc <span class="nt">--force-new-deployment</span>
+</pre></table></code></div></div><h2 id="connect-to-ecs-task"><span class="me-2">Connect to ECS task</span><a href="#connect-to-ecs-task" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><div class="table-wrapper"><table><thead><tr><th style="text-align: left">params<th style="text-align: left">value<tbody><tr><td style="text-align: left">cluster<td style="text-align: left">prod-fargate-cluster<tr><td style="text-align: left">service<td style="text-align: left">app-container</table></div><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre><td class="rouge-code"><pre><span class="o">&gt;</span> aws ecs execute-command <span class="nt">--cluster</span> prod-fargate-cluster <span class="nt">--task</span> 6ebc693821521f131d <span class="nt">--container</span> app-container <span class="nt">--interactive</span> <span class="nt">--command</span> <span class="s2">"/bin/bash"</span>
+
+The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
+An error occurred <span class="o">(</span>TargetNotConnectedException<span class="o">)</span> when calling the ExecuteCommand operation: The execute <span class="nb">command </span>failed due to an internal error. Try again later.
+</pre></table></code></div></div><p>This error shows that <code class="language-plaintext highlighter-rouge">IAM Role</code> attached to container does not contain proper permissions to establish communication channel for <code class="language-plaintext highlighter-rouge">SSH</code> We need to create the following policy and attach it to Container <code class="language-plaintext highlighter-rouge">exec Role</code>:</p><div class="language-json highlighter-rouge"><div class="code-header"> <span data-label-text="JSON"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre><td class="rouge-code"><pre><span class="p">{</span><span class="w">
+  </span><span class="nl">"Version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2012-10-17"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"Statement"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"Effect"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Allow"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Action"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"ssmmessages:CreateControlChannel"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"ssmmessages:CreateDataChannel"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"ssmmessages:OpenControlChannel"</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"ssmmessages:OpenDataChannel"</span><span class="w">
+      </span><span class="p">],</span><span class="w">
+      </span><span class="nl">"Resource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"*"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre></table></code></div></div><h2 id="once-role-is-setup-connect-again"><span class="me-2">Once role is setup, connect again:</span><a href="#once-role-is-setup-connect-again" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre><td class="rouge-code"><pre><span class="o">&gt;</span> aws ecs execute-command <span class="nt">--cluster</span> prod-fargate-cluster <span class="nt">--task</span> 6ebc693821521f131d <span class="nt">--container</span> app-container <span class="nt">--interactive</span> <span class="nt">--command</span> <span class="s2">"/bin/bash"</span>
+The Session Manager plugin was installed successfully. Use the AWS CLI to start a session.
+Starting session with SessionId: ecs-execute-command-0f350d07e044f81b4
+bash-5.0#
+</pre></table></code></div></div><p>We are in container shell now:</p><p>Be careful - because now you are the <code class="language-plaintext highlighter-rouge">root</code>:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre><span class="c"># whoami</span>
+root
+</pre></table></code></div></div><blockquote class="prompt-tip"><p>When a user runs commands on a container using ECS Exec, these commands are run as the root user. The SSM agent and its child processes run as root even when you specify a user ID for the container.</p></blockquote><p>Interesting that <code class="language-plaintext highlighter-rouge">AWS Fargate</code> uses 2 COREs of <code class="language-plaintext highlighter-rouge">Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz</code> <code class="language-plaintext highlighter-rouge">CPU</code> attached to task:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+</pre><td class="rouge-code"><pre><span class="nb">cat</span> /proc/cpuinfo
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel<span class="o">(</span>R<span class="o">)</span> Xeon<span class="o">(</span>R<span class="o">)</span> Platinum 8259CL CPU @ 2.50GHz
+stepping	: 7
+microcode	: 0x5003605
+cpu MHz		: 2500.004
+cache size	: 36608 KB
+physical <span class="nb">id</span>	: 0
+siblings	: 2
+core <span class="nb">id</span>		: 0
+cpu cores	: 1
+apicid		: 0
+initial apicid	: 0
+fpu		: <span class="nb">yes
+</span>fpu_exception	: <span class="nb">yes
+</span>cpuid level	: 13
+wp		: <span class="nb">yes
+</span>flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch invpcid_single pti fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid mpx avx512f avx512dq rdseed adx smap clflushopt clwb avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves ida arat pku ospke
+bugs		: cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs itlb_multihit mmio_stale_data retbleed gds
+bogomips	: 5000.00
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 46 bits physical, 48 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 85
+model name	: Intel<span class="o">(</span>R<span class="o">)</span> Xeon<span class="o">(</span>R<span class="o">)</span> Platinum 8259CL CPU @ 2.50GHz
+stepping	: 7
+microcode	: 0x5003605
+cpu MHz		: 2500.004
+cache size	: 36608 KB
+physical <span class="nb">id</span>	: 0
+siblings	: 2
+core <span class="nb">id</span>		: 0
+cpu cores	: 1
+apicid		: 1
+initial apicid	: 1
+fpu		: <span class="nb">yes
+</span>fpu_exception	: <span class="nb">yes
+</span>cpuid level	: 13
+wp		: <span class="nb">yes
+</span>flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch invpcid_single pti fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid mpx avx512f avx512dq rdseed adx smap clflushopt clwb avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves ida arat pku ospke
+bugs		: cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs itlb_multihit mmio_stale_data retbleed gds
+bogomips	: 5000.00
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 46 bits physical, 48 bits virtual
+power management:
+</pre></table></code></div></div><p>Check the memory and SWAP usage:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre><td class="rouge-code"><pre>free
+              total        used        free      shared  buff/cache   available
+Mem:         950088      405392       72064         468      472632      457088
+Swap:             0           0           0
+</pre></table></code></div></div><p>Here is the mounting point of container. By default <code class="language-plaintext highlighter-rouge">Fargate</code> uses <code class="language-plaintext highlighter-rouge">20GB</code> volume for free without billing - looks like that it uses <code class="language-plaintext highlighter-rouge">nvme</code> for it, attaching <code class="language-plaintext highlighter-rouge">/dev/nvme1n1</code>:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre><td class="rouge-code"><pre>bash-5.0# <span class="nb">df</span> <span class="nt">-h</span>
+Filesystem                Size      Used Available Use% Mounted on
+overlay                  29.4G      9.9G     17.9G  36% /
+tmpfs                    64.0M         0     64.0M   0% /dev
+shm                     463.9M         0    463.9M   0% /dev/shm
+tmpfs                   463.9M         0    463.9M   0% /sys/fs/cgroup
+/dev/nvme1n1             29.4G      9.9G     17.9G  36% /etc/hosts
+/dev/nvme1n1             29.4G      9.9G     17.9G  36% /etc/resolv.conf
+/dev/nvme1n1             29.4G      9.9G     17.9G  36% /etc/hostname
+/dev/nvme0n1p1            4.8G      1.9G      2.8G  41% /managed-agents/execute-command
+tmpfs                   463.9M         0    463.9M   0% /proc/acpi
+tmpfs                    64.0M         0     64.0M   0% /proc/kcore
+tmpfs                    64.0M         0     64.0M   0% /proc/keys
+tmpfs                    64.0M         0     64.0M   0% /proc/latency_stats
+tmpfs                    64.0M         0     64.0M   0% /proc/timer_list
+tmpfs                    64.0M         0     64.0M   0% /proc/sched_debug
+tmpfs                   463.9M         0    463.9M   0% /sys/firmware
+</pre></table></code></div></div><p>Also interesting observation is <code class="language-plaintext highlighter-rouge">/dev/nvme0n1p1</code> mounted to <code class="language-plaintext highlighter-rouge">/managed-agents/execute-command</code> - this is the agent that established secure connection we are using right now.</p><p>Keep note that there is a small overhead <code class="language-plaintext highlighter-rouge">2%</code> of <code class="language-plaintext highlighter-rouge">CPU</code> consumption when ssm-session is active (to maintain channel connection and expose shell) - it is relatively small compared to the benefits.</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre><td class="rouge-code"><pre><span class="c"># top</span>
+Mem: 749224K used, 194304K free, 420K shrd, 26588K buff, 274588K cached
+CPU:   0% usr   0% sys   0% nic  98% idle   0% io   0% irq   0% sirq
+Load average: 0.04 0.01 0.00 3/321 10327
+  PID  PPID USER     STAT   VSZ %VSZ CPU %CPU COMMAND
+10317    46 root     S    1228m 133%   1   0% /managed-agents/execute-command/ssm-session-worker ecs-execute-command-0c08a0b0a74e088bb
+   46    15 root     S    1530m 166%   0   0% /managed-agents/execute-command/ssm-agent-worker
+10145    46 root     S    1302m 141%   1   0% /managed-agents/execute-command/ssm-session-worker ecs-execute-command-00b61e27773ca1bbc
+   15     0 root     S    1298m 141%   0   0% /managed-agents/execute-command/amazon-ssm-agent
+    1     0 node-red S     318m  35%   0   0% node /opt/yarn-v1.22.19/bin/yarn.js start
+  114     1 node-red S     318m  35%   1   0% node /opt/yarn-v1.22.19/bin/yarn.js run file-watcher
+10154 10145 root     S     2944   0%   0   0% /bin/bash
+10326 10317 root     S     2944   0%   0   0% /bin/bash
+10327 10326 root     R     1708   0%   0   0% top
+ 8285     1 root     Z        0   0%   1   0% <span class="o">[</span>python]
+</pre></table></code></div></div><blockquote class="prompt-tip"><p>ECS Exec will use some CPU and memory. You’ll want to accommodate for that when specifying the CPU and memory resource allocations in your task definition.</p></blockquote><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre><span class="c"># ls -la /managed-agents/execute-command/</span>
+total 52808
+drwx------    4 root     root          4096 Feb  3 22:17 <span class="nb">.</span>
+drwxr-xr-x    3 root     root          4096 Feb  3 22:17 ..
+<span class="nt">-r-x--x--x</span>    1 root     root      14008128 Feb  3 22:17 amazon-ssm-agent
+drwx------    2 root     root          4096 Feb  3 22:17 certs
+drwx------    2 root     root          4096 Feb  3 22:17 configuration
+<span class="nt">-r-x--x--x</span>    1 root     root      22925408 Feb  3 22:17 ssm-agent-worker
+<span class="nt">-r-x--x--x</span>    1 root     root      17120000 Feb  3 22:17 ssm-session-worker
+</pre></table></code></div></div><p>So <code class="language-plaintext highlighter-rouge">ssm-agent</code> configuration with certs and executables is provisioned and attached as <code class="language-plaintext highlighter-rouge">mounting point</code> once we enable exec access.</p><blockquote class="prompt-tip"><p>ECS Exec makes use of AWS Systems Manager (SSM) Session Manager to establish a connection with the running container and uses AWS Identity and Access Management (IAM) policies to control access to running commands in a running container. This is made possible by bind-mounting the necessary SSM agent binaries into the container. The Amazon ECS or AWS Fargate agent is responsible for starting the SSM core agent inside the container alongside your application code.</p></blockquote><h2 id="same-way-we-can-inspect-network-configuration"><span class="me-2">Same way we can inspect network configuration:</span><a href="#same-way-we-can-inspect-network-configuration" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+</pre><td class="rouge-code"><pre>ifconfig
+eth0      Link encap:Ethernet  HWaddr xx:xx:xx:xx:xx:xx
+          inet addr:169.254.172.2  Bcast:0.0.0.0  Mask:255.255.252.0
+          inet6 addr: fe80::fe80:fe80:fe80:cd26/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:75 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:68 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:29991 <span class="o">(</span>29.2 KiB<span class="o">)</span>  TX bytes:6990 <span class="o">(</span>6.8 KiB<span class="o">)</span>
+
+eth1      Link encap:Ethernet  HWaddr xx:xx:xx:xx:xx:xx
+          inet addr:10.0.2.11  Bcast:0.0.0.0  Mask:255.255.255.0
+          inet6 addr: fe80::fe80:fe80:fe80:f21b/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:9001  Metric:1
+          RX packets:97705 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:22986 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:120145440 <span class="o">(</span>114.5 MiB<span class="o">)</span>  TX bytes:4789383 <span class="o">(</span>4.5 MiB<span class="o">)</span>
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+</pre></table></code></div></div><h2 id="even-install-more-utils-if-needed"><span class="me-2">Even install more utils if needed</span><a href="#even-install-more-utils-if-needed" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre><td class="rouge-code"><pre><span class="c"># apk add mc</span>
+<span class="o">(</span>1/11<span class="o">)</span> Installing libcom_err <span class="o">(</span>1.47.0-r2<span class="o">)</span>
+<span class="o">(</span>2/11<span class="o">)</span> Installing e2fsprogs-libs <span class="o">(</span>1.47.0-r2<span class="o">)</span>
+<span class="o">(</span>3/11<span class="o">)</span> Installing libintl <span class="o">(</span>0.21.1-r7<span class="o">)</span>
+<span class="o">(</span>4/11<span class="o">)</span> Installing libblkid <span class="o">(</span>2.38.1-r8<span class="o">)</span>
+<span class="o">(</span>5/11<span class="o">)</span> Installing libmount <span class="o">(</span>2.38.1-r8<span class="o">)</span>
+<span class="o">(</span>6/11<span class="o">)</span> Installing glib <span class="o">(</span>2.76.4-r0<span class="o">)</span>
+<span class="o">(</span>7/11<span class="o">)</span> Installing gpm-libs <span class="o">(</span>1.20.7-r3<span class="o">)</span>
+<span class="o">(</span>8/11<span class="o">)</span> Installing pcre <span class="o">(</span>8.45-r3<span class="o">)</span>
+<span class="o">(</span>9/11<span class="o">)</span> Installing slang <span class="o">(</span>2.3.3-r1<span class="o">)</span>
+<span class="o">(</span>10/11<span class="o">)</span> Installing libssh2 <span class="o">(</span>1.11.0-r0<span class="o">)</span>
+<span class="o">(</span>11/11<span class="o">)</span> Installing mc <span class="o">(</span>4.8.29-r2<span class="o">)</span>
+Executing busybox-1.36.1-r2.trigger
+Executing glib-2.76.4-r0.trigger
+OK: 98 MiB <span class="k">in </span>74 packages
+</pre></table></code></div></div><h2 id="conclusions"><span class="me-2">Conclusions</span><a href="#conclusions" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Amazon ECS Exec is a powerful tool, crucial to have in toolset of support and development for any product. By poviding access to container shell without exposing any port outside, working though session of <code class="language-plaintext highlighter-rouge">aws-based</code> agent it is an extra secure instrument.</p><h2 id="references-links"><span class="me-2">References (Links)</span><a href="#references-links" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><ul><li><a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-macos-overview.html">https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-macos-overview.html</a><li><a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-verify.html">https://docs.aws.amazon.com/systems-manager/latest/userguide/install-plugin-verify.html</a><li><a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html#ecs-exec-required-iam-permissions">https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-exec.html#ecs-exec-required-iam-permissions</a></ul></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw me-1"></i> <a href="/categories/aws/">aws</a>, <a href="/categories/ecs/">ecs</a>, <a href="/categories/fargate/">fargate</a>, <a href="/categories/ssh/">ssh</a>, <a href="/categories/security/">security</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw me-1"></i> <a href="/tags/aws/" class="post-tag no-text-decoration" >aws</a> <a href="/tags/ecs/" class="post-tag no-text-decoration" >ecs</a> <a href="/tags/fargate/" class="post-tag no-text-decoration" >fargate</a> <a href="/tags/ssh/" class="post-tag no-text-decoration" >ssh</a> <a href="/tags/security/" class="post-tag no-text-decoration" >security</a></div><div class=" post-tail-bottom d-flex justify-content-between align-items-center mt-5 pb-2 " ><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0 </a> by the author.</div><div class="share-wrapper d-flex align-items-center"> <span class="share-label text-muted">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Securely%20accessing%20ECS%20Fargate%20containers%20shell,%20without%20SSH%20or%20exposed%20ports%20-%20Engineer's%20Notes&url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2024%2F02%2F04%2Fecs-exec.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitter" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Securely%20accessing%20ECS%20Fargate%20containers%20shell,%20without%20SSH%20or%20exposed%20ports%20-%20Engineer's%20Notes&u=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2024%2F02%2F04%2Fecs-exec.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Facebook" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://t.me/share/url?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2024%2F02%2F04%2Fecs-exec.html&text=Securely%20accessing%20ECS%20Fargate%20containers%20shell,%20without%20SSH%20or%20exposed%20ports%20-%20Engineer's%20Notes" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Telegram" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2024%2F02%2F04%2Fecs-exec.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Linkedin" aria-label="Linkedin"> <i class="fa-fw fab fa-linkedin"></i> </a> <button id="copy-link" aria-label="Copy link" class="btn small" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link" data-title-succeed="Link copied successfully!" > <i class="fa-fw fas fa-link pe-none fs-6"></i> </button> </span></div></div></div></article></main><aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted"><div class="access"><section id="access-lastmod"><h2 class="panel-heading">Recently Updated</h2><ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2"><li class="text-truncate lh-lg"> <a href="/posts/2025/09/26/multiagnet-n8n-bedrock.html">Orchestrating AI multi-agent infrastructure with AWS Bedrock, OpenAI and n8n</a><li class="text-truncate lh-lg"> <a href="/posts/2025/07/20/elastic-cache-vector.html">Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts</a><li class="text-truncate lh-lg"> <a href="/posts/2025/09/17/duckdb-s3.html">Running analytics queries from your machine with Zero-BigData stack needed on top of AWS S3(compressed JSON, Parquet, csv) or other DataSources</a><li class="text-truncate lh-lg"> <a href="/posts/2023/10/02/dynamo-design.html">DynamoDB Table Design Principles - NoSQL Modeling</a><li class="text-truncate lh-lg"> <a href="/posts/2023/10/04/dynamo-one-to-many.html">DynamoDB Table Design Principles - One-To-Many Relationships in NoSQL</a></ul></section><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div class="toc-border-cover z-3"></div><section id="toc-wrapper" class="invisible position-sticky ps-0 pe-4 pb-4"><h2 class="panel-heading ps-3 pb-2 mb-0">Contents</h2><nav id="toc"></nav></section></aside></div><div class="row"><div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 px-md-4"><aside id="related-posts" aria-labelledby="related-label"><h3 class="mb-4" id="related-label">Further Reading</h3><nav class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4"><article class="col"> <a href="/posts/2024/02/11/system-manager.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1707660000" data-df="ll" > Feb 11, 2024 </time><h4 class="pt-0 my-2">AWS SSM Session Manager as secure Hub to establish multiple Connections to instances and Port Forwarding</h4><div class="text-muted"><p>Abstract Port forwarding or SSH tunnelling is technic widely used to map remote ports to a client machine with possibility of remapping. The data traffic is encrypted and transferred within SSH tu...</p></div></div></a></article><article class="col"> <a href="/posts/2024/01/27/arm-graviton.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1706364000" data-df="ll" > Jan 27, 2024 </time><h4 class="pt-0 my-2">Migrating ECS Fargate Cluster from x86-64 to arm-64 AWS Graviton Architecture with Fallback Strategy</h4><div class="text-muted"><p>Abstract In recent years, the technology landscape has seen a significant shift towards sustainable and energy-efficient practices. This paradigm is not just limited to data centers, user interfac...</p></div></div></a></article><article class="col"> <a href="/posts/2023/01/23/ecs-billing.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1674482400" data-df="ll" > Jan 23, 2023 </time><h4 class="pt-0 my-2">Running inventory on ECS Fargate cluster to optimize resources utilization and reduce your billing costs</h4><div class="text-muted"><p>Abstract In this blog post, we will explore how to use Amazon Elastic Container Service (ECS) Fargate to inventory cluster resources, decrease costs and reduce billing. By implementing a few simpl...</p></div></div></a></article></nav></aside><nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation"> <a href="/posts/2024/02/03/s3-signed-urls.html" class="btn btn-outline-primary" aria-label="Older" ><p>AWS S3-presigned URLs: Deep Dive and Use Cases of secure file transfers</p></a> <a href="/posts/2024/02/11/system-manager.html" class="btn btn-outline-primary" aria-label="Newer" ><p>AWS SSM Session Manager as secure Hub to establish multiple Connections to instances and Port Forwarding</p></a></nav><footer aria-label="Site Info" class=" d-flex flex-column justify-content-center text-muted flex-lg-row justify-content-lg-between align-items-lg-center pb-lg-3 " ><p>© <time>2025</time> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a>. <span data-bs-toggle="tooltip" data-bs-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author." >Some rights reserved.</span> <span data-bs-toggle="tooltip" data-bs-placement="top" title="2025-09-26 20:11:52 +0300 &#013;be60bb44e6416aa69b8fd68791db025be40c523c">Build version: be60bb4</span></p><p>Using the <a data-bs-toggle="tooltip" data-bs-placement="top" title="v7.2.4" href="https://github.com/cotes2020/jekyll-theme-chirpy" target="_blank" rel="noopener" >Chirpy</a> theme for <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>.</p></footer></div></div><div id="search-result-wrapper" class="d-flex justify-content-center d-none"><div class="col-11 content"><div id="search-hints"><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><aside aria-label="Scroll to Top"> <button id="back-to-top" type="button" class="btn btn-lg btn-box-shadow"> <i class="fas fa-angle-up"></i> </button></aside></div><div id="mask" class="d-none position-fixed w-100 h-100 z-1"></div><aside id="notification" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-animation="true" data-bs-autohide="false" ><div class="toast-header"> <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast" aria-label="Close" ></button></div><div class="toast-body text-center pt-0"><p class="px-2 mb-3">A new version of content is available.</p><button type="button" class="btn btn-primary" aria-label="Update"> Update </button></div></aside><script> (function () { const themeMapper = Theme.getThemeMapper('light', 'dark_dimmed'); const initTheme = themeMapper[Theme.visualState]; let lang = 'en';if (lang.length > 2 && !lang.startsWith('zh')) { lang = lang.slice(0, 2); } let giscusAttributes = { src: 'https://giscus.app/client.js', 'data-repo': 'tsypuk/tsypuk.github.io', 'data-repo-id': 'R_kgDOIxaFiw', 'data-category': 'General', 'data-category-id': 'DIC_kwDOIxaFi84CUSfn', 'data-mapping': 'og:title', 'data-strict' : '0', 'data-reactions-enabled': '1', 'data-emit-metadata': '0', 'data-theme': initTheme, 'data-input-position': 'top', 'data-lang': lang, 'data-loading': 'lazy', crossorigin: 'anonymous', async: '' }; let giscusNode = document.createElement('script'); Object.entries(giscusAttributes).forEach(([key, value]) => giscusNode.setAttribute(key, value) ); const $footer = document.querySelector('footer'); $footer.insertAdjacentElement("beforebegin", giscusNode); addEventListener('message', (event) => { if (event.source === window && event.data && event.data.id === Theme.ID) { const newTheme = themeMapper[Theme.visualState]; const message = { setConfig: { theme: newTheme } }; const giscus = document.getElementsByClassName('giscus-frame')[0].contentWindow; giscus.postMessage({ giscus: message }, 'https://giscus.app'); } }); })(); </script> <script> document.addEventListener('DOMContentLoaded', () => { SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<article class="px-1 px-sm-2 px-lg-4 px-xl-0"><header><h2><a href="{url}">{title}</a></h2><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags}</div></header><p>{content}</p></article>', noResultsText: '<p class="mt-5">Oops! No results found.</p>', templateMiddleware: function(prop, value, template) { if (prop === 'categories') { if (value === '') { return `${value}`; } else { return `<div class="me-sm-4"><i class="far fa-folder fa-fw"></i>${value}</div>`; } } if (prop === 'tags') { if (value === '') { return `${value}`; } else { return `<div><i class="fa fa-tag fa-fw"></i>${value}</div>`; } } } }); }); </script>

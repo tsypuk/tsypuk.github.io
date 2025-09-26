@@ -1,0 +1,25 @@
+@startuml
+
+class Twitter
+
+package "Connect Cluster" <<Rectangle>> #E9D1DF {
+Twitter -> Worker
+  class Worker
+  class Worker2
+}
+
+package "Kafka Cluster" <<Rectangle>> #E9D1DF {
+Worker -> Broker
+  class Broker
+  class Broker2
+  class Broker3
+}
+
+Broker -> Consumer
+Broker -[hidden]-> Broker2
+Broker2 -[hidden]-> Broker3
+Worker -[hidden]-> Worker2
+note top of Consumer #lightgreen : cli kafka comsumer
+note top of Twitter #lightgreen : *java* tweets
+
+@enduml

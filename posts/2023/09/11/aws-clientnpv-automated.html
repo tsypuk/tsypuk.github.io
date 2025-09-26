@@ -1,0 +1,321 @@
+<!doctype html><html lang="en" ><head> <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); </script><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="viewport" content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover" ><meta name="generator" content="Jekyll v4.3.3" /><meta property="og:title" content="Automating AWS Client VPN creation with Terraform and Scripts | by Roman Tsypuk" /><meta name="author" content="Roman Tsypuk" /><meta property="og:locale" content="en" /><meta name="description" content="In previous Post Latest AWS Managed Client VPN Connection, we checked how managed AWS VPN Client allows much faster and secure bootstrap OpenVPN server compared to DIY EC2-based instance setup. And there are some manual time-consuming steps that require human interaction. Now we will define and automate these steps to make experience with bootstrapping AWS Client VPN even more smoother." /><meta property="og:description" content="In previous Post Latest AWS Managed Client VPN Connection, we checked how managed AWS VPN Client allows much faster and secure bootstrap OpenVPN server compared to DIY EC2-based instance setup. And there are some manual time-consuming steps that require human interaction. Now we will define and automate these steps to make experience with bootstrapping AWS Client VPN even more smoother." /><meta property="twitter:description" content="In previous Post Latest AWS Managed Client VPN Connection, we checked how managed AWS VPN Client allows much faster and secure bootstrap OpenVPN server compared to DIY EC2-based instance setup. And there are some manual time-consuming steps that require human interaction. Now we will define and automate these steps to make experience with bootstrapping AWS Client VPN even more smoother." /><link rel="canonical" href="https://tsypuk.github.io/posts/2023/09/11/aws-clientnpv-automated.html" /><meta property="og:url" content="https://tsypuk.github.io/posts/2023/09/11/aws-clientnpv-automated.html" /><meta property="og:site_name" content="Engineer’s Notes | Roman Tsypuk" /><meta property="og:image" content="https://tsypuk.github.io/images/banners/1200/pexels-pixabay-326957.jpeg" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2023-09-11T17:00:00+03:00" /><meta name="publish_date" property="og:publish_date" content="2023-09-11T17:00:00+03:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://tsypuk.github.io/images/banners/1200/pexels-pixabay-326957.jpeg" /><meta property="twitter:title" content="Automating AWS Client VPN creation with Terraform and Scripts | by Roman Tsypuk" /><meta name="twitter:site" content="@roman_tsypuk" /><meta name="twitter:creator" content="@roman_tsypuk" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Roman Tsypuk"},"dateModified":"2024-02-25T18:38:06+02:00","datePublished":"2023-09-11T17:00:00+03:00","description":"In previous Post Latest AWS Managed Client VPN Connection, we checked how managed AWS VPN Client allows much faster and secure bootstrap OpenVPN server compared to DIY EC2-based instance setup. And there are some manual time-consuming steps that require human interaction. Now we will define and automate these steps to make experience with bootstrapping AWS Client VPN even more smoother.","headline":"Automating AWS Client VPN creation with Terraform and Scripts","image":"https://tsypuk.github.io/images/banners/1200/pexels-pixabay-326957.jpeg","mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/posts/2023/09/11/aws-clientnpv-automated.html"},"url":"https://tsypuk.github.io/posts/2023/09/11/aws-clientnpv-automated.html"}</script><title>Automating AWS Client VPN creation with Terraform and Scripts | Engineer's Notes</title><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/site.webmanifest"><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico"><meta name="apple-mobile-web-app-title" content="Engineer's Notes"><meta name="application-name" content="Engineer's Notes"><meta name="msapplication-TileColor" content="#da532c"><meta name="msapplication-config" content="/assets/img/favicons/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.googleapis.com" ><link rel="dns-prefetch" href="https://fonts.googleapis.com" ><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="dns-prefetch" href="https://fonts.gstatic.com" ><link rel="preconnect" href="https://cdn.jsdelivr.net" ><link rel="dns-prefetch" href="https://cdn.jsdelivr.net" ><link rel="stylesheet" href="/assets/css/jekyll-theme-chirpy.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&family=Source+Sans+Pro:wght@400;600;700;900&display=swap"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.32.2/dist/tocbot.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css"> <script src="/assets/js/dist/theme.min.js"></script> <script defer src="https://cdn.jsdelivr.net/combine/npm/simple-jekyll-search@1.10.0/dest/simple-jekyll-search.min.js,npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.umd.min.js,npm/glightbox@3.3.0/dist/js/glightbox.min.js,npm/clipboard@2.0.11/dist/clipboard.min.js,npm/dayjs@1.11.13/dayjs.min.js,npm/dayjs@1.11.13/locale/en.js,npm/dayjs@1.11.13/plugin/relativeTime.js,npm/dayjs@1.11.13/plugin/localizedFormat.js,npm/tocbot@4.32.2/dist/tocbot.min.js"></script> <script defer src="/assets/js/dist/post.min.js"></script> <script defer src="/app.min.js?baseurl=&register=" ></script> <script defer src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> document.addEventListener('DOMContentLoaded', () => { window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); }); </script><body><aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end"><header class="profile-wrapper"> <a href="/" id="avatar" class="rounded-circle"><img src="/images/avatar/rtsypuk.jpg" width="112" height="112" alt="avatar" onerror="this.style.display='none'"></a> <a class="site-title d-block" href="/">Engineer's Notes</a><p class="site-subtitle fst-italic mb-0">Cloud, Infrastructure, Architecture, Networking</p></header><nav class="flex-column flex-grow-1 w-100 ps-0"><ul class="nav"><li class="nav-item"> <a href="/" class="nav-link"> <i class="fa-fw fas fa-home"></i> <span>HOME</span> </a><li class="nav-item"> <a href="/categories.html" class="nav-link"> <i class="fa-fw fas fa-stream"></i> <span>CATEGORIES</span> </a><li class="nav-item"> <a href="/tags.html" class="nav-link"> <i class="fa-fw fas fa-tag"></i> <span>TAGS</span> </a><li class="nav-item"> <a href="/archived_posts.html" class="nav-link"> <i class="fa-fw fas fa-archive"></i> <span>ARCHIVES</span> </a><li class="nav-item"> <a href="/roman_tsypuk.html" class="nav-link"> <i class="fa-fw fas fa-info-circle"></i> <span>ABOUT</span> </a></ul></nav><div class="sidebar-bottom d-flex flex-wrap align-items-center w-100"> <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle"> <i class="fas fa-adjust"></i> </button> <span class="icon-border"></span> <a href="https://github.com/tsypuk" aria-label="github" target="_blank" rel="noopener noreferrer" > <i class="fab fa-github"></i> </a> <a href="https://twitter.com/roman_tsypuk" aria-label="twitter" target="_blank" rel="noopener noreferrer" > <i class="fab fa-twitter"></i> </a> <a href="https://www.linkedin.com/in/roman-tsypuk" aria-label="linkedin" target="_blank" rel="noopener noreferrer" > <i class="fab fa-linkedin"></i> </a> <a href="javascript:location.href = 'mailto:' + ['tsypuk_conf','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a></div></aside><div id="main-wrapper" class="d-flex justify-content-center"><div class="container d-flex flex-column px-xxl-5"><header id="topbar-wrapper" aria-label="Top Bar"><div id="topbar" class="d-flex align-items-center justify-content-between px-lg-3 h-100" ><nav id="breadcrumb" aria-label="Breadcrumb"> <span> <a href="/">Home</a> </span> <span>Automating AWS Client VPN creation with Terraform and Scripts</span></nav><button type="button" id="sidebar-trigger" class="btn btn-link" aria-label="Sidebar"> <i class="fas fa-bars fa-fw"></i> </button><div id="topbar-title"> Post</div><button type="button" id="search-trigger" class="btn btn-link" aria-label="Search"> <i class="fas fa-search fa-fw"></i> </button> <search id="search" class="align-items-center ms-3 ms-lg-0"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" autocomplete="off" placeholder="Search..." > </search> <button type="button" class="btn btn-link text-decoration-none" id="search-cancel">Cancel</button></div></header><div class="row flex-grow-1"><main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4"><article class="px-1" data-toc="true"><header><h1 data-toc-skip>Automating AWS Client VPN creation with Terraform and Scripts</h1><div class="post-meta text-muted"> <span> Posted <time data-ts="1694440800" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Sep 11, 2023 </time> </span> <span> Updated <time data-ts="1708879086" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Feb 25, 2024 </time> </span><div class="mt-3 mb-3"> <a href="/images/banners/1200/pexels-pixabay-326957.jpeg" class="popup img-link preview-img shimmer"><img src="/images/banners/1200/pexels-pixabay-326957.jpeg" alt="Preview Image" width="1200" height="630" loading="lazy"></a></div><div class="d-flex justify-content-between"> <span> By <em> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a> </em> </span><div> <span class="readtime" data-bs-toggle="tooltip" data-bs-placement="bottom" title="898 words" > <em>4 min</em> read</span></div></div></div></header><div id="toc-bar" class="d-flex align-items-center justify-content-between invisible"> <span class="label text-truncate">Automating AWS Client VPN creation with Terraform and Scripts</span> <button type="button" class="toc-trigger btn me-1"> <i class="fa-solid fa-list-ul fa-fw"></i> </button></div><button id="toc-solo-trigger" type="button" class="toc-trigger btn btn-outline-secondary btn-sm"> <span class="label ps-2 pe-1">Contents</span> <i class="fa-solid fa-angle-right fa-fw"></i> </button> <dialog id="toc-popup" class="p-0"><div class="header d-flex flex-row align-items-center justify-content-between"><div class="label text-truncate py-2 ms-4">Automating AWS Client VPN creation with Terraform and Scripts</div><button id="toc-popup-close" type="button" class="btn mx-1 my-1 opacity-75"> <i class="fas fa-close"></i> </button></div><div id="toc-popup-content" class="px-4 py-3 pb-4"></div></dialog><div class="content"><h2 id="abstract"><span class="me-2">Abstract</span><a href="#abstract" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>In previous Post <a href="/posts/2023/09/09/aws-clientvpn.html">Latest AWS Managed Client VPN Connection</a>, we checked how managed AWS VPN Client allows much faster and secure bootstrap OpenVPN server compared to DIY EC2-based instance setup. And there are some manual time-consuming steps that require human interaction. Now we will define and automate these steps to make experience with bootstrapping AWS Client VPN even more smoother.</p><h2 id="target-architecture-diagram"><span class="me-2">Target Architecture Diagram</span><a href="#target-architecture-diagram" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p><a href="/images/posts/vpn/infra.png" class="popup img-link shimmer"><img src="/images/posts/vpn/infra.png" alt="infra.png" loading="lazy"></a></p><h2 id="identifying-time-consuming-tasks-to-automate"><span class="me-2">Identifying Time-consuming Tasks to Automate</span><a href="#identifying-time-consuming-tasks-to-automate" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Here is a list of Tasks that are potential candidates for automation:</p><ul><li>interaction with AWS console wizard while creating VPN Client<li>Certificates and Keys generation<li>Manual Download of OpenVPN configuration<li>Manual Patch of OpenVPN configuration</ul><h2 id="automation-step-1-automate-certs-generation"><span class="me-2">Automation Step 1 (Automate Certs generation):</span><a href="#automation-step-1-automate-certs-generation" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Let’s define following script that will automatically check out the latest <strong>OpenVPN easy-rsa</strong> and generate <strong>root CA</strong>, <strong>clients Cert and Key</strong>, <strong>servers Cert and Key</strong>.</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+</pre><td class="rouge-code"><pre><span class="c">#!/usr/bin/env bash</span>
+
+<span class="c"># 1. generate certs</span>
+git clone https://github.com/OpenVPN/easy-rsa.git
+<span class="nb">cd </span>easy-rsa/easyrsa3
+./easyrsa init-pki
+./easyrsa init-pki
+./easyrsa build-ca nopass
+./easyrsa build-server-full server nopass
+./easyrsa build-client-full client1.domain.tld nopass
+
+<span class="c"># 2. copy certificates</span>
+<span class="nb">mkdir</span> ../../certs_<span class="nv">$1</span>/
+<span class="nb">cp </span>pki/ca.crt ../../certs_<span class="nv">$1</span>/
+<span class="nb">cp </span>pki/issued/server.crt ../../certs_<span class="nv">$1</span>/
+<span class="nb">cp </span>pki/private/server.key ../../certs_<span class="nv">$1</span>/
+<span class="nb">cp </span>pki/issued/client1.domain.tld.crt ../../certs_<span class="nv">$1</span>/
+<span class="nb">cp </span>pki/private/client1.domain.tld.key ../../certs_<span class="nv">$1</span>/
+</pre></table></code></div></div><p>It supports a parameter with <strong>aws region name</strong>:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre><td class="rouge-code"><pre>./gen_certs.sh us-west-1
+</pre></table></code></div></div><p>The output of certs generation script is following files created in folder named with <strong>region</strong> postfix:</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre><td class="rouge-code"><pre> <span class="nb">ls</span> <span class="nt">-l</span> certs_us-west-1
+total 56
+<span class="nt">-rw-------</span>  1   staff  1172 Sep  11 20:10 ca.crt
+<span class="nt">-rw-------</span>  1   staff  4460 Sep  11 20:10 client1.domain.tld.crt
+<span class="nt">-rw-------</span>  1   staff  1704 Sep  11 20:10 client1.domain.tld.key
+<span class="nt">-rw-------</span>  1   staff  4547 Sep  11 20:10 server.crt
+<span class="nt">-rw-------</span>  1   staff  1704 Sep  11 20:10 server.key
+
+</pre></table></code></div></div><h2 id="automation-step-2-automating-aws-resources-creation-with-terraform"><span class="me-2">Automation Step 2 (Automating AWS resources creation with Terraform):</span><a href="#automation-step-2-automating-aws-resources-creation-with-terraform" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Let’s start with main network topology creation:</p><ul><li>VPC<li>SN<li>InternetGateway</ul><div class="language-terraform highlighter-rouge"><div class="code-header"> <span data-label-text="Terraform"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+</pre><td class="rouge-code"><pre><span class="k">resource</span> <span class="s2">"aws_vpc"</span> <span class="s2">"main"</span> <span class="p">{</span>
+  <span class="nx">cidr_block</span> <span class="p">=</span> <span class="kd">var</span><span class="p">.</span><span class="nx">vpc_CIDR</span>
+
+  <span class="nx">enable_dns_hostnames</span> <span class="p">=</span> <span class="kc">true</span>
+  <span class="nx">enable_dns_support</span>   <span class="p">=</span> <span class="kc">true</span>
+  <span class="nx">instance_tenancy</span>     <span class="p">=</span> <span class="s2">"default"</span>
+
+  <span class="nx">tags</span> <span class="p">=</span> <span class="kd">local</span><span class="p">.</span><span class="nx">global_tags</span>
+<span class="p">}</span>
+
+<span class="k">resource</span> <span class="s2">"aws_default_security_group"</span> <span class="s2">"default"</span> <span class="p">{</span>
+  <span class="nx">vpc_id</span> <span class="p">=</span> <span class="nx">aws_vpc</span><span class="p">.</span><span class="nx">main</span><span class="p">.</span><span class="nx">id</span>
+
+  <span class="nx">egress</span> <span class="p">{</span>
+    <span class="nx">from_port</span>   <span class="p">=</span> <span class="mi">0</span>
+    <span class="nx">to_port</span>     <span class="p">=</span> <span class="mi">0</span>
+    <span class="nx">protocol</span>    <span class="p">=</span> <span class="s2">"-1"</span>
+    <span class="nx">cidr_blocks</span> <span class="p">=</span> <span class="p">[</span><span class="s2">"0.0.0.0/0"</span><span class="p">]</span>
+  <span class="p">}</span>
+
+  <span class="nx">tags</span> <span class="p">=</span> <span class="kd">local</span><span class="p">.</span><span class="nx">global_tags</span>
+<span class="p">}</span>
+
+<span class="k">resource</span> <span class="s2">"aws_subnet"</span> <span class="s2">"sn_az"</span> <span class="p">{</span>
+
+  <span class="nx">availability_zone</span> <span class="p">=</span> <span class="kd">local</span><span class="p">.</span><span class="nx">availability_zone</span>
+
+  <span class="nx">vpc_id</span>                  <span class="p">=</span> <span class="nx">aws_vpc</span><span class="p">.</span><span class="nx">main</span><span class="p">.</span><span class="nx">id</span>
+  <span class="nx">map_public_ip_on_launch</span> <span class="p">=</span> <span class="kc">false</span>
+
+  <span class="nx">cidr_block</span> <span class="p">=</span> <span class="nx">cidrsubnet</span><span class="p">(</span><span class="nx">aws_vpc</span><span class="p">.</span><span class="nx">main</span><span class="p">.</span><span class="nx">cidr_block</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+  <span class="nx">tags</span> <span class="p">=</span> <span class="kd">local</span><span class="p">.</span><span class="nx">global_tags</span>
+<span class="p">}</span>
+
+<span class="k">resource</span> <span class="s2">"aws_internet_gateway"</span> <span class="s2">"igw"</span> <span class="p">{</span>
+  <span class="nx">vpc_id</span> <span class="p">=</span> <span class="nx">aws_vpc</span><span class="p">.</span><span class="nx">main</span><span class="p">.</span><span class="nx">id</span>
+
+  <span class="nx">tags</span> <span class="p">=</span> <span class="kd">local</span><span class="p">.</span><span class="nx">global_tags</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>Following Terraform resources will upload certificates to AWS ACM:</p><ul><li>ACM Client Certificate<li>ACM Server Certificate</ul><div class="language-terraform highlighter-rouge"><div class="code-header"> <span data-label-text="Terraform"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre><td class="rouge-code"><pre><span class="k">resource</span> <span class="s2">"aws_acm_certificate"</span> <span class="s2">"vpn_server"</span> <span class="p">{</span>
+  <span class="nx">private_key</span>       <span class="p">=</span> <span class="nx">file</span><span class="p">(</span><span class="s2">"</span><span class="k">${</span><span class="kd">var</span><span class="p">.</span><span class="nx">cert_dir</span><span class="k">}</span><span class="s2">_</span><span class="k">${</span><span class="kd">local</span><span class="p">.</span><span class="nx">region</span><span class="k">}</span><span class="s2">/server.key"</span><span class="p">)</span>
+  <span class="nx">certificate_body</span>  <span class="p">=</span> <span class="nx">file</span><span class="p">(</span><span class="s2">"</span><span class="k">${</span><span class="kd">var</span><span class="p">.</span><span class="nx">cert_dir</span><span class="k">}</span><span class="s2">_</span><span class="k">${</span><span class="kd">local</span><span class="p">.</span><span class="nx">region</span><span class="k">}</span><span class="s2">/server.crt"</span><span class="p">)</span>
+  <span class="nx">certificate_chain</span> <span class="p">=</span> <span class="nx">file</span><span class="p">(</span><span class="s2">"</span><span class="k">${</span><span class="kd">var</span><span class="p">.</span><span class="nx">cert_dir</span><span class="k">}</span><span class="s2">_</span><span class="k">${</span><span class="kd">local</span><span class="p">.</span><span class="nx">region</span><span class="k">}</span><span class="s2">/ca.crt"</span><span class="p">)</span>
+
+  <span class="nx">tags</span> <span class="p">=</span> <span class="kd">local</span><span class="p">.</span><span class="nx">global_tags</span>
+
+  <span class="nx">lifecycle</span> <span class="p">{</span>
+    <span class="nx">create_before_destroy</span> <span class="p">=</span> <span class="kc">true</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">resource</span> <span class="s2">"aws_acm_certificate"</span> <span class="s2">"vpn_client"</span> <span class="p">{</span>
+  <span class="nx">private_key</span>       <span class="p">=</span> <span class="nx">file</span><span class="p">(</span><span class="s2">"</span><span class="k">${</span><span class="kd">var</span><span class="p">.</span><span class="nx">cert_dir</span><span class="k">}</span><span class="s2">_</span><span class="k">${</span><span class="kd">local</span><span class="p">.</span><span class="nx">region</span><span class="k">}</span><span class="s2">/client1.domain.tld.key"</span><span class="p">)</span>
+  <span class="nx">certificate_body</span>  <span class="p">=</span> <span class="nx">file</span><span class="p">(</span><span class="s2">"</span><span class="k">${</span><span class="kd">var</span><span class="p">.</span><span class="nx">cert_dir</span><span class="k">}</span><span class="s2">_</span><span class="k">${</span><span class="kd">local</span><span class="p">.</span><span class="nx">region</span><span class="k">}</span><span class="s2">/client1.domain.tld.crt"</span><span class="p">)</span>
+  <span class="nx">certificate_chain</span> <span class="p">=</span> <span class="nx">file</span><span class="p">(</span><span class="s2">"</span><span class="k">${</span><span class="kd">var</span><span class="p">.</span><span class="nx">cert_dir</span><span class="k">}</span><span class="s2">_</span><span class="k">${</span><span class="kd">local</span><span class="p">.</span><span class="nx">region</span><span class="k">}</span><span class="s2">/ca.crt"</span><span class="p">)</span>
+
+  <span class="nx">tags</span> <span class="p">=</span> <span class="kd">local</span><span class="p">.</span><span class="nx">global_tags</span>
+<span class="p">}</span>
+</pre></table></code></div></div><ul><li>Client VPN<div class="language-terraform highlighter-rouge"><div class="code-header"> <span data-label-text="Terraform"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre><td class="rouge-code"><pre><span class="k">resource</span> <span class="s2">"aws_ec2_client_vpn_endpoint"</span> <span class="s2">"vpn"</span> <span class="p">{</span>
+<span class="nx">description</span>            <span class="p">=</span> <span class="s2">"Client VPN example"</span>
+<span class="nx">client_cidr_block</span>      <span class="p">=</span> <span class="kd">var</span><span class="p">.</span><span class="nx">vpn_client_CIDR</span>
+<span class="nx">split_tunnel</span>           <span class="p">=</span> <span class="kd">var</span><span class="p">.</span><span class="nx">split_tunnel</span>
+<span class="nx">server_certificate_arn</span> <span class="p">=</span> <span class="nx">aws_acm_certificate</span><span class="p">.</span><span class="nx">vpn_server</span><span class="p">.</span><span class="nx">arn</span>
+
+<span class="nx">authentication_options</span> <span class="p">{</span>
+  <span class="nx">type</span>                       <span class="p">=</span> <span class="s2">"certificate-authentication"</span>
+  <span class="nx">root_certificate_chain_arn</span> <span class="p">=</span> <span class="nx">aws_acm_certificate</span><span class="p">.</span><span class="nx">vpn_client</span><span class="p">.</span><span class="nx">arn</span>
+<span class="p">}</span>
+
+<span class="nx">dns_servers</span> <span class="p">=</span> <span class="kd">var</span><span class="p">.</span><span class="nx">dns_servers</span>
+
+<span class="nx">connection_log_options</span> <span class="p">{</span>
+  <span class="nx">enabled</span> <span class="p">=</span> <span class="kc">false</span>
+<span class="p">}</span>
+
+<span class="nx">tags</span> <span class="p">=</span> <span class="kd">local</span><span class="p">.</span><span class="nx">global_tags</span>
+<span class="p">}</span>
+</pre></table></code></div></div><li>SN association</ul><div class="language-terraform highlighter-rouge"><div class="code-header"> <span data-label-text="Terraform"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre><span class="k">resource</span> <span class="s2">"aws_ec2_client_vpn_network_association"</span> <span class="s2">"vpn_subnets"</span> <span class="p">{</span>
+  <span class="nx">client_vpn_endpoint_id</span> <span class="p">=</span> <span class="nx">aws_ec2_client_vpn_endpoint</span><span class="p">.</span><span class="nx">vpn</span><span class="p">.</span><span class="nx">id</span>
+  <span class="nx">subnet_id</span>              <span class="p">=</span> <span class="nx">aws_subnet</span><span class="p">.</span><span class="nx">sn_az</span><span class="p">.</span><span class="nx">id</span>
+  <span class="nx">security_groups</span>        <span class="p">=</span> <span class="p">[</span><span class="nx">aws_security_group</span><span class="p">.</span><span class="nx">vpn_access</span><span class="p">.</span><span class="nx">id</span><span class="p">]</span>
+
+  <span class="nx">lifecycle</span> <span class="p">{</span>
+    <span class="nx">ignore_changes</span> <span class="p">=</span> <span class="p">[</span><span class="nx">subnet_id</span><span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><h2 id="automation-step-3-automate-openvpn-config-download"><span class="me-2">Automation Step 3 (Automate OpenVPN config download):</span><a href="#automation-step-3-automate-openvpn-config-download" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>This will automatically download *.opvn configuration file to local machine with no need to click pages and navigate in AWS console.</p><div class="language-terraform highlighter-rouge"><div class="code-header"> <span data-label-text="Terraform"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre><td class="rouge-code"><pre><span class="k">resource</span> <span class="s2">"null_resource"</span> <span class="s2">"export-client-config"</span> <span class="p">{</span>
+  <span class="k">provisioner</span> <span class="s2">"local-exec"</span> <span class="p">{</span>
+    <span class="nx">command</span> <span class="p">=</span> <span class="s2">"aws --region </span><span class="k">${</span><span class="kd">local</span><span class="p">.</span><span class="nx">region</span><span class="k">}</span><span class="s2"> ec2 export-client-vpn-client-configuration --client-vpn-endpoint-id </span><span class="k">${</span><span class="nx">aws_ec2_client_vpn_endpoint</span><span class="p">.</span><span class="nx">vpn</span><span class="p">.</span><span class="nx">id</span><span class="k">}</span><span class="s2"> --output text&gt;</span><span class="k">${</span><span class="nx">path</span><span class="p">.</span><span class="nx">root</span><span class="k">}</span><span class="s2">/</span><span class="k">${</span><span class="kd">local</span><span class="p">.</span><span class="nx">region</span><span class="k">}</span><span class="s2">_openvpn-client-config.ovpn"</span>
+  <span class="p">}</span>
+
+  <span class="nx">depends_on</span> <span class="p">=</span> <span class="p">[</span>
+    <span class="nx">aws_ec2_client_vpn_endpoint</span><span class="p">.</span><span class="nx">vpn</span><span class="p">,</span>
+    <span class="nx">aws_ec2_client_vpn_route</span><span class="p">.</span><span class="nx">vpn_routes</span><span class="p">,</span>
+    <span class="nx">aws_ec2_client_vpn_network_association</span><span class="p">.</span><span class="nx">vpn_subnets</span><span class="p">,</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></table></code></div></div><h2 id="automation-step-4-automatic-patching-openvpn-configuration-with-proper-values"><span class="me-2">Automation Step 4 (Automatic Patching OpenVPN configuration with proper values):</span><a href="#automation-step-4-automatic-patching-openvpn-configuration-with-proper-values" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Since downloaded AWS OpenVPN configuration can not apply immediately, and it requires manual modification this is also a great candidate for automation. Following script does all heavy lifting and adds <strong>cert</strong>, <strong>key</strong> and modifies <strong>server_name</strong></p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+</pre><td class="rouge-code"><pre><span class="c">#!/usr/bin/env bash</span>
+
+<span class="c"># Contents of client certificate (.crt) file</span>
+<span class="nb">echo</span> <span class="s2">""</span>  <span class="o">&gt;&gt;</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+<span class="nb">echo</span> <span class="s2">""</span>  <span class="o">&gt;&gt;</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+<span class="nb">echo</span> <span class="s1">'&lt;cert&gt;'</span> <span class="o">&gt;&gt;</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+
+<span class="nb">cat </span>certs_<span class="nv">$1</span>/client1.domain.tld.crt <span class="o">&gt;&gt;</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+
+<span class="nb">echo</span> <span class="s1">'&lt;/cert&gt;'</span> <span class="o">&gt;&gt;</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+<span class="nb">echo</span> <span class="s2">""</span>  <span class="o">&gt;&gt;</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+
+<span class="c"># Contents of private key (.key) file</span>
+<span class="nb">echo</span> <span class="s2">""</span>  <span class="o">&gt;&gt;</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+<span class="nb">echo</span> <span class="s1">'&lt;key&gt;'</span> <span class="o">&gt;&gt;</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+
+<span class="nb">cat </span>certs_<span class="nv">$1</span>/client1.domain.tld.key <span class="o">&gt;&gt;</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+
+<span class="nb">echo</span> <span class="s1">'&lt;/key&gt;'</span> <span class="o">&gt;&gt;</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+<span class="nb">echo</span> <span class="s2">""</span>  <span class="o">&gt;&gt;</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+
+<span class="c"># Append server to DNS name</span>
+<span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">''</span> <span class="s1">'s/cvpn-endpoint/server.cvpn-endpoint/g'</span> <span class="nv">$1_openvpn</span><span class="nt">-client-config</span>.ovpn
+</pre></table></code></div></div><h2 id="automation-step-5-adding-openvpn-patching-as-terraform-resource"><span class="me-2">Automation Step 5 (Adding OpenVPN patching as terraform resource):</span><a href="#automation-step-5-adding-openvpn-patching-as-terraform-resource" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><div class="language-terraform highlighter-rouge"><div class="code-header"> <span data-label-text="Terraform"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre><td class="rouge-code"><pre><span class="k">resource</span> <span class="s2">"null_resource"</span> <span class="s2">"patch_vpn_config_locally"</span> <span class="p">{</span>
+  <span class="k">provisioner</span> <span class="s2">"local-exec"</span> <span class="p">{</span>
+    <span class="nx">command</span> <span class="p">=</span> <span class="s2">"</span><span class="k">${</span><span class="nx">path</span><span class="p">.</span><span class="nx">root</span><span class="k">}</span><span class="s2">/patch_certs.sh </span><span class="k">${</span><span class="kd">local</span><span class="p">.</span><span class="nx">region</span><span class="k">}</span><span class="s2">"</span>
+  <span class="p">}</span>
+
+  <span class="nx">depends_on</span> <span class="p">=</span> <span class="p">[</span>
+    <span class="nx">aws_ec2_client_vpn_authorization_rule</span><span class="p">.</span><span class="nx">vpn_auth_rule</span><span class="p">,</span>
+    <span class="nx">null_resource</span><span class="p">.</span><span class="nx">export-client-config</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></table></code></div></div><h2 id="results"><span class="me-2">Results</span><a href="#results" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Now creation of AWS managed Client VPN is fully automated, just run the following commands, and you are ready to connect to you VPN Endpoint.</p><div class="language-shell highlighter-rouge"><div class="code-header"> <span data-label-text="Shell"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre>./gen_certs.sh us-east-1
+terraform apply
+</pre></table></code></div></div><p>AWS VPN is created and in your local folder you will find <strong>us-west-1_openvpn-client-config.ovpn</strong> config file ready to be uploaded into OpenVPN Connect.</p><h2 id="references-links"><span class="me-2">References (Links)</span><a href="#references-links" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><ul><li><a href="/posts/2023/09/09/aws-clientvpn.html">Latest AWS Managed Client VPN Connection</a><li><a href="https://github.com/tsypuk/samples/tree/main/client-vpn">GitHub Client VPN Sample with Terraform &amp; Scripts Sources</a></ul></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw me-1"></i> <a href="/categories/aws/">aws</a>, <a href="/categories/vpn/">vpn</a>, <a href="/categories/cloud/">cloud</a>, <a href="/categories/network/">network</a>, <a href="/categories/terraform/">terraform</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw me-1"></i> <a href="/tags/aws/" class="post-tag no-text-decoration" >aws</a> <a href="/tags/vpn/" class="post-tag no-text-decoration" >vpn</a> <a href="/tags/cloud/" class="post-tag no-text-decoration" >cloud</a> <a href="/tags/network/" class="post-tag no-text-decoration" >network</a> <a href="/tags/terraform/" class="post-tag no-text-decoration" >terraform</a></div><div class=" post-tail-bottom d-flex justify-content-between align-items-center mt-5 pb-2 " ><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0 </a> by the author.</div><div class="share-wrapper d-flex align-items-center"> <span class="share-label text-muted">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Automating%20AWS%20Client%20VPN%20creation%20with%20Terraform%20and%20Scripts%20-%20Engineer's%20Notes&url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2023%2F09%2F11%2Faws-clientnpv-automated.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitter" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Automating%20AWS%20Client%20VPN%20creation%20with%20Terraform%20and%20Scripts%20-%20Engineer's%20Notes&u=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2023%2F09%2F11%2Faws-clientnpv-automated.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Facebook" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://t.me/share/url?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2023%2F09%2F11%2Faws-clientnpv-automated.html&text=Automating%20AWS%20Client%20VPN%20creation%20with%20Terraform%20and%20Scripts%20-%20Engineer's%20Notes" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Telegram" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2023%2F09%2F11%2Faws-clientnpv-automated.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Linkedin" aria-label="Linkedin"> <i class="fa-fw fab fa-linkedin"></i> </a> <button id="copy-link" aria-label="Copy link" class="btn small" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link" data-title-succeed="Link copied successfully!" > <i class="fa-fw fas fa-link pe-none fs-6"></i> </button> </span></div></div></div></article></main><aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted"><div class="access"><section id="access-lastmod"><h2 class="panel-heading">Recently Updated</h2><ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2"><li class="text-truncate lh-lg"> <a href="/posts/2025/09/26/multiagnet-n8n-bedrock.html">Orchestrating AI multi-agent infrastructure with AWS Bedrock, OpenAI and n8n</a><li class="text-truncate lh-lg"> <a href="/posts/2025/07/20/elastic-cache-vector.html">Amazon ElastiCache Redis as a Vector Embeddings Storage for Semantic Search in AWS Community Blog posts</a><li class="text-truncate lh-lg"> <a href="/posts/2025/09/17/duckdb-s3.html">Running analytics queries from your machine with Zero-BigData stack needed on top of AWS S3(compressed JSON, Parquet, csv) or other DataSources</a><li class="text-truncate lh-lg"> <a href="/posts/2023/10/02/dynamo-design.html">DynamoDB Table Design Principles - NoSQL Modeling</a><li class="text-truncate lh-lg"> <a href="/posts/2023/10/04/dynamo-one-to-many.html">DynamoDB Table Design Principles - One-To-Many Relationships in NoSQL</a></ul></section><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div class="toc-border-cover z-3"></div><section id="toc-wrapper" class="invisible position-sticky ps-0 pe-4 pb-4"><h2 class="panel-heading ps-3 pb-2 mb-0">Contents</h2><nav id="toc"></nav></section></aside></div><div class="row"><div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 px-md-4"><aside id="related-posts" aria-labelledby="related-label"><h3 class="mb-4" id="related-label">Further Reading</h3><nav class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4"><article class="col"> <a href="/posts/2023/09/09/aws-clientvpn.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1694268000" data-df="ll" > Sep 9, 2023 </time><h4 class="pt-0 my-2">Latest AWS Managed Client VPN Connection</h4><div class="text-muted"><p>Abstract Creating and managing VPN connections to AWS Cloud Networks is a regular task that we periodically face with. One of the communication channels is VPN connection. For a while if you want t...</p></div></div></a></article><article class="col"> <a href="/posts/2023/02/12/aws-network-analyzer.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1676210400" data-df="ll" > Feb 12, 2023 </time><h4 class="pt-0 my-2">Troubleshooting Network Issues with AWS Network Access Analyzer and Reachability Analyzer</h4><div class="text-muted"><p>Abstract AWS has recently introduced two powerful network tools: the Network Access Analyzer and the Reachability Analyzer. Both of these tools utilize a similar algorithm, producing similarly com...</p></div></div></a></article><article class="col"> <a href="/posts/2023/02/08/aws-vpc-traffic-mirroring-ids-suricata.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1675850400" data-df="ll" > Feb 8, 2023 </time><h4 class="pt-0 my-2">AWS VPC traffic mirroring to IDS. Deep dive with Wireshark.</h4><div class="text-muted"><p>Abstract Traffic mirroring refers to the process of copying network traffic from one network port or interface to another for analysis, monitoring, or security purposes. There are multiple options...</p></div></div></a></article></nav></aside><nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation"> <a href="/posts/2023/09/09/aws-clientvpn.html" class="btn btn-outline-primary" aria-label="Older" ><p>Latest AWS Managed Client VPN Connection</p></a> <a href="/posts/2023/09/13/pfsense-client-vpn.html" class="btn btn-outline-primary" aria-label="Newer" ><p>Integrating AWS Client VPN with pfSense (most popular OpenSource Router and Firewall)</p></a></nav><footer aria-label="Site Info" class=" d-flex flex-column justify-content-center text-muted flex-lg-row justify-content-lg-between align-items-lg-center pb-lg-3 " ><p>© <time>2025</time> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a>. <span data-bs-toggle="tooltip" data-bs-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author." >Some rights reserved.</span> <span data-bs-toggle="tooltip" data-bs-placement="top" title="2025-09-26 20:11:52 +0300 &#013;be60bb44e6416aa69b8fd68791db025be40c523c">Build version: be60bb4</span></p><p>Using the <a data-bs-toggle="tooltip" data-bs-placement="top" title="v7.2.4" href="https://github.com/cotes2020/jekyll-theme-chirpy" target="_blank" rel="noopener" >Chirpy</a> theme for <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>.</p></footer></div></div><div id="search-result-wrapper" class="d-flex justify-content-center d-none"><div class="col-11 content"><div id="search-hints"><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><aside aria-label="Scroll to Top"> <button id="back-to-top" type="button" class="btn btn-lg btn-box-shadow"> <i class="fas fa-angle-up"></i> </button></aside></div><div id="mask" class="d-none position-fixed w-100 h-100 z-1"></div><aside id="notification" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-animation="true" data-bs-autohide="false" ><div class="toast-header"> <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast" aria-label="Close" ></button></div><div class="toast-body text-center pt-0"><p class="px-2 mb-3">A new version of content is available.</p><button type="button" class="btn btn-primary" aria-label="Update"> Update </button></div></aside><script> (function () { const themeMapper = Theme.getThemeMapper('light', 'dark_dimmed'); const initTheme = themeMapper[Theme.visualState]; let lang = 'en';if (lang.length > 2 && !lang.startsWith('zh')) { lang = lang.slice(0, 2); } let giscusAttributes = { src: 'https://giscus.app/client.js', 'data-repo': 'tsypuk/tsypuk.github.io', 'data-repo-id': 'R_kgDOIxaFiw', 'data-category': 'General', 'data-category-id': 'DIC_kwDOIxaFi84CUSfn', 'data-mapping': 'og:title', 'data-strict' : '0', 'data-reactions-enabled': '1', 'data-emit-metadata': '0', 'data-theme': initTheme, 'data-input-position': 'top', 'data-lang': lang, 'data-loading': 'lazy', crossorigin: 'anonymous', async: '' }; let giscusNode = document.createElement('script'); Object.entries(giscusAttributes).forEach(([key, value]) => giscusNode.setAttribute(key, value) ); const $footer = document.querySelector('footer'); $footer.insertAdjacentElement("beforebegin", giscusNode); addEventListener('message', (event) => { if (event.source === window && event.data && event.data.id === Theme.ID) { const newTheme = themeMapper[Theme.visualState]; const message = { setConfig: { theme: newTheme } }; const giscus = document.getElementsByClassName('giscus-frame')[0].contentWindow; giscus.postMessage({ giscus: message }, 'https://giscus.app'); } }); })(); </script> <script> document.addEventListener('DOMContentLoaded', () => { SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<article class="px-1 px-sm-2 px-lg-4 px-xl-0"><header><h2><a href="{url}">{title}</a></h2><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags}</div></header><p>{content}</p></article>', noResultsText: '<p class="mt-5">Oops! No results found.</p>', templateMiddleware: function(prop, value, template) { if (prop === 'categories') { if (value === '') { return `${value}`; } else { return `<div class="me-sm-4"><i class="far fa-folder fa-fw"></i>${value}</div>`; } } if (prop === 'tags') { if (value === '') { return `${value}`; } else { return `<div><i class="fa fa-tag fa-fw"></i>${value}</div>`; } } } }); }); </script>
