@@ -1,0 +1,243 @@
+<!doctype html><html lang="en" ><head> <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); </script><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="viewport" content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover" ><meta name="generator" content="Jekyll v4.4.1" /><meta property="og:title" content="Optimizing SQS operations using Batch API" /><meta name="author" content="Roman Tsypuk" /><meta property="og:locale" content="en" /><meta name="description" content="Abstract In this post, we explore how refactoring SQS message processing from individual SendMessage calls to Batch SendMessage operations can significantly improve application performance and reduce SQS billing costs by lowering IOPS usage." /><meta name="twitter:description" property="og:description" content="Abstract In this post, we explore how refactoring SQS message processing from individual SendMessage calls to Batch SendMessage operations can significantly improve application performance and reduce SQS billing costs by lowering IOPS usage." /><link rel="canonical" href="https://tsypuk.github.io/posts/2025/12/23/sqs-batch.html" /><meta property="og:url" content="https://tsypuk.github.io/posts/2025/12/23/sqs-batch.html" /><meta property="og:site_name" content="Engineer’s Notes" /><meta property="og:image" content="https://tsypuk.github.io/images/banners/1200/pexels-london.jpg" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2025-12-23T16:00:00+02:00" /><meta property="article:modified_time" content="2025-12-23T16:00:00+02:00" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:image" content="https://tsypuk.github.io/images/banners/1200/pexels-london.jpg" /><meta name="twitter:title" content="Optimizing SQS operations using Batch API" /><meta name="twitter:site" content="@roman_tsypuk" /><meta name="twitter:creator" content="@roman_tsypuk" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Roman Tsypuk"},"dateModified":"2025-12-23T16:00:00+02:00","datePublished":"2025-12-23T16:00:00+02:00","description":"Abstract In this post, we explore how refactoring SQS message processing from individual SendMessage calls to Batch SendMessage operations can significantly improve application performance and reduce SQS billing costs by lowering IOPS usage.","headline":"Optimizing SQS operations using Batch API","image":"https://tsypuk.github.io/images/banners/1200/pexels-london.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/posts/2025/12/23/sqs-batch.html"},"url":"https://tsypuk.github.io/posts/2025/12/23/sqs-batch.html"}</script><title>Optimizing SQS operations using Batch API | Engineer's Notes</title><link rel="icon" type="image/png" href="/assets/img/favicons/favicon-96x96.png" sizes="96x96"><link rel="icon" type="image/svg+xml" href="/assets/img/favicons/favicon.svg"><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-touch-icon.png"><link rel="manifest" href="/assets/img/favicons/site.webmanifest"><link rel="preconnect" href="https://fonts.googleapis.com" ><link rel="dns-prefetch" href="https://fonts.googleapis.com" ><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="dns-prefetch" href="https://fonts.gstatic.com" ><link rel="preconnect" href="https://cdn.jsdelivr.net" ><link rel="dns-prefetch" href="https://cdn.jsdelivr.net" ><link rel="stylesheet" href="/assets/css/jekyll-theme-chirpy.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&family=Source+Sans+Pro:wght@400;600;700;900&display=swap"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.36.4/dist/tocbot.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css"> <script src="/assets/js/dist/theme.min.js"></script> <script defer src="https://cdn.jsdelivr.net/combine/npm/simple-jekyll-search@1.10.0/dest/simple-jekyll-search.min.js,npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.umd.min.js,npm/glightbox@3.3.0/dist/js/glightbox.min.js,npm/clipboard@2.0.11/dist/clipboard.min.js,npm/dayjs@1.11.20/dayjs.min.js,npm/dayjs@1.11.20/locale/en.js,npm/dayjs@1.11.20/plugin/relativeTime.js,npm/dayjs@1.11.20/plugin/localizedFormat.js,npm/tocbot@4.36.4/dist/tocbot.min.js"></script> <script defer src="/assets/js/dist/post.min.js"></script> <script defer src="/app.min.js?baseurl=&register=true" ></script> <script defer src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> document.addEventListener('DOMContentLoaded', () => { window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); }); </script><body><aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end"><header class="profile-wrapper"> <a href="/" id="avatar" class="rounded-circle"><img src="/images/avatar/rtsypuk.jpg" width="112" height="112" alt="avatar" onerror="this.style.display='none'"></a> <a class="site-title d-block" href="/">Engineer's Notes</a><p class="site-subtitle fst-italic mb-0">Cloud, Infrastructure, Architecture, Networking</p></header><nav class="flex-column flex-grow-1 w-100 ps-0"><ul class="nav"><li class="nav-item"> <a href="/" class="nav-link"> <i class="fa-fw fas fa-home"></i> <span>HOME</span> </a><li class="nav-item"> <a href="/categories.html" class="nav-link"> <i class="fa-fw fas fa-stream"></i> <span>CATEGORIES</span> </a><li class="nav-item"> <a href="/tags.html" class="nav-link"> <i class="fa-fw fas fa-tag"></i> <span>TAGS</span> </a><li class="nav-item"> <a href="/archived_posts.html" class="nav-link"> <i class="fa-fw fas fa-archive"></i> <span>ARCHIVES</span> </a><li class="nav-item"> <a href="/roman_tsypuk.html" class="nav-link"> <i class="fa-fw fas fa-info-circle"></i> <span>ABOUT</span> </a></ul></nav><div class="sidebar-bottom d-flex flex-wrap align-items-center w-100"> <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle"> <i class="fas fa-adjust"></i> </button> <span class="icon-border"></span> <a href="https://github.com/tsypuk" aria-label="github" target="_blank" rel="noopener noreferrer" > <i class="fab fa-github"></i> </a> <a href="https://twitter.com/roman_tsypuk" aria-label="twitter" target="_blank" rel="noopener noreferrer" > <i class="fab fa-twitter"></i> </a> <a href="https://www.linkedin.com/in/roman-tsypuk" aria-label="linkedin" target="_blank" rel="noopener noreferrer" > <i class="fab fa-linkedin"></i> </a> <a href="javascript:location.href = 'mailto:' + ['tsypuk_conf','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a></div></aside><div id="main-wrapper" class="d-flex justify-content-center"><div class="container d-flex flex-column px-xxl-5"><header id="topbar-wrapper" class="flex-shrink-0" aria-label="Top Bar"><div id="topbar" class="d-flex align-items-center justify-content-between px-lg-3 h-100" ><nav id="breadcrumb" aria-label="Breadcrumb"> <span> <a href="/">Home</a> </span> <span>Optimizing SQS operations using Batch API</span></nav><button type="button" id="sidebar-trigger" class="btn btn-link" aria-label="Sidebar"> <i class="fas fa-bars fa-fw"></i> </button><div id="topbar-title"> Post</div><button type="button" id="search-trigger" class="btn btn-link" aria-label="Search"> <i class="fas fa-search fa-fw"></i> </button> <search id="search" class="align-items-center ms-3 ms-lg-0"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" autocomplete="off" placeholder="Search..." > </search> <button type="button" class="btn btn-link text-decoration-none" id="search-cancel">Cancel</button></div></header><div class="row flex-grow-1"><main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4"><article class="px-1" data-toc="true"><header><h1 data-toc-skip>Optimizing SQS operations using Batch API</h1><div class="post-meta text-muted"> <span> Posted <time data-ts="1766498400" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Dec 23, 2025 </time> </span><div class="mt-3 mb-3"> <a href="/images/banners/1200/pexels-london.jpg" class="popup img-link preview-img shimmer"><img src="/images/banners/1200/pexels-london.jpg" alt="Preview Image" width="1200" height="630" loading="lazy"></a></div><div class="d-flex justify-content-between"> <span> By <em> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a> </em> </span><div> <span class="readtime" data-bs-toggle="tooltip" data-bs-placement="bottom" title="886 words" > <em>4 min</em> read</span></div></div></div></header><div id="toc-bar" class="d-flex align-items-center justify-content-between invisible"> <span class="label text-truncate">Optimizing SQS operations using Batch API</span> <button type="button" class="toc-trigger btn me-1"> <i class="fa-solid fa-list-ul fa-fw"></i> </button></div><button id="toc-solo-trigger" type="button" class="toc-trigger btn btn-outline-secondary btn-sm"> <span class="label ps-2 pe-1">Contents</span> <i class="fa-solid fa-angle-right fa-fw"></i> </button> <dialog id="toc-popup" class="p-0"><div class="header d-flex flex-row align-items-center justify-content-between"><div class="label text-truncate py-2 ms-4">Optimizing SQS operations using Batch API</div><button id="toc-popup-close" type="button" class="btn mx-1 my-1 opacity-75"> <i class="fas fa-close"></i> </button></div><div id="toc-popup-content" class="px-4 py-3 pb-4"></div></dialog><div class="content"><h2 id="abstract"><span class="me-2">Abstract</span><a href="#abstract" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>In this post, we explore how refactoring SQS message processing from individual <strong>SendMessage</strong> calls to <strong>Batch SendMessage</strong> operations can significantly improve application performance and reduce SQS billing costs by lowering IOPS usage.</p><h2 id="the-idea"><span class="me-2">The idea</span><a href="#the-idea" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>When monitoring a Golang application with DataDog, we can measure SQS message sending in detail. By comparing a traditional loop-based send approach versus batch sending, we can see clear differences in timing, network calls, and resource usage.</p><h2 id="full-datadog-tracing-of-sqs-is-not-supported-for-all-languages"><span class="me-2">Full Datadog tracing of SQS is not supported for all languages:</span><a href="#full-datadog-tracing-of-sqs-is-not-supported-for-all-languages" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Set DD_TRACE_CLOUD_REQUEST_PAYLOAD_TAGGING=all and DD_TRACE_CLOUD_RESPONSE_PAYLOAD_TAGGING=all on this service to enable complete payload tagging.</p><p>https://docs.datadoghq.com/tracing/guide/aws_payload_tagging/?tab=nodejs</p><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre>DD_TRACE_CLOUD_REQUEST_PAYLOAD_TAGGING=all
+DD_TRACE_CLOUD_RESPONSE_PAYLOAD_TAGGING=all
+</pre></table></code></div></div><p>For Golang, you can leverage Datadog attribute tags to inspect payload metadata.</p><h2 id="regular-sqs-message-send-operations"><span class="me-2">Regular SQS message send operations</span><a href="#regular-sqs-message-send-operations" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Sending messages one by one involves multiple network calls and extra overhead.</p><p>Following tracing diagram displays how timing looks like when using loop operation.</p><p><a href="/images/posts/sqs-batch/img_2.png" class="popup img-link shimmer"><img src="/images/posts/sqs-batch/img_2.png" alt="img2.png" loading="lazy"></a></p><p>For example, sending <code class="language-plaintext highlighter-rouge">7 messages</code> individually took <code class="language-plaintext highlighter-rouge">175ms</code>, with <code class="language-plaintext highlighter-rouge">7 separate HTTP requests</code>. The first call typically dominates the timing due to DNS lookup and connection setup.</p><p>But since the service in running in same K8S cluster, we can assume that experiment is clean and no additional overhead is present.</p><h2 id="sending-messages-in-a-batch"><span class="me-2">Sending messages in a Batch</span><a href="#sending-messages-in-a-batch" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p><a href="/images/posts/sqs-batch/img_3.png" class="popup img-link shimmer"><img src="/images/posts/sqs-batch/img_3.png" alt="img3.png" loading="lazy"></a></p><p>AWS SQS allows sending up to 10 messages per batch. Sending <code class="language-plaintext highlighter-rouge">20 messages</code> in <code class="language-plaintext highlighter-rouge">2 batches</code> demonstrates significant efficiency gains:</p><ul><li>Sent 3x more messages.<li>Made 10x fewer HTTP requests.<li>Total processing time reduced by ~3x.</ul><h3 id="response-examples"><span class="me-2">Response examples:</span><a href="#response-examples" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><p>When batch send is performed in a batch response, for each given message there is a status, including the error. So the batch can be completed, but some messages in a batch can fail, parsing this response status will allow to efficiently replay or handle with a fallback business logic of such cases.</p><div class="language-json highlighter-rouge"><div class="code-header"> <span data-label-text="JSON"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+</pre><td class="rouge-code"><pre><span class="w">
+
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"Successful"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"655f3404-fbe4-4c51-8868-b5c604bd5f6d"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"daf36653-9abb-490b-b620-608efa24a219"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"93f4dcfd-0500-4076-90f2-3b880b32c943"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"3"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"f6c7b079-98f5-4290-b293-2ac6e43ed6f2"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"4"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2b4a96bc-b4ec-4711-9473-d887dd3213f7"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1bd30cd9-f9c1-4b47-8d6d-2e23ce771841"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"6"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"8eed75ef-2563-442e-a191-6b3dff29d635"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"7"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"c65a36ce-7ce0-444c-9974-96648dcae0ea"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"8"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"75379265-52f9-4a60-8c3a-0537cffdaa80"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"9"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"59239903-d4d9-498f-9a08-6d7d7ae8beba"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"10"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"9a614c58-113b-487d-a8f1-7509f93b42f9"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"11"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1077de5c-8f0f-4d5b-a0fe-dca45712bfdf"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"12"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"MessageID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"8b0f5836-0e01-4a88-9793-4bac2a6d879a"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"Error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"Failed"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre></table></code></div></div><h3 id="aws-console-behavior"><span class="me-2">AWS Console Behavior</span><a href="#aws-console-behavior" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><p>Batch sending does not change how messages appear in SQS. Each message is stored individually, so consumers don’t need any changes to handle batches.</p><p><a href="/images/posts/sqs-batch/img_4.png" class="popup img-link shimmer"><img src="/images/posts/sqs-batch/img_4.png" alt="img4.png" loading="lazy"></a></p><p>Same messages, same structures are posted and present in SQS.</p><p>However, there are other optimization technics that allow optimise consumer batch size when polling messages from <code class="language-plaintext highlighter-rouge">SQS</code>.</p><h3 id="golang-implementation-example"><span class="me-2">Golang Implementation Example</span><a href="#golang-implementation-example" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><div class="language-go highlighter-rouge"><div class="code-header"> <span data-label-text="Go"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+</pre><td class="rouge-code"><pre><span class="n">entry</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="n">sqs</span><span class="o">.</span><span class="n">SendMessageBatchRequestEntry</span><span class="p">{</span>
+  <span class="n">Id</span><span class="o">:</span>          <span class="n">aws</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">idx</span><span class="p">)),</span> <span class="c">// Unique ID within batch</span>
+  <span class="n">MessageBody</span><span class="o">:</span> <span class="n">aws</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="kt">string</span><span class="p">(</span><span class="n">b</span><span class="p">)),</span>
+<span class="p">}</span>
+
+<span class="k">if</span> <span class="n">taskConfig</span><span class="o">.</span><span class="n">MessageGroupId</span> <span class="o">!=</span> <span class="s">""</span> <span class="p">{</span>
+  <span class="n">entry</span><span class="o">.</span><span class="n">SetMessageGroupId</span><span class="p">(</span><span class="n">taskConfig</span><span class="o">.</span><span class="n">MessageGroupId</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="k">if</span> <span class="n">taskConfig</span><span class="o">.</span><span class="n">MessageDeduplicationId</span> <span class="o">!=</span> <span class="s">""</span> <span class="p">{</span>
+  <span class="n">entry</span><span class="o">.</span><span class="n">SetMessageDeduplicationId</span><span class="p">(</span><span class="n">taskConfig</span><span class="o">.</span><span class="n">MessageDeduplicationId</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="k">if</span> <span class="n">taskConfig</span><span class="o">.</span><span class="n">DelaySeconds</span> <span class="o">&gt;</span> <span class="m">0</span> <span class="p">{</span>
+  <span class="n">entry</span><span class="o">.</span><span class="n">SetDelaySeconds</span><span class="p">(</span><span class="n">taskConfig</span><span class="o">.</span><span class="n">DelaySeconds</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="n">entries</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">type</span> <span class="n">BatchResult</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">Successful</span> <span class="p">[]</span><span class="n">BatchResultEntry</span>
+	<span class="n">Failed</span>     <span class="p">[]</span><span class="n">BatchResultEntry</span>
+<span class="p">}</span>
+
+<span class="c">// BatchResultEntry represents a single entry in a batch result</span>
+<span class="k">type</span> <span class="n">BatchResultEntry</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">ID</span>        <span class="kt">string</span>
+	<span class="n">MessageID</span> <span class="kt">string</span>
+	<span class="n">Error</span>     <span class="kt">error</span>
+<span class="p">}</span>
+
+<span class="c">// Send batch</span>
+<span class="n">input</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="n">sqs</span><span class="o">.</span><span class="n">SendMessageBatchInput</span><span class="p">{</span>
+  <span class="n">QueueUrl</span><span class="o">:</span> <span class="n">stp</span><span class="o">.</span><span class="n">url</span><span class="p">,</span>
+  <span class="n">Entries</span><span class="o">:</span>  <span class="n">entries</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">output</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">stp</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">SendMessageBatchWithContext</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+  <span class="n">err</span> <span class="o">=</span> <span class="n">handleSqsErrors</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+  <span class="c">// Mark all entries in this batch as failed</span>
+  <span class="k">for</span> <span class="n">idx</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">batch</span> <span class="p">{</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">Failed</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">Failed</span><span class="p">,</span> <span class="n">BatchResultEntry</span><span class="p">{</span>
+      <span class="n">ID</span><span class="o">:</span>    <span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="n">idx</span><span class="p">),</span>
+      <span class="n">Error</span><span class="o">:</span> <span class="n">err</span><span class="p">,</span>
+    <span class="p">})</span>
+  <span class="p">}</span>
+  <span class="k">continue</span>
+<span class="p">}</span>
+</pre></table></code></div></div><h3 id="dedicated-message-details"><span class="me-2">Dedicated message details</span><a href="#dedicated-message-details" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><p><a href="/images/posts/sqs-batch/img_5.png" class="popup img-link shimmer"><img src="/images/posts/sqs-batch/img_5.png" alt="img5.png" loading="lazy"></a></p><p>Exactly this <code class="language-plaintext highlighter-rouge">messageID</code> was returned in a batch is success response section.</p><h2 id="additional-things-to-check-and-optimize"><span class="me-2">Additional things to check and optimize</span><a href="#additional-things-to-check-and-optimize" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><h3 id="deduplication-technic"><span class="me-2">Deduplication technic</span><a href="#deduplication-technic" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><p>Before sending the messages, perform the deduplication—this will reduce the SQS iops usage, decrease the latency of processing and reduce the load on the consumer side, avoid unneeded storage read queries, rewrites, etc.</p><h3 id="distributed-tracing-frameworks-can-consume-sqs-batch-slot-for-metaiformation"><span class="me-2">Distributed Tracing frameworks can consume SQS batch slot for metaiformation</span><a href="#distributed-tracing-frameworks-can-consume-sqs-batch-slot-for-metaiformation" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><p>Some frameworks for distributed tracing are propagating metainformation through async transports like SQS. If you are using them, check integrations, it can affect the max batch size. I.e. <strong>Datadog</strong> uses 1 batch element to propagate metainformation with tracing, that will be consumed and applied with span to a same trace.</p><p><strong>x-ray</strong> since it is a proprietary <strong>AWS</strong> technology does not utilize any slots in a SQS batch and uses UDP server to submit span/trace info.</p><h2 id="limitations"><span class="me-2">Limitations:</span><a href="#limitations" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><ul><li>message size payload (1Mb)<li>batch size (10 messages)<li>payload serialization (JSON)</ul><h2 id="conclusions"><span class="me-2">Conclusions:</span><a href="#conclusions" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Switching implementation from loop Send to Batch Send, allowed significantly decrease the overall timing, decrease network round trips and as a bonus decrease the SQS billing (due to decrease API calls in x10 times).</p><h2 id="links"><span class="me-2">Links:</span><a href="#links" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><ul><li><a href="https://docs.datadoghq.com/tracing/guide/aws_payload_tagging/?tab=nodejs">https://docs.datadoghq.com/tracing/guide/aws_payload_tagging/?tab=nodejs</a><li><a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-batch-api-actions.html">https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-batch-api-actions.html</a></ul></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw me-1"></i> <a href="/categories/aws/">aws</a>, <a href="/categories/sqs/">sqs</a>, <a href="/categories/batch/">batch</a>, <a href="/categories/performance/">performance</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw me-1"></i> <a href="/tags/aws/" class="post-tag no-text-decoration" >aws</a> <a href="/tags/sqs/" class="post-tag no-text-decoration" >sqs</a> <a href="/tags/batch/" class="post-tag no-text-decoration" >batch</a> <a href="/tags/performance/" class="post-tag no-text-decoration" >performance</a></div><div class=" post-tail-bottom d-flex justify-content-between align-items-center mt-5 pb-2 " ><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0 </a> by the author.</div><div class="share-wrapper d-flex align-items-center"> <span class="share-label text-muted">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Optimizing%20SQS%20operations%20using%20Batch%20API%20-%20Engineer's%20Notes&url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2025%2F12%2F23%2Fsqs-batch.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitter" aria-label="Twitter"> <i class="fa-fw fa-brands fa-square-x-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Optimizing%20SQS%20operations%20using%20Batch%20API%20-%20Engineer's%20Notes&u=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2025%2F12%2F23%2Fsqs-batch.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Facebook" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://t.me/share/url?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2025%2F12%2F23%2Fsqs-batch.html&text=Optimizing%20SQS%20operations%20using%20Batch%20API%20-%20Engineer's%20Notes" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Telegram" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <button id="copy-link" aria-label="Copy link" class="btn small" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link" data-title-succeed="Link copied successfully!" > <i class="fa-fw fas fa-link pe-none fs-6"></i> </button> </span></div></div></div></article></main><aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted"><div class="access"><section id="access-lastmod"><h2 class="panel-heading">Recently Updated</h2><ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2"><li class="text-truncate lh-lg"> <a href="/posts/2026/06/07/golden-jacket.html">AWS Golden Jacket: My Journey of Learning and Certification</a><li class="text-truncate lh-lg"> <a href="/posts/2026/06/06/edge-model-llamcpp.html">Running local AI LLM anywhere: from EC2 instances to Edge Devices</a><li class="text-truncate lh-lg"> <a href="/posts/2026/04/10/ruby-monkey-patching.html">Redis connection monkey patching in Ruby Jungles</a><li class="text-truncate lh-lg"> <a href="/posts/2026/04/05/valkey-recon.html">From Redis to Valkey: pre-migration Reconnaissance — detect all apps & connections in realtime</a><li class="text-truncate lh-lg"> <a href="/posts/2025/12/23/sqs-batch.html">Optimizing SQS operations using Batch API</a></ul></section><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div class="toc-border-cover z-3"></div><section id="toc-wrapper" class="invisible position-sticky ps-0 pe-4 pb-4"><h2 class="panel-heading ps-3 pb-2 mb-0">Contents</h2><nav id="toc"></nav></section></aside></div><div class="row"><div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 px-md-4"><aside id="related-posts" aria-labelledby="related-label"><h3 class="mb-4" id="related-label">Further Reading</h3><nav class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4"><article class="col"> <a href="/posts/2024/08/17/sqs-time-machine.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1723903200" data-df="ll" > Aug 17, 2024 </time><h4 class="pt-0 my-2">Using AWS SQS as a Time Machine: Delayed Messaging</h4><div class="text-muted"><p>Amazon Simple Queue Service (SQS) is a fully managed message queuing service that enables you to decouple and scale microservices, distributed systems, and serverless applications. One powerful fea...</p></div></div></a></article><article class="col"> <a href="/posts/2024/03/03/benchmark-fargate-cpu.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1709474400" data-df="ll" > Mar 3, 2024 </time><h4 class="pt-0 my-2">AWS Graviton ARM-64 vs Amazon X86-64 GRAND PRIX 2024. Round1: CPU Benchmark.</h4><div class="text-muted"><p>Abstract This is a first post in series of AWS Graviton ARM-64 vs Amazon X86-64 GRAND PRIX 2024 where we will check different performance factors of Graviton, compare to classic x86. I will use ow...</p></div></div></a></article><article class="col"> <a href="/posts/2023/03/21/xra-tracing-2.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1679407200" data-df="ll" > Mar 21, 2023 </time><h4 class="pt-0 my-2">AWS XRAY tracing. Part 2: Advanced. Querying & Grouping.</h4><div class="text-muted"><p>Abstract Welcome to the next part of our AWS X-Ray series. We’ll explore the flow of trace detection and how to specify different parameters like time ranges. Additionally, we’ll take a deep dive i...</p></div></div></a></article></nav></aside><nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation"> <a href="/posts/2025/09/26/multiagnet-n8n-bedrock.html" class="btn btn-outline-primary" aria-label="Older" ><p>Orchestrating AI multi-agent infrastructure with AWS Bedrock, OpenAI and n8n</p></a> <a href="/posts/2026/04/05/valkey-recon.html" class="btn btn-outline-primary" aria-label="Newer" ><p>From Redis to Valkey: pre-migration Reconnaissance — detect all apps & connections in realtime</p></a></nav><footer aria-label="Site Info" class=" d-flex flex-column justify-content-center text-muted flex-lg-row justify-content-lg-between align-items-lg-center pb-lg-3 " ><p>© <time>2026</time> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a>. <span data-bs-toggle="tooltip" data-bs-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author." >Some rights reserved.</span> <span data-bs-toggle="tooltip" data-bs-placement="top" title="2026-06-11 05:40:06 +0300 &#013;eb612af1b782d3632eaed58dc72db2cfb38ce688">Build version: eb612af</span></p><p>Using the <a data-bs-toggle="tooltip" data-bs-placement="top" title="v7.5.0" href="https://github.com/cotes2020/jekyll-theme-chirpy" target="_blank" rel="noopener" >Chirpy</a> theme for <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>.</p></footer></div></div><div id="search-result-wrapper" class="d-flex justify-content-center d-none"><div class="col-11 content"><div id="search-hints"><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><aside aria-label="Scroll to Top"> <button id="back-to-top" type="button" class="btn btn-lg btn-box-shadow"> <i class="fas fa-angle-up"></i> </button></aside></div><div id="mask" class="d-none position-fixed w-100 h-100 z-1"></div><aside id="notification" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-animation="true" data-bs-autohide="false" ><div class="toast-header"> <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast" aria-label="Close" ></button></div><div class="toast-body text-center pt-0"><p class="px-2 mb-3">A new version of content is available.</p><button type="button" class="btn btn-primary" aria-label="Update"> Update </button></div></aside><script> (function () { const themeMapper = Theme.getThemeMapper('light', 'dark_dimmed'); const initTheme = themeMapper[Theme.visualState]; let lang = 'en';if (lang.length > 2 && !lang.startsWith('zh')) { lang = lang.slice(0, 2); } let giscusAttributes = { src: 'https://giscus.app/client.js', 'data-repo': 'tsypuk/tsypuk.github.io', 'data-repo-id': 'R_kgDOIxaFiw', 'data-category': 'General', 'data-category-id': 'DIC_kwDOIxaFi84CUSfn', 'data-mapping': 'og:title', 'data-strict' : '0', 'data-reactions-enabled': '1', 'data-emit-metadata': '0', 'data-theme': initTheme, 'data-input-position': 'top', 'data-lang': lang, 'data-loading': 'lazy', crossorigin: 'anonymous', async: '' }; let giscusNode = document.createElement('script'); Object.entries(giscusAttributes).forEach(([key, value]) => giscusNode.setAttribute(key, value) ); const $footer = document.querySelector('footer'); $footer.insertAdjacentElement("beforebegin", giscusNode); addEventListener('message', (event) => { if (event.source === window && event.data && event.data.id === Theme.ID) { const newTheme = themeMapper[Theme.visualState]; const message = { setConfig: { theme: newTheme } }; const giscus = document.getElementsByClassName('giscus-frame')[0].contentWindow; giscus.postMessage({ giscus: message }, 'https://giscus.app'); } }); })(); </script> <script> document.addEventListener('DOMContentLoaded', () => { SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<article class="px-1 px-sm-2 px-lg-4 px-xl-0"><header><h2><a href="{url}">{title}</a></h2><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags}</div></header><p>{content}</p></article>', noResultsText: '<p class="mt-5">Oops! No results found.</p>', templateMiddleware: function(prop, value, template) { if (prop === 'categories') { if (value === '') { return `${value}`; } else { return `<div class="me-sm-4"><i class="far fa-folder fa-fw"></i>${value}</div>`; } } if (prop === 'tags') { if (value === '') { return `${value}`; } else { return `<div><i class="fa fa-tag fa-fw"></i>${value}</div>`; } } } }); }); </script>

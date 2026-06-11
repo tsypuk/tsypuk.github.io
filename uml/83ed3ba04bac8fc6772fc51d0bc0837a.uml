@@ -1,0 +1,28 @@
+@startuml
+
+class Commit1 <<(C,lightgreen)>> {
+-sha: 0d38698f
+--
+message: added first.txt
+
+--
+timestamp: 1580812884
+}
+class Tree1 <<(T,lightgreen)>> {
+-sha: 3d800e5a
+--
+# first.txt 100644 795ddc40
+
+}
+class Blob1 <<(B,lightgreen)>> {
+-sha: 795ddc40
+--
+FirstData
+
+}
+Commit1 --> Tree1
+Tree1 --> Blob1
+note top of Commit1 #lightgreen : HEAD
+note top of Commit1 #lightgreen : refs/heads/master
+
+@enduml

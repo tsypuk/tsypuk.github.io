@@ -1,0 +1,25 @@
+@startuml
+
+@startuml
+!define LIGHTGREEN
+!includeurl https://raw.githubusercontent.com/Drakemor/RedDress-PlantUML/master/style.puml
+
+actor User as U
+entity Browser as B
+control API as A
+database Database as D
+
+autoactivate on
+autonumber
+
+title "E-Commerce website: display user's past orders"
+
+U -> B: fetch orders
+B -> A: GET /orders
+A -> D: _sql query_
+D --> A: return resultset
+A --> B: return orders
+B --> U: display orders
+@enduml
+
+@enduml

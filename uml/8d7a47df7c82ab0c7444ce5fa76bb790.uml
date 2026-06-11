@@ -1,0 +1,82 @@
+@startuml
+
+class Commit3 <<(C,orange)>> {
+-sha: 849d8fba
+--
+message: added third.txt
+
+--
+timestamp: 1580813902
+}
+class Commit2 <<(C,lightblue)>> {
+-sha: 993bb5b5
+--
+message: added seond.txt
+
+--
+timestamp: 1580813162
+}
+class Commit1 <<(C,lightgreen)>> {
+-sha: 0d38698f
+--
+message: added first.txt
+
+--
+timestamp: 1580812884
+}
+class Tree3 <<(T,orange)>> {
+-sha: 34f58182
+--
+# first.txt 100644 795ddc40
+# seconf.txt 100644 0ba93614
+# third.txt 100644 da13a9b8
+
+}
+class Tree2 <<(T,lightblue)>> {
+-sha: 22e61880
+--
+# first.txt 100644 795ddc40
+# seconf.txt 100644 0ba93614
+
+}
+class Tree1 <<(T,lightgreen)>> {
+-sha: 3d800e5a
+--
+# first.txt 100644 795ddc40
+
+}
+class Blob3 <<(B,orange)>> {
+-sha: da13a9b8
+--
+ThirdData
+
+}
+class Blob1 <<(B,lightgreen)>> {
+-sha: 795ddc40
+--
+FirstData
+
+}
+class Blob2 <<(B,lightblue)>> {
+-sha: 0ba93614
+--
+SecondData
+
+}
+Commit3 --> Tree3
+Commit2 --> Tree2
+Commit1 --> Tree1
+Tree3 --> Blob1
+Tree3 --> Blob2
+Tree3 --> Blob3
+Tree2 --> Blob1
+Tree2 --> Blob2
+Tree1 --> Blob1
+Commit3 -l-> Commit2
+Commit2 -l-> Commit1
+note top of Commit3 #orange : HEAD
+note top of Commit3 #orange : refs/heads/master
+note top of Commit2 #lightblue : refs/heads/feature
+note top of Commit3 #orange : refs/remotes/origin/master
+
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+
+class Commit1 <<(C,lightgreen)>> {
+-sha: 2aae0a64
+--
+message: first commit
+--
+timestamp: 1580904123
+}
+class Tree1 <<(T,lightgreen)>> {
+-sha: 5b9ddc8f
+--
+}
+class Blob1 <<(B,lightgreen)>> {
+-sha: 9649cde9
+--
+First line
+}
+Commit1 --> Tree1
+Tree1 --> Blob1
+
+@enduml
