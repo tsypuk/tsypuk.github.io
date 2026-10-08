@@ -1,0 +1,533 @@
+<!doctype html><html lang="en" ><head> <script async src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); </script><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="viewport" content="width=device-width, user-scalable=no initial-scale=1, shrink-to-fit=no, viewport-fit=cover" ><meta name="generator" content="Jekyll v4.4.1" /><meta property="og:title" content="RAG Knowledge Base assessment and evaluation with RAGAS framework" /><meta name="author" content="Roman Tsypuk" /><meta property="og:locale" content="en" /><meta name="description" content="Standard RAG that is based on AWS BeedRock consists of the following parts: pdf corpus of data strored in S3, connected Beedrock Embedding Model producer with default chunk strategy setup with fixed size limitation and overlap. After RAG is connected to live system (chat bot, API, content engine, etc.) and operates we are comming to next challage - to measure and tune the accuracy of RAG." /><meta name="twitter:description" property="og:description" content="Standard RAG that is based on AWS BeedRock consists of the following parts: pdf corpus of data strored in S3, connected Beedrock Embedding Model producer with default chunk strategy setup with fixed size limitation and overlap. After RAG is connected to live system (chat bot, API, content engine, etc.) and operates we are comming to next challage - to measure and tune the accuracy of RAG." /><link rel="canonical" href="https://tsypuk.github.io/posts/2026/10/05/RAG-assessment-with-RAGAS-framework.html" /><meta property="og:url" content="https://tsypuk.github.io/posts/2026/10/05/RAG-assessment-with-RAGAS-framework.html" /><meta property="og:site_name" content="Engineer’s Notes" /><meta property="og:image" content="https://tsypuk.github.io/images/banners/1200/pexels-tugce-acikyurek-3099881-15852124.jpg" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2026-10-05T05:00:00+03:00" /><meta property="article:modified_time" content="2026-10-05T05:00:00+03:00" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:image" content="https://tsypuk.github.io/images/banners/1200/pexels-tugce-acikyurek-3099881-15852124.jpg" /><meta name="twitter:title" content="RAG Knowledge Base assessment and evaluation with RAGAS framework" /><meta name="twitter:site" content="@roman_tsypuk" /><meta name="twitter:creator" content="@roman_tsypuk" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Roman Tsypuk"},"dateModified":"2026-10-05T05:00:00+03:00","datePublished":"2026-10-05T05:00:00+03:00","description":"Standard RAG that is based on AWS BeedRock consists of the following parts: pdf corpus of data strored in S3, connected Beedrock Embedding Model producer with default chunk strategy setup with fixed size limitation and overlap. After RAG is connected to live system (chat bot, API, content engine, etc.) and operates we are comming to next challage - to measure and tune the accuracy of RAG.","headline":"RAG Knowledge Base assessment and evaluation with RAGAS framework","image":"https://tsypuk.github.io/images/banners/1200/pexels-tugce-acikyurek-3099881-15852124.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://tsypuk.github.io/posts/2026/10/05/RAG-assessment-with-RAGAS-framework.html"},"url":"https://tsypuk.github.io/posts/2026/10/05/RAG-assessment-with-RAGAS-framework.html"}</script><title>RAG Knowledge Base assessment and evaluation with RAGAS framework | Engineer's Notes</title><link rel="icon" type="image/png" href="/assets/img/favicons/favicon-96x96.png" sizes="96x96"><link rel="icon" type="image/svg+xml" href="/assets/img/favicons/favicon.svg"><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-touch-icon.png"><link rel="manifest" href="/assets/img/favicons/site.webmanifest"><link rel="preconnect" href="https://fonts.googleapis.com" ><link rel="dns-prefetch" href="https://fonts.googleapis.com" ><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="dns-prefetch" href="https://fonts.gstatic.com" ><link rel="preconnect" href="https://cdn.jsdelivr.net" ><link rel="dns-prefetch" href="https://cdn.jsdelivr.net" ><link rel="stylesheet" href="/assets/css/jekyll-theme-chirpy.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400&family=Source+Sans+Pro:wght@400;600;700;900&display=swap"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.36.4/dist/tocbot.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox@3.3.0/dist/css/glightbox.min.css"> <script src="/assets/js/dist/theme.min.js"></script> <script defer src="https://cdn.jsdelivr.net/combine/npm/simple-jekyll-search@1.10.0/dest/simple-jekyll-search.min.js,npm/loading-attribute-polyfill@2.1.1/dist/loading-attribute-polyfill.umd.min.js,npm/glightbox@3.3.0/dist/js/glightbox.min.js,npm/clipboard@2.0.11/dist/clipboard.min.js,npm/dayjs@1.11.20/dayjs.min.js,npm/dayjs@1.11.20/locale/en.js,npm/dayjs@1.11.20/plugin/relativeTime.js,npm/dayjs@1.11.20/plugin/localizedFormat.js,npm/tocbot@4.36.4/dist/tocbot.min.js"></script> <script defer src="/assets/js/dist/post.min.js"></script> <script defer src="/app.min.js?baseurl=&register=true" ></script> <script defer src="https://www.googletagmanager.com/gtag/js?id=G-LXECFRDHS1"></script> <script> document.addEventListener('DOMContentLoaded', () => { window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LXECFRDHS1'); }); </script><body><aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end"><header class="profile-wrapper"> <a href="/" id="avatar" class="rounded-circle"><img src="/images/avatar/rtsypuk.jpg" width="112" height="112" alt="avatar" onerror="this.style.display='none'"></a> <a class="site-title d-block" href="/">Engineer's Notes</a><p class="site-subtitle fst-italic mb-0">Cloud, Infrastructure, Architecture, Networking</p></header><nav class="flex-column flex-grow-1 w-100 ps-0"><ul class="nav"><li class="nav-item"> <a href="/" class="nav-link"> <i class="fa-fw fas fa-home"></i> <span>HOME</span> </a><li class="nav-item"> <a href="/categories.html" class="nav-link"> <i class="fa-fw fas fa-stream"></i> <span>CATEGORIES</span> </a><li class="nav-item"> <a href="/tags.html" class="nav-link"> <i class="fa-fw fas fa-tag"></i> <span>TAGS</span> </a><li class="nav-item"> <a href="/archived_posts.html" class="nav-link"> <i class="fa-fw fas fa-archive"></i> <span>ARCHIVES</span> </a><li class="nav-item"> <a href="/roman_tsypuk.html" class="nav-link"> <i class="fa-fw fas fa-info-circle"></i> <span>ABOUT</span> </a></ul></nav><div class="sidebar-bottom d-flex flex-wrap align-items-center w-100"> <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle"> <i class="fas fa-adjust"></i> </button> <span class="icon-border"></span> <a href="https://github.com/tsypuk" aria-label="github" target="_blank" rel="noopener noreferrer" > <i class="fab fa-github"></i> </a> <a href="https://twitter.com/roman_tsypuk" aria-label="twitter" target="_blank" rel="noopener noreferrer" > <i class="fab fa-twitter"></i> </a> <a href="https://www.linkedin.com/in/roman-tsypuk" aria-label="linkedin" target="_blank" rel="noopener noreferrer" > <i class="fab fa-linkedin"></i> </a> <a href="javascript:location.href = 'mailto:' + ['tsypuk_conf','gmail.com'].join('@')" aria-label="email" > <i class="fas fa-envelope"></i> </a></div></aside><div id="main-wrapper" class="d-flex justify-content-center"><div class="container d-flex flex-column px-xxl-5"><header id="topbar-wrapper" class="flex-shrink-0" aria-label="Top Bar"><div id="topbar" class="d-flex align-items-center justify-content-between px-lg-3 h-100" ><nav id="breadcrumb" aria-label="Breadcrumb"> <span> <a href="/">Home</a> </span> <span>RAG Knowledge Base assessment and evaluation with RAGAS framework</span></nav><button type="button" id="sidebar-trigger" class="btn btn-link" aria-label="Sidebar"> <i class="fas fa-bars fa-fw"></i> </button><div id="topbar-title"> Post</div><button type="button" id="search-trigger" class="btn btn-link" aria-label="Search"> <i class="fas fa-search fa-fw"></i> </button> <search id="search" class="align-items-center ms-3 ms-lg-0"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" autocomplete="off" placeholder="Search..." > </search> <button type="button" class="btn btn-link text-decoration-none" id="search-cancel">Cancel</button></div></header><div class="row flex-grow-1"><main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4"><article class="px-1" data-toc="true"><header><h1 data-toc-skip>RAG Knowledge Base assessment and evaluation with RAGAS framework</h1><div class="post-meta text-muted"> <span> Posted <time data-ts="1791165600" data-df="ll" data-bs-toggle="tooltip" data-bs-placement="bottom" > Oct 5, 2026 </time> </span><div class="mt-3 mb-3"> <a href="/images/banners/1200/pexels-tugce-acikyurek-3099881-15852124.jpg" class="popup img-link preview-img shimmer"><img src="/images/banners/1200/pexels-tugce-acikyurek-3099881-15852124.jpg" alt="Preview Image" width="1200" height="630" loading="lazy"></a></div><div class="d-flex justify-content-between"> <span> By <em> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a> </em> </span><div> <span class="readtime" data-bs-toggle="tooltip" data-bs-placement="bottom" title="2942 words" > <em>16 min</em> read</span></div></div></div></header><div id="toc-bar" class="d-flex align-items-center justify-content-between invisible"> <span class="label text-truncate">RAG Knowledge Base assessment and evaluation with RAGAS framework</span> <button type="button" class="toc-trigger btn me-1"> <i class="fa-solid fa-list-ul fa-fw"></i> </button></div><button id="toc-solo-trigger" type="button" class="toc-trigger btn btn-outline-secondary btn-sm"> <span class="label ps-2 pe-1">Contents</span> <i class="fa-solid fa-angle-right fa-fw"></i> </button> <dialog id="toc-popup" class="p-0"><div class="header d-flex flex-row align-items-center justify-content-between"><div class="label text-truncate py-2 ms-4">RAG Knowledge Base assessment and evaluation with RAGAS framework</div><button id="toc-popup-close" type="button" class="btn mx-1 my-1 opacity-75"> <i class="fas fa-close"></i> </button></div><div id="toc-popup-content" class="px-4 py-3 pb-4"></div></dialog><div class="content"><p>Standard RAG that is based on AWS BeedRock consists of the following parts: <code class="language-plaintext highlighter-rouge">pdf</code> corpus of data strored in <code class="language-plaintext highlighter-rouge">S3</code>, connected <code class="language-plaintext highlighter-rouge">Beedrock</code> Embedding Model producer with default chunk strategy setup with fixed size limitation and overlap. After RAG is connected to live system (chat bot, API, content engine, etc.) and operates we are comming to next challage - to measure and tune the accuracy of RAG.</p><p><a href="/../images/posts/ragas/infra.png" class="popup img-link shimmer"><img src="/../images/posts/ragas/infra.png" alt="infra.png" loading="lazy"></a></p><h2 id="evaluation-infrastructure"><span class="me-2">Evaluation Infrastructure</span><a href="#evaluation-infrastructure" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>When it comes to evaluation and tunning, it can be made using <code class="language-plaintext highlighter-rouge">AWS RAG evaluation</code> and 3rd-party toolboxes, In this post I’ll give an overview of <code class="language-plaintext highlighter-rouge">ragas</code> framework that allows to define a set of metrics that will be evaluated across different configurations of <code class="language-plaintext highlighter-rouge">RAG</code>, output results into <code class="language-plaintext highlighter-rouge">xls</code> file, have historical data of metrics.</p><p>It is very useful both for RAG evaluation and tuning. Changing knowledge base processing, like chunk size, overlap, embedding model, etc. we can reevaluate new assembled version using <code class="language-plaintext highlighter-rouge">ragas</code> framework and compare with previous versions.</p><p><a href="/../images/posts/ragas/infra1.png" class="popup img-link shimmer"><img src="/../images/posts/ragas/infra1.png" alt="infra1.png" loading="lazy"></a></p><h4 id="evaluation-metrics"><span class="me-2">Evaluation Metrics</span><a href="#evaluation-metrics" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h4><p>Here is a list of RAGAS evaluations metrics:</p><ul><li><strong>Faithfulness:</strong> This measures the factual consistency of the generated answer against the given context. It is calculated from answer and retrieved context. The answer is scaled to (0,1) range. Higher the better.<li><strong>Answer Relevance:</strong> This metric focuses on assessing how pertinent the generated answer is to the given prompt. A lower score is assigned to answers that are incomplete or contain redundant information and higher scores indicate better relevancy. This metric is computed using the question, the context and the answer. Please note, that even though in practice the score will range between 0 and 1 most of the time, this is not mathematically guaranteed, due to the nature of the cosine similarity ranging from -1 to 1.<li><strong>Context Precision:</strong> This is a metric that evaluates whether all of the ground-truth relevant items present in the contexts are ranked higher or not. Ideally all the relevant chunks must appear at the top ranks. This metric is computed using the question, ground_truth and the contexts, with values ranging between 0 and 1, where higher scores indicate better precision.<li><strong>Context Recall:</strong> This metric measures the extent to which the retrieved context aligns with the annotated answer, treated as the ground truth. It is computed based on the ground truth and the retrieved context, and the values range between 0 and 1, with higher values indicating better performance.<li><strong>Context entities recall:</strong> This metric gives the measure of recall of the retrieved context, based on the number of entities present in both ground_truths and contexts relative to the number of entities present in the ground_truths alone. Simply put, it is a measure of what fraction of entities are recalled from ground_truths. This metric is useful in fact-based use cases like tourism help desk, historical QA, etc. This metric can help evaluate the retrieval mechanism for entities, based on comparison with entities present in ground_truths, because in cases where entities matter, we need the contexts which cover them.<li><strong>Answer Semantic Similarity:</strong> The concept of Answer Semantic Similarity pertains to the assessment of the semantic resemblance between the generated answer and the ground truth. This evaluation is based on the ground truth and the answer, with values falling within the range of 0 to 1. A higher score signifies a better alignment between the generated answer and the ground truth.<li><strong>Answer Correctness:</strong> The assessment of Answer Correctness involves gauging the accuracy of the generated answer when compared to the ground truth. This evaluation relies on the ground truth and the answer, with scores ranging from 0 to 1. A higher score indicates a closer alignment between the generated answer and the ground truth, signifying better correctness. Answer correctness encompasses two critical aspects: semantic similarity between the generated answer and the ground truth, as well as factual similarity. These aspects are combined using a weighted scheme to formulate the answer correctness score. Users also have the option to employ a ‘threshold’ value to round the resulting score to binary, if desired.<li><strong>Aspect Critique:</strong> This is designed to assess submissions based on predefined aspects such as harmlessness and correctness. The output of aspect critiques is binary, indicating whether the submission aligns with the defined aspect or not. This evaluation is performed using the ‘answer’ as input.</ul><p>Also we can define our own custom metrics it a numeric or PROMT form for ragas.</p><h2 id="evaluation-setup"><span class="me-2">Evaluation setup</span><a href="#evaluation-setup" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><h3 id="specify-or-detect-knowledge-base-id"><span class="me-2">Specify or detect Knowledge Base ID</span><a href="#specify-or-detect-knowledge-base-id" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><div class="language-python highlighter-rouge"><div class="code-header"> <span data-label-text="Python"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">botocore</span>
+<span class="kn">import</span> <span class="n">boto3</span>
+
+<span class="n">session</span> <span class="o">=</span> <span class="n">boto3</span><span class="p">.</span><span class="nc">Session</span><span class="p">()</span>
+<span class="n">bedrock_client</span> <span class="o">=</span> <span class="n">session</span><span class="p">.</span><span class="nf">client</span><span class="p">(</span><span class="sh">'</span><span class="s">bedrock-agent</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">response</span> <span class="o">=</span> <span class="n">bedrock_client</span><span class="p">.</span><span class="nf">list_knowledge_bases</span><span class="p">(</span>
+    <span class="n">maxResults</span><span class="o">=</span><span class="mi">1</span>  <span class="c1"># We only need to retrieve the first Knowledge Base
+</span>  <span class="p">)</span>
+  <span class="n">knowledge_base_summaries</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">'</span><span class="s">knowledgeBaseSummaries</span><span class="sh">'</span><span class="p">,</span> <span class="p">[])</span>
+
+  <span class="k">if</span> <span class="n">knowledge_base_summaries</span><span class="p">:</span>
+    <span class="n">kb_id</span> <span class="o">=</span> <span class="n">knowledge_base_summaries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="sh">'</span><span class="s">knowledgeBaseId</span><span class="sh">'</span><span class="p">]</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Knowledge Base ID: </span><span class="si">{</span><span class="n">kb_id</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">No Knowledge Base summaries found.</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="k">except</span> <span class="n">botocore</span><span class="p">.</span><span class="n">exceptions</span><span class="p">.</span><span class="n">ClientError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+  <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</pre></table></code></div></div><h3 id="initialize-bedrock-models"><span class="me-2">Initialize BedRock Models:</span><a href="#initialize-bedrock-models" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><p>We’ll be using several different models, each with its own purpose:</p><ul><li>Initialize bedrock model <strong>amazon.nova-pro-v1:0</strong> as your large language model to perform query completions using the RAG pattern.<li>Initialize bedrock model <strong>us.amazon.nova-2-lite-v1:0</strong> as your large language model to perform RAG evaluation.<li>Initialize bedrock model <strong>amazon.titan-embed-text-v1</strong> as your large language embedding model to create embeddings for RAG evaluation. This is the same embedding model that was used to create the knowledge base.<li>Initialize LangChain retriever integrated with knowledge bases.</ul><div class="language-python highlighter-rouge"><div class="code-header"> <span data-label-text="Python"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">boto3</span>
+<span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="kn">from</span> <span class="n">langchain_aws</span> <span class="kn">import</span> <span class="n">ChatBedrock</span>
+<span class="kn">from</span> <span class="n">langchain_aws</span> <span class="kn">import</span> <span class="n">BedrockEmbeddings</span>
+<span class="kn">from</span> <span class="n">langchain_aws.retrievers.bedrock</span> <span class="kn">import</span> <span class="n">AmazonKnowledgeBasesRetriever</span>
+
+<span class="n">pp</span> <span class="o">=</span> <span class="n">pprint</span><span class="p">.</span><span class="nc">PrettyPrinter</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">bedrock_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="p">.</span><span class="nf">client</span><span class="p">(</span><span class="sh">'</span><span class="s">bedrock-runtime</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">llm_for_text_generation</span> <span class="o">=</span> <span class="nc">ChatBedrock</span><span class="p">(</span><span class="n">model_id</span><span class="o">=</span><span class="sh">"</span><span class="s">amazon.nova-pro-v1:0</span><span class="sh">"</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="n">bedrock_client</span><span class="p">)</span>
+<span class="n">llm_for_evaluation</span> <span class="o">=</span> <span class="nc">ChatBedrock</span><span class="p">(</span><span class="n">model_id</span><span class="o">=</span><span class="sh">"</span><span class="s">us.amazon.nova-2-lite-v1:0</span><span class="sh">"</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="n">bedrock_client</span><span class="p">)</span>
+
+<span class="n">bedrock_embeddings</span> <span class="o">=</span> <span class="nc">BedrockEmbeddings</span><span class="p">(</span><span class="n">model_id</span><span class="o">=</span><span class="sh">"</span><span class="s">amazon.titan-embed-text-v1</span><span class="sh">"</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="n">bedrock_client</span><span class="p">)</span>
+</pre></table></code></div></div><h3 id="amazonknowledgebasesretriever-allows-get-advanced-information-about-documents-metadata"><span class="me-2">AmazonKnowledgeBasesRetriever allows get advanced information about documents metadata:</span><a href="#amazonknowledgebasesretriever-allows-get-advanced-information-about-documents-metadata" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><div class="language-python highlighter-rouge"><div class="code-header"> <span data-label-text="Python"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="n">retriever</span> <span class="o">=</span> <span class="nc">AmazonKnowledgeBasesRetriever</span><span class="p">(</span>
+  <span class="n">knowledge_base_id</span><span class="o">=</span><span class="n">kb_id</span><span class="p">,</span>
+  <span class="n">retrieval_config</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">vectorSearchConfiguration</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span><span class="sh">"</span><span class="s">numberOfResults</span><span class="sh">"</span><span class="p">:</span> <span class="mi">5</span><span class="p">}},</span>
+  <span class="c1"># endpoint_url=endpoint_url,
+</span>  <span class="c1"># region_name="us-east-1",
+</span>  <span class="c1"># credentials_profile_name="&lt;profile_name&gt;",
+</span><span class="p">)</span>
+</pre></table></code></div></div><h3 id="creating-promt-with-context-and-question-as-variables"><span class="me-2">Creating PROMT with context and question as variables:</span><a href="#creating-promt-with-context-and-question-as-variables" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><div class="language-python highlighter-rouge"><div class="code-header"> <span data-label-text="Python"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre><td class="rouge-code"><pre><span class="kn">from</span> <span class="n">langchain.prompts</span> <span class="kn">import</span> <span class="n">PromptTemplate</span>
+
+<span class="n">PROMPT_TEMPLATE</span> <span class="o">=</span> <span class="sh">"""</span><span class="s">
+Human: You are a financial advisor AI system, and provides answers to questions by using fact based and statistical information when possible.
+Use the following pieces of information to provide a concise answer to the question enclosed in &lt;question&gt; tags.
+If you don</span><span class="sh">'</span><span class="s">t know the answer, just say that you don</span><span class="sh">'</span><span class="s">t know, don</span><span class="sh">'</span><span class="s">t try to make up an answer.
+&lt;context&gt;
+{context}
+&lt;/context&gt;
+
+&lt;question&gt;
+{question}
+&lt;/question&gt;
+
+The response should be specific and use statistics or numbers when possible.
+
+Assistant:</span><span class="sh">"""</span>
+<span class="n">prompt</span> <span class="o">=</span> <span class="nc">PromptTemplate</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">PROMPT_TEMPLATE</span><span class="p">,</span>
+                        <span class="n">input_variables</span><span class="o">=</span><span class="p">[</span><span class="sh">"</span><span class="s">context</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">question</span><span class="sh">"</span><span class="p">])</span>
+</pre></table></code></div></div><p>used <code class="language-plaintext highlighter-rouge">amazon.nova-pro-v1:0</code> model</p><div class="language-python highlighter-rouge"><div class="code-header"> <span data-label-text="Python"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre><td class="rouge-code"><pre><span class="kn">from</span> <span class="n">langchain_core.output_parsers</span> <span class="kn">import</span> <span class="n">StrOutputParser</span>
+<span class="kn">from</span> <span class="n">langchain_core.runnables</span> <span class="kn">import</span> <span class="n">RunnablePassthrough</span>
+
+
+<span class="k">def</span> <span class="nf">format_docs</span><span class="p">(</span><span class="n">docs</span><span class="p">):</span>  <span class="c1"># concatenate the text from the page_content field in the output from retriever.invoke
+</span>  <span class="k">return</span> <span class="sh">"</span><span class="se">\n\n</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">doc</span><span class="p">.</span><span class="n">page_content</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">)</span>
+
+
+<span class="n">chain</span> <span class="o">=</span> <span class="p">(</span>
+  <span class="p">{</span><span class="sh">"</span><span class="s">context</span><span class="sh">"</span><span class="p">:</span> <span class="n">retriever</span> <span class="o">|</span> <span class="n">format_docs</span><span class="p">,</span> <span class="sh">"</span><span class="s">question</span><span class="sh">"</span><span class="p">:</span> <span class="nc">RunnablePassthrough</span><span class="p">()}</span>
+  <span class="o">|</span> <span class="n">prompt</span>
+  <span class="o">|</span> <span class="n">llm_for_text_generation</span>
+  <span class="o">|</span> <span class="nc">StrOutputParser</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="sh">"</span><span class="s">Provide a list of ten risks for AnyCompany financial as a numbered list. Do not include descriptions.</span><span class="sh">"</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">chain</span><span class="p">.</span><span class="nf">invoke</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</pre></table></code></div></div><h3 id="promt-execution-results-v1"><span class="me-2">PROMT execution results v1:</span><a href="#promt-execution-results-v1" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><ol><li>Supplier Risk<li>Market Risks (Commodity Prices)<li>Market Risks (Foreign Exchange Rates)<li>Market Risks (Equity Prices)<li>Operational Risk<li>Regulatory Risk<li>Strategic Risk<li>Reputation Risk<li>Legal Risk<li>Environmental, Social, and Governance (ESG) Risk</ol><h3 id="promt-execution-results-v2-once-aws-released-new-model-version---same-day"><span class="me-2">PROMT execution results v2 (once AWS released new model version - same day):</span><a href="#promt-execution-results-v2-once-aws-released-new-model-version---same-day" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><ol><li>Market risk due to changes in market prices.<li>Credit risk from issuer defaults.<li>Liquidity risk from inability to sell securities timely or at fair value.<li>Concentration risk with top five borrowers accounting for 15% of total loan portfolio.<li>Estimation risk in allowance for doubtful accounts.<li>Trading securities portfolio unrealized loss of $50 million as of December 31, 2021.<li>Significant investment positions in Company A ($400 million), Company B ($350 million), and Company C ($250 million), representing 22% of the total investment portfolio.<li>Risk from leasing office space from a significant shareholder (PersonA).<li>Risk associated with the use of estimates in financial reporting.<li>Risk from material related party transactions conducted at arm’s length.</ol><h3 id="preparing-groundtruth-data"><span class="me-2">Preparing GroundTruth Data:</span><a href="#preparing-groundtruth-data" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><p>To perform evaluation, we need to have a ground truth data. The best way is to prepare such corpus of data based on your documents domain knowledge with <code class="language-plaintext highlighter-rouge">domain experts</code> and <code class="language-plaintext highlighter-rouge">business analysts</code>. Another technique can be usage of highly tunned model (that is perfectly trained under your domain), or high-cost comercial model (just for corpus generation task) not for reglar usage.</p><p>So once <em>question</em> and <em>ground_truths</em> pairs are prepared, they are ready for inference:</p><div class="language-python highlighter-rouge"><div class="code-header"> <span data-label-text="Python"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+</pre><td class="rouge-code"><pre><span class="kn">from</span> <span class="n">datasets</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="n">random</span>
+
+<span class="c1"># Define questions and ground truths for RAGAS evaluation
+</span><span class="n">questions</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="sh">"</span><span class="s">What was the primary reason for the increase in net cash by operating activities for AnyCompany Financial in 2021?</span><span class="sh">"</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">Which year did AnyCompany Financial have the highest net cash used in investing activities, what was the primary reason?</span><span class="sh">"</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">What was the primary source of cash inflows from financing activities for AnyCompany Financial in 2021?</span><span class="sh">"</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">Calculate the year-over-year percentage change in cash and cash equivalents for AnyCompany Financial from 2020 to 2021.</span><span class="sh">"</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">With the information provided, what can you infer about AnyCompany Financial</span><span class="sh">'</span><span class="s">s overall financial health and growth prospects?</span><span class="sh">"</span>
+<span class="p">]</span>
+
+<span class="n">ground_truth</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="sh">"</span><span class="s">An increase in net cash provided by operating activities was primarily due to increases in net income and favorable changes in operating assets and liabilities.</span><span class="sh">"</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">AnyCompany Financial had the highest net cash used in investing activities in 2021, at $360 million, compared to $290 million in 2020 and $240 million in 2019. The primary reason was an increase in purchases of property, plant, and equipment and marketable securities.</span><span class="sh">"</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">The primary source of cash inflows from financing activities for AnyCompany Financial in 2021 was an increase in proceeds from the issuance of common stock and long-term debt.</span><span class="sh">"</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">To calculate the year-over-year percentage change in cash and cash equivalents from 2020 to 2021: </span><span class="se">\
+</span><span class="s">  2020 cash and cash equivalents: $350 million </span><span class="se">\
+</span><span class="s">  2021 cash and cash equivalents: $480 million </span><span class="se">\
+</span><span class="s">  Percentage change = (2021 value - 2020 value) / 2020 value * 100 </span><span class="se">\
+</span><span class="s">  = ($480 million - $350 million) / $350 million * 100 </span><span class="se">\
+</span><span class="s">  = 37.14% increase</span><span class="sh">"</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">Based on information provided, AnyCompany Financial appears to be in a healthy financial position with good growth prospects. The company increased its net cash provided by operating activities, indicating strong profitability and efficient management of working capital. AnyCompany Financial has been investing in long-term assets, such as property, plant, and equipment, and marketable securities, which suggests plans for future growth and expansion. The company was able to finance its growth through the issuance of common stock and long-term debt, indicating confidence from investors and lenders. Overall, AnyCompany Financial</span><span class="sh">'</span><span class="s">s steady increase in cash and cash equivalents over the past three years provides a strong foundation for future growth and investment opportunities.</span><span class="sh">"</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">get_model_response</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="n">retriever</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">wait_time</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
+  <span class="sh">"""</span><span class="s">Get response from the model with fixed wait time between retries</span><span class="sh">"""</span>
+  <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">max_retries</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="c1"># Configure Nova Lite with increased tokens
+</span>      <span class="n">nova_config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="sh">"</span><span class="s">schemaVersion</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">messages-v1</span><span class="sh">"</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">messages</span><span class="sh">"</span><span class="p">:</span> <span class="p">[{</span>
+          <span class="sh">"</span><span class="s">role</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">user</span><span class="sh">"</span><span class="p">,</span>
+          <span class="sh">"</span><span class="s">content</span><span class="sh">"</span><span class="p">:</span> <span class="p">[{</span><span class="sh">"</span><span class="s">text</span><span class="sh">"</span><span class="p">:</span> <span class="n">query</span><span class="p">}]</span>
+        <span class="p">}],</span>
+        <span class="sh">"</span><span class="s">inferenceConfig</span><span class="sh">"</span><span class="p">:</span> <span class="p">{</span>
+          <span class="sh">"</span><span class="s">maxTokens</span><span class="sh">"</span><span class="p">:</span> <span class="mi">2048</span><span class="p">,</span>
+          <span class="sh">"</span><span class="s">temperature</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+          <span class="sh">"</span><span class="s">topP</span><span class="sh">"</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+          <span class="sh">"</span><span class="s">topK</span><span class="sh">"</span><span class="p">:</span> <span class="mi">20</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+
+      <span class="c1"># Try to invoke with config override
+</span>      <span class="k">try</span><span class="p">:</span>
+        <span class="n">answer</span> <span class="o">=</span> <span class="n">chain</span><span class="p">.</span><span class="nf">invoke</span><span class="p">(</span>
+          <span class="n">query</span><span class="p">,</span>
+          <span class="n">config_override</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">model_kwargs</span><span class="sh">"</span><span class="p">:</span> <span class="n">nova_config</span><span class="p">}</span>
+        <span class="p">)</span>
+      <span class="k">except</span> <span class="nb">AttributeError</span><span class="p">:</span>
+        <span class="c1"># If config_override doesn't work, try direct invocation
+</span>        <span class="n">answer</span> <span class="o">=</span> <span class="n">chain</span><span class="p">.</span><span class="nf">invoke</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+      <span class="n">context</span> <span class="o">=</span> <span class="p">[</span><span class="n">docs</span><span class="p">.</span><span class="n">page_content</span> <span class="k">for</span> <span class="n">docs</span> <span class="ow">in</span> <span class="n">retriever</span><span class="p">.</span><span class="nf">invoke</span><span class="p">(</span><span class="n">query</span><span class="p">)]</span>
+      <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Successfully processed query on attempt </span><span class="si">{</span><span class="n">attempt</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">answer</span><span class="p">,</span> <span class="n">context</span>
+
+    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">attempt</span> <span class="o">==</span> <span class="n">max_retries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed after </span><span class="si">{</span><span class="n">max_retries</span><span class="si">}</span><span class="s"> attempts for query: </span><span class="si">{</span><span class="n">query</span><span class="p">[</span><span class="si">:</span><span class="mi">50</span><span class="p">]</span><span class="si">}</span><span class="s">...</span><span class="sh">"</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Error: </span><span class="si">{</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+      <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Attempt </span><span class="si">{</span><span class="n">attempt</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s"> failed, waiting </span><span class="si">{</span><span class="n">wait_time</span><span class="si">}</span><span class="s"> seconds before retry...</span><span class="sh">"</span><span class="p">)</span>
+      <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="n">wait_time</span><span class="p">)</span>
+
+
+<span class="c1"># Process questions one at a time with fixed delay
+</span><span class="n">answers</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">contexts</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Starting to process questions...</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">query</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">questions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+  <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="se">\n</span><span class="s">Processing question </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">questions</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+  <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Query: </span><span class="si">{</span><span class="n">query</span><span class="p">[</span><span class="si">:</span><span class="mi">100</span><span class="p">]</span><span class="si">}</span><span class="s">...</span><span class="sh">"</span><span class="p">)</span>
+
+  <span class="n">answer</span><span class="p">,</span> <span class="n">context</span> <span class="o">=</span> <span class="nf">get_model_response</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="n">retriever</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">answer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">answers</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">answer</span><span class="p">)</span>
+    <span class="n">contexts</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Successfully processed question </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Failed to process question </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nf">len</span><span class="p">(</span><span class="n">questions</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Waiting 60 seconds before next question...</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+
+<span class="c1"># Create dataset for RAGAS evaluation
+</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="sh">"</span><span class="s">question</span><span class="sh">"</span><span class="p">:</span> <span class="n">questions</span><span class="p">[:</span><span class="nf">len</span><span class="p">(</span><span class="n">answers</span><span class="p">)],</span>
+  <span class="sh">"</span><span class="s">ground_truth</span><span class="sh">"</span><span class="p">:</span> <span class="n">ground_truth</span><span class="p">[:</span><span class="nf">len</span><span class="p">(</span><span class="n">answers</span><span class="p">)],</span>
+  <span class="sh">"</span><span class="s">answer</span><span class="sh">"</span><span class="p">:</span> <span class="n">answers</span><span class="p">,</span>
+  <span class="sh">"</span><span class="s">contexts</span><span class="sh">"</span><span class="p">:</span> <span class="n">contexts</span>
+<span class="p">}</span>
+
+<span class="c1"># Convert to dataset
+</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">.</span><span class="nf">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Print dataset information
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">Dataset Creation Summary:</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Total questions processed: </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="si">}</span><span class="s"> out of </span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">questions</span><span class="p">)</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Columns available: </span><span class="si">{</span><span class="n">dataset</span><span class="p">.</span><span class="n">column_names</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Print sample entry
+</span><span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+  <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">Sample Entry (First Question):</span><span class="sh">"</span><span class="p">)</span>
+  <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Question: </span><span class="si">{</span><span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="sh">'</span><span class="s">question</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+  <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Ground Truth: </span><span class="si">{</span><span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="sh">'</span><span class="s">ground_truth</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+  <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Model Answer: </span><span class="si">{</span><span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="sh">'</span><span class="s">answer</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+  <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="se">\n</span><span class="s">No entries were successfully processed into the dataset.</span><span class="sh">"</span><span class="p">)</span>
+
+</pre></table></code></div></div><h3 id="retriever-actions"><span class="me-2">Retriever actions:</span><a href="#retriever-actions" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><p>The <code class="language-plaintext highlighter-rouge">Retriever</code> is connected to Knowledge Base - it populates <code class="language-plaintext highlighter-rouge">context</code> with 5 most closed document chunks. These chunks will be included into final results evaluation table for expert review of measurement, metrics, Q&amp;A and sampling.</p><h3 id="compare-answer-results-from-llm--ground-truth"><span class="me-2">Compare answer results from LLM &amp; Ground truth:</span><a href="#compare-answer-results-from-llm--ground-truth" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h3><div class="language-python highlighter-rouge"><div class="code-header"> <span data-label-text="Python"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre><td class="rouge-code"><pre><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">answer</span> <span class="ow">in</span> <span class="n">answers</span><span class="p">:</span>
+  <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+  <span class="nf">print</span><span class="p">(</span><span class="nf">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="sh">'</span><span class="s">).</span><span class="sh">'</span> <span class="o">+</span> <span class="n">questions</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="sh">'</span><span class="se">\n</span><span class="sh">'</span><span class="p">)</span>
+  <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">LLM:</span><span class="sh">"</span> <span class="o">+</span> <span class="n">answer</span> <span class="o">+</span> <span class="sh">'</span><span class="se">\n</span><span class="sh">'</span><span class="p">)</span>
+  <span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Ground truth: </span><span class="sh">"</span> <span class="o">+</span> <span class="n">ground_truth</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="sh">'</span><span class="se">\n</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">dataset</span><span class="p">.</span><span class="nf">to_csv</span><span class="p">(</span><span class="sh">'</span><span class="s">DATASET.csv</span><span class="sh">'</span><span class="p">)</span>
+</pre></table></code></div></div><h2 id="answers-by-model-and-groundtruth-to-questions"><span class="me-2">Answers by Model and GroundTruth to Questions:</span><a href="#answers-by-model-and-groundtruth-to-questions" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre>1).What was the primary reason for the increase in net cash by operating activities for AnyCompany Financial in 2021?
+LLM:The primary reason for the increase in net cash provided by operating activities for AnyCompany Financial in 2021 was an increase in net income and favorable changes in operating assets and liabilities. Specifically, net cash provided by operating activities rose from $880 million in 2020 to $1,100 million in 2021.
+Ground truth: An increase in net cash provided by operating activities was primarily due to increases in net income and favorable changes in operating assets and liabilities.
+</pre></table></code></div></div><div class="language-plaintext highlighter-rouge"><div class="code-header"> <span data-label-text="Plaintext"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre>2).Which year did AnyCompany Financial have the highest net cash used in investing activities, what was the primary reason?
+LLM:AnyCompany Financial had the highest net cash used in investing activities in 2021, with a net cash used of $360 million. This was primarily due to an increase in purchases of property, plant, and equipment and marketable securities.
+Ground truth: AnyCompany Financial had the highest net cash used in investing activities in 2021, at $360 million, compared to $290 million in 2020 and $240 million in 2019. The primary reason was an increase in purchases of property, plant, and equipment and marketable securities.
+</pre></table></code></div></div><h2 id="running-the-evaluation-with-ragas"><span class="me-2">Running the evaluation with RAGAs</span><a href="#running-the-evaluation-with-ragas" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>In the next task, we import all the metrics we want to use from <em>ragas.metrics</em>. Then, using the <em>evaluate ()</em> function and simply passing in the relevant metrics and the prepared dataset.</p><div class="language-python highlighter-rouge"><div class="code-header"> <span data-label-text="Python"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+</pre><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">warnings</span>
+<span class="kn">import</span> <span class="n">logging</span>
+
+<span class="n">warnings</span><span class="p">.</span><span class="nf">filterwarnings</span><span class="p">(</span><span class="sh">'</span><span class="s">ignore</span><span class="sh">'</span><span class="p">)</span>  <span class="c1"># ignore warnings related to pydantic v1 to v2 migration
+</span><span class="n">logging</span><span class="p">.</span><span class="nf">getLogger</span><span class="p">(</span><span class="sh">'</span><span class="s">root</span><span class="sh">'</span><span class="p">).</span><span class="nf">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="p">.</span><span class="n">CRITICAL</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="n">ragas</span> <span class="kn">import</span> <span class="n">evaluate</span>
+<span class="kn">from</span> <span class="n">ragas.metrics</span> <span class="kn">import</span> <span class="p">(</span>
+  <span class="n">faithfulness</span><span class="p">,</span>
+  <span class="n">answer_relevancy</span><span class="p">,</span>
+  <span class="n">context_recall</span><span class="p">,</span>
+  <span class="n">context_precision</span><span class="p">,</span>
+  <span class="n">context_entity_recall</span><span class="p">,</span>
+  <span class="n">answer_similarity</span><span class="p">,</span>
+  <span class="n">answer_correctness</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="n">ragas.metrics.critique</span> <span class="kn">import</span> <span class="p">(</span>
+  <span class="n">harmfulness</span><span class="p">,</span>
+  <span class="n">maliciousness</span><span class="p">,</span>
+  <span class="n">coherence</span><span class="p">,</span>
+  <span class="n">correctness</span><span class="p">,</span>
+  <span class="n">conciseness</span>
+<span class="p">)</span>
+
+<span class="c1"># specify the metrics here
+</span><span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="n">faithfulness</span><span class="p">,</span>
+  <span class="n">answer_relevancy</span><span class="p">,</span>
+  <span class="n">context_precision</span><span class="p">,</span>
+  <span class="n">context_recall</span><span class="p">,</span>
+  <span class="n">context_entity_recall</span><span class="p">,</span>
+  <span class="n">answer_similarity</span><span class="p">,</span>
+  <span class="n">answer_correctness</span><span class="p">,</span>
+  <span class="n">harmfulness</span><span class="p">,</span>
+  <span class="n">maliciousness</span><span class="p">,</span>
+  <span class="n">coherence</span><span class="p">,</span>
+  <span class="n">correctness</span><span class="p">,</span>
+  <span class="n">conciseness</span>
+<span class="p">]</span>
+
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="nf">evaluate</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+    <span class="n">llm</span><span class="o">=</span><span class="n">llm_for_evaluation</span><span class="p">,</span>
+    <span class="n">embeddings</span><span class="o">=</span><span class="n">bedrock_embeddings</span><span class="p">,</span>
+  <span class="p">)</span>
+  <span class="n">df</span> <span class="o">=</span> <span class="n">result</span><span class="p">.</span><span class="nf">to_pandas</span><span class="p">()</span>
+<span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+  <span class="c1"># Handle any exceptions that occur during the evaluation
+</span>  <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">An error occurred: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</pre></table></code></div></div><h2 id="saving-ragas-scores-to-xls"><span class="me-2">Saving RAGAS scores to xls</span><a href="#saving-ragas-scores-to-xls" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><div class="language-python highlighter-rouge"><div class="code-header"> <span data-label-text="Python"><i class="fas fa-code fa-fw small"></i></span> <button aria-label="copy" data-title-succeed="Copied!"><i class="far fa-clipboard"></i></button></div><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre><td class="rouge-code"><pre><span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+
+<span class="n">pd</span><span class="p">.</span><span class="n">options</span><span class="p">.</span><span class="n">display</span><span class="p">.</span><span class="n">max_colwidth</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">df</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">set_sticky</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="sh">"</span><span class="s">columns</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">df</span><span class="p">.</span><span class="n">style</span><span class="p">.</span><span class="nf">to_excel</span><span class="p">(</span><span class="sh">'</span><span class="s">styled.xlsx</span><span class="sh">'</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="sh">'</span><span class="s">openpyxl</span><span class="sh">'</span><span class="p">)</span>
+</pre></table></code></div></div><h2 id="scores-analysis-and-further-rag-tuning"><span class="me-2">Scores analysis and further RAG tuning</span><a href="#scores-analysis-and-further-rag-tuning" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Here is one single entry question example from evaluation results (full xls you can dowload and check at Links section).</p><p><strong>Question:</strong> Which year did AnyCompany Financial have the highest net cash used in investing activities, what was the primary reason?</p><p><strong>Ground Truth:</strong> AnyCompany Financial had the highest net cash used in investing activities in 2021, at $360 million, compared to $290 million in 2020 and $240 million in 2019. The primary reason was an increase in purchases of property, plant, and equipment and marketable securities.</p><p><strong>Answer:</strong> AnyCompany Financial had the highest net cash used in investing activities in 2021, with a net cash used of $360 million. The primary reason for this increase was due to an increase in purchases of property, plant, and equipment and marketable securities, compared to $ 290 million in 2020 and $240 million in 2019.</p><div class="table-wrapper"><table><thead><tr><th style="text-align: left">faithfulness<th style="text-align: left">answer_relevancy<th style="text-align: left">context_precision<th style="text-align: left">context_recall<th style="text-align: left">context_entity_recall<th style="text-align: left">answer_similarity<th style="text-align: left">answer_correctness<th style="text-align: left">harmfulness<th style="text-align: left">maliciousness<th style="text-align: left">coherence<th style="text-align: left">correctness<th style="text-align: left">conciseness<tbody><tr><td style="text-align: left">0.666667<td style="text-align: left">0.881489<td style="text-align: left">0.500000<td style="text-align: left">1.000000<td style="text-align: left">1.000000<td style="text-align: left">0.988129<td style="text-align: left">0.847032<td style="text-align: left">0<td style="text-align: left">0<td style="text-align: left">1<td style="text-align: left">1<td style="text-align: left">1</table></div><h2 id="conclusions"><span class="me-2">Conclusions</span><a href="#conclusions" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><p>Please note that the scores above give a relative idea on the performance of your RAG application and should be used with caution and not as standalone scores.</p><p>Also note that we have used only 5 question/answer pairs for evaluation. As a best practice, you should use enough data to cover different aspects of your document for evaluating model.</p><p>Based on the scores, we can review other components of RAG workflow to further optimize the scores.</p><p>Few recommended options are to review your <strong>chunking strategy</strong>, <strong>prompt instructions</strong>, adding more <strong>numberOfResults</strong> for additional context and so on.</p><h2 id="links"><span class="me-2">Links:</span><a href="#links" class="anchor text-muted"><i class="fas fa-hashtag"></i></a></h2><ul><li><a href="https://www.ragas.io/">https://www.ragas.io/</a><li><a href="../images/posts/ragas/evaluation_resuls.xlsx">RAGAs evaluation_results.xls</a></ul></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw me-1"></i> <a href="/categories/aws/">aws</a>, <a href="/categories/bedrock/">bedrock</a>, <a href="/categories/rag/">rag</a>, <a href="/categories/assessment/">assessment</a>, <a href="/categories/ragas/">ragas</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw me-1"></i> <a href="/tags/aws/" class="post-tag no-text-decoration" >aws</a> <a href="/tags/bedrock/" class="post-tag no-text-decoration" >bedrock</a> <a href="/tags/rag/" class="post-tag no-text-decoration" >rag</a> <a href="/tags/assessment/" class="post-tag no-text-decoration" >assessment</a> <a href="/tags/ragas/" class="post-tag no-text-decoration" >ragas</a></div><div class=" post-tail-bottom d-flex justify-content-between align-items-center mt-5 pb-2 " ><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/"> CC BY 4.0 </a> by the author.</div><div class="share-wrapper d-flex align-items-center"> <span class="share-label text-muted">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=RAG%20Knowledge%20Base%20assessment%20and%20evaluation%20with%20RAGAS%20framework%20-%20Engineer's%20Notes&url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2026%2F10%2F05%2FRAG-assessment-with-RAGAS-framework.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Twitter" aria-label="Twitter"> <i class="fa-fw fa-brands fa-square-x-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=RAG%20Knowledge%20Base%20assessment%20and%20evaluation%20with%20RAGAS%20framework%20-%20Engineer's%20Notes&u=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2026%2F10%2F05%2FRAG-assessment-with-RAGAS-framework.html" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Facebook" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://t.me/share/url?url=https%3A%2F%2Ftsypuk.github.io%2Fposts%2F2026%2F10%2F05%2FRAG-assessment-with-RAGAS-framework.html&text=RAG%20Knowledge%20Base%20assessment%20and%20evaluation%20with%20RAGAS%20framework%20-%20Engineer's%20Notes" target="_blank" rel="noopener" data-bs-toggle="tooltip" data-bs-placement="top" title="Telegram" aria-label="Telegram"> <i class="fa-fw fab fa-telegram"></i> </a> <button id="copy-link" aria-label="Copy link" class="btn small" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link" data-title-succeed="Link copied successfully!" > <i class="fa-fw fas fa-link pe-none fs-6"></i> </button> </span></div></div></div></article></main><aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted"><div class="access"><section id="access-lastmod"><h2 class="panel-heading">Recently Updated</h2><ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2"><li class="text-truncate lh-lg"> <a href="/posts/2026/10/05/RAG-assessment-with-RAGAS-framework.html">RAG Knowledge Base assessment and evaluation with RAGAS framework</a><li class="text-truncate lh-lg"> <a href="/posts/2026/10/03/wireguard.html">Setting up Wireguard server on EC2</a><li class="text-truncate lh-lg"> <a href="/posts/2026/06/07/golden-jacket.html">AWS Golden Jacket: My Journey of Learning and Certification</a><li class="text-truncate lh-lg"> <a href="/posts/2026/06/06/edge-model-llamcpp.html">Running local AI LLM anywhere: from EC2 instances to Edge Devices</a><li class="text-truncate lh-lg"> <a href="/posts/2026/04/10/ruby-monkey-patching.html">Redis connection monkey patching in Ruby Jungles</a></ul></section><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div class="toc-border-cover z-3"></div><section id="toc-wrapper" class="invisible position-sticky ps-0 pe-4 pb-4"><h2 class="panel-heading ps-3 pb-2 mb-0">Contents</h2><nav id="toc"></nav></section></aside></div><div class="row"><div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 px-md-4"><aside id="related-posts" aria-labelledby="related-label"><h3 class="mb-4" id="related-label">Further Reading</h3><nav class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4"><article class="col"> <a href="/posts/2025/09/26/multiagnet-n8n-bedrock.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1758895200" data-df="ll" > Sep 26, 2025 </time><h4 class="pt-0 my-2">Orchestrating AI multi-agent infrastructure with AWS Bedrock, OpenAI and n8n</h4><div class="text-muted"><p>Abstract This article explores how to build a multi-agent AI ecosystem using n8n, AWS Bedrock, OpenAI, and MCP servers—all with a no-code approach. The idea Each AI agent is designed with its ...</p></div></div></a></article><article class="col"> <a href="/posts/2023/03/21/xra-tracing-2.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1679407200" data-df="ll" > Mar 21, 2023 </time><h4 class="pt-0 my-2">AWS XRAY tracing. Part 2: Advanced. Querying & Grouping.</h4><div class="text-muted"><p>Abstract Welcome to the next part of our AWS X-Ray series. We’ll explore the flow of trace detection and how to specify different parameters like time ranges. Additionally, we’ll take a deep dive i...</p></div></div></a></article><article class="col"> <a href="/posts/2023/03/07/mingrammer.html" class="post-preview card h-100"><div class="card-body"> <time data-ts="1678165200" data-df="ll" > Mar 7, 2023 </time><h4 class="pt-0 my-2">Diagrams-as-a-Code DaC with Mingrammer for Public Cloud Providers and Agnostic Stacks.</h4><div class="text-muted"><p>Abstract During my analysis of open-source libraries that are suitable for rendering AWS components, in order to simplify the understanding and documenting of application architecture I discovered ...</p></div></div></a></article></nav></aside><nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation"> <a href="/posts/2026/10/03/wireguard.html" class="btn btn-outline-primary" aria-label="Older" ><p>Setting up Wireguard server on EC2</p></a><div class="btn btn-outline-primary disabled" aria-label="Newer"><p>-</p></div></nav><footer aria-label="Site Info" class=" d-flex flex-column justify-content-center text-muted flex-lg-row justify-content-lg-between align-items-lg-center pb-lg-3 " ><p>© <time>2026</time> <a href="https://www.linkedin.com/in/roman-tsypuk">Roman Tsypuk</a>. <span data-bs-toggle="tooltip" data-bs-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author." >Some rights reserved.</span> <span data-bs-toggle="tooltip" data-bs-placement="top" title="2026-10-08 05:16:11 +0300 &#013;11361431f0fbacbfafd0edbbacde262d1be31ad3">Build version: 1136143</span></p><p>Using the <a data-bs-toggle="tooltip" data-bs-placement="top" title="v7.5.0" href="https://github.com/cotes2020/jekyll-theme-chirpy" target="_blank" rel="noopener" >Chirpy</a> theme for <a href="https://jekyllrb.com" target="_blank" rel="noopener">Jekyll</a>.</p></footer></div></div><div id="search-result-wrapper" class="d-flex justify-content-center d-none"><div class="col-11 content"><div id="search-hints"><section><h2 class="panel-heading">Trending Tags</h2><div class="d-flex flex-wrap mt-3 mb-1 me-3"> <a class="post-tag btn btn-outline-primary" href="/tags/aws/">aws</a> <a class="post-tag btn btn-outline-primary" href="/tags/dynamodb/">dynamodb</a> <a class="post-tag btn btn-outline-primary" href="/tags/git/">git</a> <a class="post-tag btn btn-outline-primary" href="/tags/security/">security</a> <a class="post-tag btn btn-outline-primary" href="/tags/s3/">s3</a> <a class="post-tag btn btn-outline-primary" href="/tags/ecs/">ecs</a> <a class="post-tag btn btn-outline-primary" href="/tags/network/">network</a> <a class="post-tag btn btn-outline-primary" href="/tags/cli/">cli</a> <a class="post-tag btn btn-outline-primary" href="/tags/fargate/">fargate</a> <a class="post-tag btn btn-outline-primary" href="/tags/firehose/">firehose</a></div></section></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><aside aria-label="Scroll to Top"> <button id="back-to-top" type="button" class="btn btn-lg btn-box-shadow"> <i class="fas fa-angle-up"></i> </button></aside></div><div id="mask" class="d-none position-fixed w-100 h-100 z-1"></div><aside id="notification" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-animation="true" data-bs-autohide="false" ><div class="toast-header"> <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast" aria-label="Close" ></button></div><div class="toast-body text-center pt-0"><p class="px-2 mb-3">A new version of content is available.</p><button type="button" class="btn btn-primary" aria-label="Update"> Update </button></div></aside><script> (function () { const themeMapper = Theme.getThemeMapper('light', 'dark_dimmed'); const initTheme = themeMapper[Theme.visualState]; let lang = 'en';if (lang.length > 2 && !lang.startsWith('zh')) { lang = lang.slice(0, 2); } let giscusAttributes = { src: 'https://giscus.app/client.js', 'data-repo': 'tsypuk/tsypuk.github.io', 'data-repo-id': 'R_kgDOIxaFiw', 'data-category': 'General', 'data-category-id': 'DIC_kwDOIxaFi84CUSfn', 'data-mapping': 'og:title', 'data-strict' : '0', 'data-reactions-enabled': '1', 'data-emit-metadata': '0', 'data-theme': initTheme, 'data-input-position': 'top', 'data-lang': lang, 'data-loading': 'lazy', crossorigin: 'anonymous', async: '' }; let giscusNode = document.createElement('script'); Object.entries(giscusAttributes).forEach(([key, value]) => giscusNode.setAttribute(key, value) ); const $footer = document.querySelector('footer'); $footer.insertAdjacentElement("beforebegin", giscusNode); addEventListener('message', (event) => { if (event.source === window && event.data && event.data.id === Theme.ID) { const newTheme = themeMapper[Theme.visualState]; const message = { setConfig: { theme: newTheme } }; const giscus = document.getElementsByClassName('giscus-frame')[0].contentWindow; giscus.postMessage({ giscus: message }, 'https://giscus.app'); } }); })(); </script> <script> document.addEventListener('DOMContentLoaded', () => { SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<article class="px-1 px-sm-2 px-lg-4 px-xl-0"><header><h2><a href="{url}">{title}</a></h2><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"> {categories} {tags}</div></header><p>{content}</p></article>', noResultsText: '<p class="mt-5">Oops! No results found.</p>', templateMiddleware: function(prop, value, template) { if (prop === 'categories') { if (value === '') { return `${value}`; } else { return `<div class="me-sm-4"><i class="far fa-folder fa-fw"></i>${value}</div>`; } } if (prop === 'tags') { if (value === '') { return `${value}`; } else { return `<div><i class="fa fa-tag fa-fw"></i>${value}</div>`; } } } }); }); </script>

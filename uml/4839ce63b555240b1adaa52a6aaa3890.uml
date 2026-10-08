@@ -1,0 +1,53 @@
+@startuml
+
+class Commit2 <<(C,lightblue)>> {
+-sha: 993bb5b5
+--
+message: added seond.txt
+
+--
+timestamp: 1580813162
+}
+class Commit1 <<(C,lightgreen)>> {
+-sha: 0d38698f
+--
+message: added first.txt
+
+--
+timestamp: 1580812884
+}
+class Tree2 <<(T,lightblue)>> {
+-sha: 22e61880
+--
+# first.txt 100644 795ddc40
+# seconf.txt 100644 0ba93614
+
+}
+class Tree1 <<(T,lightgreen)>> {
+-sha: 3d800e5a
+--
+# first.txt 100644 795ddc40
+
+}
+class Blob1 <<(B,lightgreen)>> {
+-sha: 795ddc40
+--
+FirstData
+
+}
+class Blob2 <<(B,lightblue)>> {
+-sha: 0ba93614
+--
+SecondData
+
+}
+Commit2 --> Tree2
+Commit1 --> Tree1
+Tree2 --> Blob1
+Tree2 --> Blob2
+Tree1 --> Blob1
+Commit2 -l-> Commit1
+note top of Commit1 #lightgreen : HEAD
+note top of Commit2 #lightblue : refs/heads/master
+
+@enduml

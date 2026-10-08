@@ -1,0 +1,13 @@
+@startuml
+
+....
+class Commit1 <<(C,lightgreen)>> {
+-sha: 2aae0a64
+--
+message: first commit
+--
+timestamp: 1580904123
+}
+
+
+@enduml
